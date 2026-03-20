@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Iseriser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+Iseriser is the **meta-framework** that generates new -iser projects.
+
+Given a description of a target language's interop model (how it exposes
+functions, its type system, its build process), Iseriser scaffolds a
+complete -iser project with manifest parser, code generation engine,
+Idris2 ABI definitions, and Zig FFI bridge.
+
+== How It Works
+
+Describe a target language in `iseriser.toml`. Iseriser:
+
+1. Generates a complete -iser repo (Cargo.toml, src/, README, tests)
+2. Scaffolds the manifest parser for the target language's concepts
+3. Generates codegen templates for the target's interop model
+4. Creates Idris2 ABI stubs appropriate to the target's type system
+5. Creates Zig FFI bridge templates for the target's calling convention
+
+== Key Value
+
+* **Create a new -iser in minutes** instead of days
+* **Consistent architecture** across all -iser projects
+* **The -iser that makes -isers** — bootstrapping the ecosystem
+
+== Current -iser Family
+
+|===
+| Name | Target Language | Domain
+
+| https://github.com/hyperpolymath/chapeliser[Chapeliser] | Chapel | Parallelism / HPC
+| https://github.com/hyperpolymath/julianiser[Julianiser] | Julia | Scientific computing
+| https://github.com/hyperpolymath/futharkiser[Futharkiser] | Futhark | GPU computing
+| https://github.com/hyperpolymath/idrisiser[Idrisiser] | Idris2 | Formal verification
+| https://github.com/hyperpolymath/tlaiser[TLAiser] | TLA+ | Model checking
+| https://github.com/hyperpolymath/dafniser[Dafniser] | Dafny | Verified code
+| https://github.com/hyperpolymath/ponyiser[Ponyiser] | Pony | Data-race freedom
+| https://github.com/hyperpolymath/otpiser[OTPiser] | Erlang/OTP | Fault tolerance
+| https://github.com/hyperpolymath/halideiser[Halideiser] | Halide | Image/video processing
+| https://github.com/hyperpolymath/lustreiser[Lustreiser] | Lustre | Real-time embedded
+| https://github.com/hyperpolymath/bqniser[BQNiser] | BQN | Array programming
+| https://github.com/hyperpolymath/alloyiser[Alloyiser] | Alloy | Formal modelling
+| https://github.com/hyperpolymath/atsiser[ATSiser] | ATS | Memory safety for C
+| https://github.com/hyperpolymath/nimiser[Nimiser] | Nim | C library generation
+|===
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern (same as https://github.com/hyperpolymath/chapeliser[Chapeliser]):
+
+* **Manifest** (`iseriser.toml`) — describe WHAT you want
+* **Idris2 ABI** (`src/abi/`) — formal proofs of interface correctness
+* **Zig FFI** (`ffi/zig/`) — C-ABI bridge to target language runtime
+* **Codegen** (`src/codegen/`) — generates target language wrapper code
+* **Rust CLI** — parses manifest, validates, generates, builds, runs
+
+User writes zero target language code. Iseriser generates everything.
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of acceleration frameworks.
+
+== Status
+
+**Pre-alpha.** Architecture defined, scaffolding in place, codegen pending.
+
+== License
+
+SPDX-License-Identifier: PMPL-1.0-or-later
