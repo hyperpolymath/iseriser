@@ -1,0 +1,135 @@
+<!-- SPDX-License-Identifier: PMPL-2.0-or-later -->
+<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iseriser — the -iser family hub</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6;padding:2rem}
+.container{max-width:800px;margin:0 auto}
+h1,h2,h3{font-family:"JetBrains Mono",Consolas,"Courier New",monospace;color:#58a6ff}
+h1{font-size:2.2rem;margin-bottom:.3rem}
+.tagline{color:#8b949e;font-size:1.1rem;margin-bottom:1.5rem}
+.badge{display:inline-block;padding:.2rem .5rem;border-radius:3px;font-size:.75rem;font-weight:600;margin-right:.4rem;text-decoration:none}
+.badge-license{background:#1f6feb;color:#fff}
+.badge-crates{background:#fc8d62;color:#fff}
+.badge-count{background:#3fb950;color:#fff}
+.badges{margin-bottom:1.8rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:1rem;overflow-x:auto;margin:1rem 0;color:#e6edf3;font-size:.9rem}
+code{font-family:"JetBrains Mono",Consolas,monospace}
+h2{font-size:1.3rem;margin-top:1.8rem;margin-bottom:.6rem;border-bottom:1px solid #21262d;padding-bottom:.3rem}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.links{margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap}
+.links a{border:1px solid #30363d;padding:.4rem 1rem;border-radius:6px;font-size:.9rem}
+.links a:hover{border-color:#58a6ff}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d;color:#484f58;font-size:.8rem}
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th{text-align:left;padding:.5rem;border-bottom:2px solid #30363d;color:#58a6ff;font-family:"JetBrains Mono",Consolas,monospace;font-size:.85rem}
+td{padding:.4rem .5rem;border-bottom:1px solid #21262d;font-size:.88rem}
+td:first-child{white-space:nowrap}
+tr:hover{background:#161b22}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>iseriser</h1>
+<p class="tagline">The meta-framework that generates new -iser projects. Factory for the entire family.</p>
+<div class="badges">
+  <a class="badge badge-license" href="https://github.com/hyperpolymath/palimpsest-license">PMPL-2.0</a>
+  <a class="badge badge-crates" href="https://crates.io/crates/iseriser">crates.io</a>
+  <span class="badge badge-count">28 -isers</span>
+</div>
+
+<h2>Install</h2>
+<pre><code>cargo install iseriser</code></pre>
+
+<h2>What It Does</h2>
+<p>Given a language description — name, type system, compilation target, calling convention —
+iseriser scaffolds a complete -iser repository with a bespoke manifest schema, codegen engine,
+Idris2 ABI definitions, Zig FFI bridge, tests, CI/CD workflows, and documentation. All 28
+-iser repos share the same architecture because they come from this factory.</p>
+
+<h2>The -iser Family</h2>
+<table>
+<thead><tr><th>Name</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/hyperpolymath/a2mliser">a2mliser</a></td>
+<td>Wraps markup and config files in A2ML cryptographic attestation envelopes</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/affinescriptiser">affinescriptiser</a></td>
+<td>Wraps code in AffineScript affine + dependent types, compiles to WASM</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/alloyiser">alloyiser</a></td>
+<td>Extracts API specs into Alloy 6 formal models, finds design bugs via SAT solving</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/anvomidaviser">anvomidaviser</a></td>
+<td>Converts ISU skating notation into formal verification models</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/atsiser">atsiser</a></td>
+<td>Analyses C source, identifies memory-critical patterns, wraps in ATS2 proofs</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/betlangiser">betlangiser</a></td>
+<td>Analyses deterministic code, identifies values that should be formally verified</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/bqniser">bqniser</a></td>
+<td>Scans code for array computation patterns, rewrites them in BQN</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/chapeliser">chapeliser</a></td>
+<td>Scales single-machine apps to distributed clusters via Chapel, no Chapel needed</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/dafniser">dafniser</a></td>
+<td>Generates correct-by-construction code for critical functions via Dafny</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/eclexiaiser">eclexiaiser</a></td>
+<td>Instruments code with energy, carbon, and resource-cost accounting</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/ephapaxiser">ephapaxiser</a></td>
+<td>Analyses code for resource handles, inserts Ephapax linear-type wrappers</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/futharkiser">futharkiser</a></td>
+<td>Identifies array-parallel patterns, extracts and compiles them via Futhark to GPU</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/halideiser">halideiser</a></td>
+<td>Compiles image and video processing pipelines to optimised Halide schedules</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/idrisiser">idrisiser</a></td>
+<td>Meta-prover: adds Idris2 dependent-type proofs to existing code</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/iseriser">iseriser</a></td>
+<td>The meta-framework that generates new -iser projects (this repo)</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/julianiser">julianiser</a></td>
+<td>Converts Python and R data science code to Julia for performance</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/k9iser">k9iser</a></td>
+<td>Analyses configs, infers constraints, generates K9 contracts with attestation</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/lustreiser">lustreiser</a></td>
+<td>Generates formally verified real-time embedded code via Lustre</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/mylangiser">mylangiser</a></td>
+<td>Analyses complex API surfaces, identifies complexity layers, generates wrappers</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/nimiser">nimiser</a></td>
+<td>Generates high-performance C libraries from high-level interface descriptions via Nim</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/oblibeniser">oblibeniser</a></td>
+<td>Makes operations reversible and auditable via Obliben</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/otpiser">otpiser</a></td>
+<td>Generates OTP supervision trees, GenServers, and GenStateMachines</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/phronesiser">phronesiser</a></td>
+<td>Adds provably safe ethical constraints to AI agent decision-making</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/ponyiser">ponyiser</a></td>
+<td>Wraps concurrent code in Pony reference capabilities, eliminating data races</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/tlaiser">tlaiser</a></td>
+<td>Extracts state machine specs from code, generates TLA+ models</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/typedqliser">typedqliser</a></td>
+<td>Adds formal type safety to SQL, GraphQL, Cypher, and other query languages</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/verisimiser">verisimiser</a></td>
+<td>Augments existing databases with VeriSimDB capabilities</td></tr>
+<tr><td><a href="https://github.com/hyperpolymath/wokelangiser">wokelangiser</a></td>
+<td>Transforms code into consent-aware, accessible, and inclusive implementations</td></tr>
+</tbody>
+</table>
+
+<h2>Architecture</h2>
+<p>Every -iser follows the same pattern: a TOML manifest describes what the user wants,
+Idris2 ABI definitions formally prove interface correctness, a Zig FFI bridge provides
+the C-ABI layer, and a Rust CLI orchestrates codegen. 17 CI/CD workflows and full RSR
+governance are included in every generated repo.</p>
+
+<div class="links">
+  <a href="https://github.com/hyperpolymath/iseriser">GitHub</a>
+  <a href="https://crates.io/crates/iseriser">crates.io</a>
+</div>
+
+<footer>
+  Licensed under <a href="https://github.com/hyperpolymath/palimpsest-license">PMPL-2.0-or-later</a>.
+</footer>
+</div>
+</body>
+</html>
