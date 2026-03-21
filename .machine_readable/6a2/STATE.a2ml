@@ -5,31 +5,34 @@
 (state
   (metadata
     (version "0.1.0")
-    (last-updated "2026-03-20")
+    (last-updated "2026-03-21")
     (author "Jonathan D.A. Jewell"))
 
   (project-context
     (name "iseriser")
-    (description "Meta-framework that generates new -iser projects")
-    (status "scaffold")
-    (priority "—")
+    (description "Meta-framework that generates new -iser projects from language descriptions")
+    (status "codebase-in-progress")
+    (priority "critical — tooling foundation for all 28 -iser repos")
     (ecosystem "-iser family (https://github.com/hyperpolymath/iseriser)"))
 
   (current-position
-    (phase "initial-scaffold")
-    (completion-percentage 5)
-    (milestone "Architecture defined, CLI scaffolded, RSR template complete"))
+    (phase "scaffold-documented")
+    (completion-percentage 12)
+    (milestone "Architecture defined, CLI scaffolded, bespoke Idris2 ABI and Zig FFI written, TOPOLOGY and ROADMAP complete"))
 
   (route-to-mvp
-    (step 1 "Replace codegen stubs with target-language-specific generation")
-    (step 2 "Implement Idris2 ABI proofs for core invariants")
-    (step 3 "Build Zig FFI bridge")
-    (step 4 "Integration tests with real-world examples")
-    (step 5 "Documentation and examples"))
+    (step 1 "Implement LanguageDescription parser in manifest/mod.rs")
+    (step 2 "Build Handlebars template set for all generated artifact types")
+    (step 3 "Wire template engine to language model in codegen/mod.rs")
+    (step 4 "Write Idris2 ABI proofs for template expansion correctness")
+    (step 5 "End-to-end test: iseriser generates chapeliser, passes cargo test")
+    (step 6 "Self-hosting: iseriser generates iseriser")
+    (step 7 "Batch mode: regenerate all 28 -iser repos from updated templates"))
 
   (blockers-and-issues
     (none "Project is in scaffold phase — no blockers yet"))
 
   (critical-next-actions
-    (action "Implement codegen for primary use case")
-    (action "Write first working example end-to-end")))
+    (action "Implement LanguageDescription struct and TOML parsing")
+    (action "Create Handlebars template files for Cargo.toml, main.rs, lib.rs")
+    (action "First end-to-end generation test")))

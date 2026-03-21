@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# NEUROSYM.a2ml — Neurosymbolic integration metadata
+# NEUROSYM.a2ml — Neurosymbolic integration metadata for iseriser
 # Configuration for Hypatia scanning and symbolic reasoning.
 
 [metadata]
 version = "0.1.0"
-last-updated = "{{CURRENT_DATE}}"
+last-updated = "2026-03-21"
 
 [hypatia-config]
 scan-enabled = true
@@ -14,10 +14,14 @@ scan-depth = "standard"  # quick | standard | deep
 report-format = "logtalk"
 
 [symbolic-rules]
-# Custom symbolic rules for this project
+# Custom symbolic rules for iseriser:
+# - Verify generated Idris2 files have no unresolved {{placeholders}}
+# - Verify generated Zig files compile against declared ABI
+# - Verify generated Cargo.toml has correct dependencies for target language
 # - { name = "no-unsafe-ffi", pattern = "believe_me|unsafeCoerce", severity = "critical" }
+# - { name = "no-unresolved-templates", pattern = "\\{\\{[A-Z_]+\\}\\}", severity = "error" }
 
 [neural-config]
-# Neural pattern detection settings
+# Neural pattern detection settings for generated code quality
 # confidence-threshold = 0.85
 # model = "hypatia-v2"

@@ -7,35 +7,99 @@ Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 
 == What Is This?
 
-Iseriser is the **meta-framework** that generates new -iser projects.
+Iseriser is **the meta-framework that generates new -iser projects**.
+It is the factory that makes all other -isers.
 
-Given a description of a target language's interop model (how it exposes
-functions, its type system, its build process), Iseriser scaffolds a
-complete -iser project with manifest parser, code generation engine,
-Idris2 ABI definitions, and Zig FFI bridge.
+Given a language description — name, type system features, compilation target,
+key primitives, calling convention — iseriser scaffolds a complete -iser
+repository with a bespoke manifest schema, codegen engine, Idris2 ABI
+definitions, Zig FFI bridge, tests, CI/CD workflows, and documentation,
+all customised for the target language.
+
+When hyperpolymath adds a new language to the nextgen-languages ecosystem,
+iseriser is how that language's -iser comes into existence in minutes, not days.
 
 == How It Works
 
-Describe a target language in `iseriser.toml`. Iseriser:
+. Describe the target language in an `iseriser.toml` manifest: name, type
+  system features (dependent types, linear types, array semantics, etc.),
+  compilation target (native, BEAM, JVM, WASM), key primitives, and
+  calling convention.
 
-1. Generates a complete -iser repo (Cargo.toml, src/, README, tests)
-2. Scaffolds the manifest parser for the target language's concepts
-3. Generates codegen templates for the target's interop model
-4. Creates Idris2 ABI stubs appropriate to the target's type system
-5. Creates Zig FFI bridge templates for the target's calling convention
+. Iseriser parses this into a **language model** — an internal representation
+  of the target language's interop surface.
+
+. The **Idris2 ABI layer** proves generator correctness: template expansion is
+  type-safe, generated struct layouts are verified, and FFI function signatures
+  match their C-ABI counterparts.
+
+. The **template engine** expands the language model into a complete -iser repo:
+  `Cargo.toml`, `src/{main,lib,manifest,codegen,abi}.rs`, Idris2 ABI definitions
+  (`Types.idr`, `Layout.idr`, `Foreign.idr`), Zig FFI bridge (`build.zig`,
+  `src/main.zig`, `test/integration_test.zig`), CI/CD workflows (17 total),
+  `README.adoc`, `ROADMAP.adoc`, `TOPOLOGY.md`, and all RSR governance files.
+
+. The generated -iser is immediately functional: it can parse manifests, validate
+  them, and produce stub codegen for the target language — ready for domain-specific
+  implementation.
 
 == Key Value
 
-* **Create a new -iser in minutes** instead of days
-* **Consistent architecture** across all -iser projects
-* **The -iser that makes -isers** — bootstrapping the ecosystem
+* **Instant -iser creation** — adding a new language to the ecosystem takes minutes
+* **Consistent architecture** — all 28+ -iser repos share the same structure, CI/CD,
+  and governance because they are generated from the same factory
+* **Formally verified generation** — Idris2 dependent types prove that templates
+  expand correctly and that ABI layouts are consistent
+* **The -iser that makes -isers** — the bootstrap point for the entire ecosystem
 
-== Current -iser Family
+== Generated Artifacts
 
+For each target language, iseriser produces:
+
+[cols="1,3"]
+|===
+| Artifact | Purpose
+
+| `Cargo.toml` | Rust CLI project with correct dependencies for the target domain
+| `src/main.rs` | CLI entry point with init/validate/generate/build/run subcommands
+| `src/lib.rs` | Library API exposing manifest, codegen, and ABI modules
+| `src/manifest/mod.rs` | TOML manifest parser customised for the target language's concepts
+| `src/codegen/mod.rs` | Codegen engine with target-specific template expansion
+| `src/abi/mod.rs` | Rust-side ABI types mirroring the Idris2 formal definitions
+| `src/interface/abi/Types.idr` | Idris2 ABI type definitions with platform proofs
+| `src/interface/abi/Layout.idr` | Memory layout proofs for C-compatible structs
+| `src/interface/abi/Foreign.idr` | FFI function declarations with safety wrappers
+| `src/interface/ffi/build.zig` | Zig build configuration for shared/static library
+| `src/interface/ffi/src/main.zig` | Zig FFI implementation matching the Idris2 ABI
+| `src/interface/ffi/test/integration_test.zig` | Integration tests verifying FFI correctness
+| `.github/workflows/` | 17 CI/CD workflows (Hypatia, CodeQL, Scorecard, mirrors, etc.)
+| `README.adoc` | Bespoke documentation for the generated -iser
+| `ROADMAP.adoc` | Phase-structured roadmap
+| `TOPOLOGY.md` | Architectural topology diagram
+| `.machine_readable/` | Full RSR governance: STATE, META, ECOSYSTEM, contractiles, bot directives
+|===
+
+== Use Cases
+
+* **Adding new nextgen languages** — when a new language joins the ecosystem
+  (e.g., a new array language, a new theorem prover), iseriser generates its
+  -iser immediately
+* **Creating domain-specific -isers** — iseriser can target any language with
+  a C-compatible FFI, not just nextgen languages
+* **Testing -iser architecture patterns** — changes to the -iser template
+  propagate to all generated repos on re-generation
+* **Bootstrapping the ecosystem** — currently generates all 28 -iser repos
+  in the family
+
+== Current -iser Family (28 repos)
+
+[cols="1,1,2"]
 |===
 | Name | Target Language | Domain
 
-| https://github.com/hyperpolymath/chapeliser[Chapeliser] | Chapel | Parallelism / HPC
+| https://github.com/hyperpolymath/typedqliser[TypedQLiser] | Query Languages | Formal type safety for queries (*priority 1*)
+| https://github.com/hyperpolymath/chapeliser[Chapeliser] | Chapel | Distributed computing / HPC (*priority 2*)
+| https://github.com/hyperpolymath/verisimiser[Verisimiser] | VeriSimDB | Database octad augmentation (*priority 3*)
 | https://github.com/hyperpolymath/julianiser[Julianiser] | Julia | Scientific computing
 | https://github.com/hyperpolymath/futharkiser[Futharkiser] | Futhark | GPU computing
 | https://github.com/hyperpolymath/idrisiser[Idrisiser] | Idris2 | Formal verification
@@ -49,25 +113,59 @@ Describe a target language in `iseriser.toml`. Iseriser:
 | https://github.com/hyperpolymath/alloyiser[Alloyiser] | Alloy | Formal modelling
 | https://github.com/hyperpolymath/atsiser[ATSiser] | ATS | Memory safety for C
 | https://github.com/hyperpolymath/nimiser[Nimiser] | Nim | C library generation
+| https://github.com/hyperpolymath/gleamiser[Gleamiser] | Gleam | BEAM type safety
+| https://github.com/hyperpolymath/rescriptiser[Rescriptiser] | ReScript | JS type safety
+| https://github.com/hyperpolymath/elixiriser[Elixiriser] | Elixir | BEAM distributed systems
+| https://github.com/hyperpolymath/rustiser[Rustiser] | Rust | Systems / WASM
+| https://github.com/hyperpolymath/zigiser[Zigiser] | Zig | Low-level systems
+| https://github.com/hyperpolymath/leaniser[Leaniser] | Lean 4 | Theorem proving
+| https://github.com/hyperpolymath/agdaiser[Agdaiser] | Agda | Dependently typed
+| https://github.com/hyperpolymath/squeakwell[SqueakWell] | Cross-modal | Database recovery
+| https://github.com/hyperpolymath/coqiser[Coqiser] | Coq | Proof assistants
+| https://github.com/hyperpolymath/fortraniser[Fortraniser] | Fortran | Legacy HPC
+| https://github.com/hyperpolymath/mpiiser[MPIiser] | MPI | Message passing
+| https://github.com/hyperpolymath/iseriser[Iseriser] | -iser family | **This repo** (meta-framework)
 |===
 
 == Architecture
 
-Follows the hyperpolymath -iser pattern (same as https://github.com/hyperpolymath/chapeliser[Chapeliser]):
+```
+iseriser.toml (language description)
+       |
+       v
+  +-----------+      +------------------+
+  | Manifest  |----->| Language Model   |
+  | Parser    |      | (internal repr)  |
+  +-----------+      +------------------+
+                              |
+                    +---------+---------+
+                    |                   |
+                    v                   v
+           +----------------+   +----------------+
+           | Idris2 ABI     |   | Template       |
+           | (proves        |   | Engine         |
+           |  correctness)  |   | (Handlebars)   |
+           +----------------+   +----------------+
+                    |                   |
+                    v                   v
+           +----------------+   +----------------+
+           | Generated ABI  |   | Generated Repo |
+           | definitions    |   | (complete -iser)|
+           +----------------+   +----------------+
+```
 
-* **Manifest** (`iseriser.toml`) — describe WHAT you want
-* **Idris2 ABI** (`src/abi/`) — formal proofs of interface correctness
-* **Zig FFI** (`ffi/zig/`) — C-ABI bridge to target language runtime
-* **Codegen** (`src/codegen/`) — generates target language wrapper code
-* **Rust CLI** — parses manifest, validates, generates, builds, runs
-
-User writes zero target language code. Iseriser generates everything.
-
-Part of the https://github.com/hyperpolymath/iseriser[-iser family] of acceleration frameworks.
+* **Manifest** (`iseriser.toml`) — describe the target language's interop model
+* **Language Model** — parsed representation of type system, primitives, targets
+* **Idris2 ABI** (`src/interface/abi/`) — formal proofs that generation is correct
+* **Template Engine** (Handlebars) — expands language model into repo files
+* **Zig FFI** (`src/interface/ffi/`) — C-ABI bridge template
+* **Rust CLI** — orchestrates manifest parsing, validation, generation, build, run
 
 == Status
 
-**Pre-alpha.** Architecture defined, scaffolding in place, codegen pending.
+**Codebase in progress.** Architecture defined, CLI scaffolded, manifest parser
+functional, template engine (Handlebars) integrated. Codegen stubs present —
+domain-specific generation logic is the current frontier.
 
 == License
 

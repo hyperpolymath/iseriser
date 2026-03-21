@@ -1,14 +1,23 @@
 
-# AI Assistant Instructions
+# AI Assistant Instructions for Iseriser
 
 ## Repository Focus
-- `rsr-template-repo` is treated as a Rhodium Standard Repository; obey the Rhodium policies and keep `.machine_readable/` authoritative.
+- **Iseriser** is the meta-framework that generates new -iser projects from language descriptions.
+- It is the most important -iser from a tooling perspective: it is the factory that makes all other -isers.
 - All machine-readable content lives under `.machine_readable/` — state files (a2ml), bot directives, and contractiles.
 - Prefer to keep generated files out of source control, and regenerate them with the documented commands before committing.
 
+## Key Architecture
+- **Manifest** (`iseriser.toml`): describes target language (name, type system features, compilation target, primitives)
+- **Language Model**: internal representation parsed from manifest
+- **Idris2 ABI** (`src/interface/abi/`): Types.idr (LanguageModel, TypeSystemFeature, etc.), Layout.idr (generation struct layouts), Foreign.idr (generation engine FFI)
+- **Zig FFI** (`src/interface/ffi/`): C-ABI generation engine (libiseriser)
+- **Template Engine**: Handlebars-based, expands language model into complete -iser repos
+- **Rust CLI** (`src/main.rs`): orchestrates init, validate, generate, build, run
+
 ## Workflow
-1. Inspect `.machine_readable/STATE.a2ml` for blockers and next actions.
-2. Respect any constraints listed inside `.machine_readable/AGENTIC.a2ml` when tooling changes are requested.
+1. Inspect `.machine_readable/6a2/STATE.a2ml` for blockers and next actions.
+2. Respect any constraints listed inside `.machine_readable/6a2/AGENTIC.a2ml`.
 3. After finishing edits, update STATE with your outcomes and commit with a concise, imperative message.
 
 ## Delivery Promises

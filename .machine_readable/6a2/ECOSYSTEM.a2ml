@@ -5,34 +5,47 @@
 (ecosystem
   (version "0.1.0")
   (name "iseriser")
-  (type "tool")
-  (purpose "Meta-framework that generates new -iser projects")
+  (type "meta-framework")
+  (purpose "Generates new -iser projects from language descriptions — the factory that makes all other -isers")
 
   (position-in-ecosystem
     (family "-iser acceleration frameworks")
-    (meta-framework "iseriser")
-    (relationship "sibling")
+    (role "meta-framework — generates all sibling -isers")
+    (generates-count 28)
+    (relationship "parent-generator")
     (top-3 ("typedqliser" "chapeliser" "verisimiser")))
 
   (related-projects
-    (project "iseriser"
-      (relationship "meta-framework")
-      (description "Generates new -iser project scaffolding"))
     (project "typedqliser"
-      (relationship "sibling-priority-1")
+      (relationship "generated-sibling-priority-1")
       (description "Formal type safety for any query language"))
     (project "chapeliser"
-      (relationship "sibling-priority-2")
+      (relationship "generated-sibling-priority-2")
       (description "Chapel distributed computing acceleration"))
     (project "verisimiser"
-      (relationship "sibling-priority-3")
+      (relationship "generated-sibling-priority-3")
       (description "VeriSimDB octad database augmentation"))
+    (project "julianiser"
+      (relationship "generated-sibling")
+      (description "Julia scientific computing acceleration"))
+    (project "futharkiser"
+      (relationship "generated-sibling")
+      (description "Futhark GPU computing acceleration"))
+    (project "idrisiser"
+      (relationship "generated-sibling")
+      (description "Idris2 formal verification acceleration"))
     (project "squeakwell"
-      (relationship "sibling")
+      (relationship "generated-sibling")
       (description "Database recovery via constraint propagation"))
     (project "proven"
       (relationship "dependency")
-      (description "Shared Idris2 verified library"))
+      (description "Shared Idris2 verified library for ABI proofs"))
     (project "typell"
       (relationship "dependency")
-      (description "Type theory engine"))))
+      (description "Type theory engine used in language model analysis"))
+    (project "rsr-template-repo"
+      (relationship "dependency")
+      (description "Source templates for generated RSR governance files"))
+    (project "nextgen-languages"
+      (relationship "upstream")
+      (description "Language ecosystem that iseriser scaffolds -isers for"))))

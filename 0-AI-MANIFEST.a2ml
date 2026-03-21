@@ -1,13 +1,19 @@
-# ⚠️ STOP - CRITICAL READING REQUIRED
+# STOP - CRITICAL READING REQUIRED
 
 **THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
 
 ## WHAT IS THIS?
 
-This is the AI manifest for **[YOUR-REPO-NAME]**. It declares:
-- Canonical file locations (where things MUST be, and nowhere else)
-- Critical invariants (rules that must NEVER be violated)
-- Repository structure and organization
+This is the AI manifest for **iseriser** — the meta-framework that generates
+new -iser projects from language descriptions. Iseriser is the factory that
+makes all other -isers in the hyperpolymath ecosystem.
+
+Given a language description (name, type system features, compilation target,
+key primitives), iseriser scaffolds a complete -iser repository with bespoke
+manifest schema, codegen engine, Idris2 ABI definitions, Zig FFI bridge,
+tests, CI/CD workflows, and documentation — all customised for the target language.
+
+Currently generates all 28 -iser repos in the family.
 
 ## CANONICAL LOCATIONS (UNIVERSAL RULE)
 
@@ -70,6 +76,52 @@ Policy enforcement contracts (k9, dust, lust, must, trust).
 
 - `0-AI-MANIFEST.a2ml` - THIS FILE (universal entry point)
 
+## REPOSITORY STRUCTURE
+
+```
+iseriser/
+├── 0-AI-MANIFEST.a2ml         # THIS FILE (start here)
+├── README.adoc                 # What iseriser does, architecture, -iser family table
+├── ROADMAP.adoc                # Phase 0-6 roadmap
+├── CONTRIBUTING.adoc           # Human contribution guide
+├── Cargo.toml                  # Rust CLI project (clap, serde, handlebars, etc.)
+├── Justfile                    # Task runner
+├── Containerfile               # OCI build (Chainguard base)
+├── LICENSE                     # PMPL-1.0-or-later
+├── src/
+│   ├── main.rs                 # CLI: init, validate, generate, build, run, info
+│   ├── lib.rs                  # Library API: manifest, codegen, abi modules
+│   ├── manifest/mod.rs         # TOML manifest parser (language descriptions)
+│   ├── codegen/mod.rs          # Template expansion engine (Handlebars)
+│   ├── abi/mod.rs              # Rust-side ABI types (mirrors Idris2 definitions)
+│   ├── core/                   # Language model and feature detection
+│   ├── definitions/            # Language feature definitions
+│   ├── contracts/              # Contract validation for generated output
+│   ├── bridges/                # Bridge generation (Zig FFI templates)
+│   ├── errors/                 # Error types and diagnostics
+│   ├── aspects/                # Cross-cutting concerns
+│   └── interface/              # Verified Interface Seams
+│       ├── abi/                # Idris2 ABI: LanguageModel, TypeSystemFeature, etc.
+│       │   ├── Types.idr       # Core types with formal proofs
+│       │   ├── Layout.idr      # Memory layout proofs for generation structs
+│       │   └── Foreign.idr     # FFI declarations for generation engine
+│       ├── ffi/                # Zig FFI: C-ABI generation engine
+│       │   ├── build.zig       # Build config for libiseriser
+│       │   ├── src/main.zig    # FFI implementation
+│       │   └── test/           # Integration tests
+│       └── generated/          # Auto-generated C headers
+├── docs/
+│   └── architecture/
+│       └── TOPOLOGY.md         # Architectural topology diagram
+└── .machine_readable/          # ALL machine-readable metadata
+    ├── 6a2/                    # STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK
+    ├── anchors/                # ANCHOR.a2ml
+    ├── policies/               # Maintenance policies
+    ├── bot_directives/         # Bot instructions
+    ├── contractiles/           # k9, dust, lust, must, trust
+    └── ai/                     # AI configuration
+```
+
 ## CORE INVARIANTS
 
 1. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
@@ -80,41 +132,14 @@ Policy enforcement contracts (k9, dust, lust, must, trust).
 6. **Container images** - MUST use Chainguard base (`cgr.dev/chainguard/wolfi-base:latest` or `cgr.dev/chainguard/static:latest`)
 7. **Container runtime** - Podman, never Docker. Files are `Containerfile`, never `Dockerfile`
 8. **Container orchestration** - `selur-compose`, never `docker-compose`
-
-## REPOSITORY STRUCTURE
-
-This repo follows the **Dual-Track** architecture:
-
-```
-[YOUR-REPO-NAME]/
-├── 0-AI-MANIFEST.a2ml         # THIS FILE (start here)
-├── README.adoc                 # High-level orientation (Rich Human)
-├── ROADMAP.adoc                # Future direction
-├── CONTRIBUTING.adoc           # Human contribution guide
-├── GOVERNANCE.adoc             # Decision-making model
-├── Justfile                    # Task runner
-├── Containerfile               # OCI build
-├── LICENSE                     # Primary license
-├── src/                        # Source code
-│   └── interface/              # Verified Interface Seams
-│       ├── abi/                # Idris2 ABI (The Spec)
-│       ├── ffi/                # Zig FFI (The Bridge)
-│       └── generated/          # C Headers (The Result)
-├── container/                  # Stapeln container ecosystem
-├── docs/                       # Technical depths
-│   ├── attribution/            # Citations, owners, maintainers (adoc)
-│   ├── architecture/           # Topology, diagrams
-│   ├── theory/                 # Domain theory
-│   └── practice/               # Manuals
-├── docs/legal/                  # Legal exhibits and full texts
-└── .machine_readable/          # ALL machine-readable metadata
-```
+9. **Meta-framework role** - Iseriser generates -isers; it does not generate application code directly
+10. **Template completeness** - All generated repos must pass `cargo check` and contain full RSR governance
 
 ## SESSION STARTUP CHECKLIST
 
-✅ Read THIS file (0-AI-MANIFEST.a2ml) first
-✅ Understand canonical location: `.machine_readable/`
-✅ State understanding of canonical locations
+Read THIS file (0-AI-MANIFEST.a2ml) first
+Understand canonical location: `.machine_readable/`
+State understanding of canonical locations
 
 ## ATTESTATION PROOF
 

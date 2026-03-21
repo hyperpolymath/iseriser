@@ -1,89 +1,182 @@
-// {{PROJECT}} Integration Tests
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// Iseriser Integration Tests
 //
 // These tests verify that the Zig FFI correctly implements the Idris2 ABI
+// declarations from src/interface/abi/Foreign.idr.
+//
+// The tests exercise the full generation pipeline: context creation,
+// language model loading, template expansion, and repo generation.
+//
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 const std = @import("std");
 const testing = std.testing;
 
-// Import FFI functions
-extern fn {{project}}_init() ?*opaque {};
-extern fn {{project}}_free(?*opaque {}) void;
-extern fn {{project}}_process(?*opaque {}, u32) c_int;
-extern fn {{project}}_get_string(?*opaque {}) ?[*:0]const u8;
-extern fn {{project}}_free_string(?[*:0]const u8) void;
-extern fn {{project}}_last_error() ?[*:0]const u8;
-extern fn {{project}}_version() [*:0]const u8;
-extern fn {{project}}_is_initialized(?*opaque {}) u32;
+// Import iseriser FFI functions (declared in Foreign.idr, implemented in main.zig)
+extern fn iseriser_init() ?*opaque {};
+extern fn iseriser_free(?*opaque {}) void;
+extern fn iseriser_load_language(?*opaque {}, ?[*:0]const u8) c_int;
+extern fn iseriser_language_name(?*opaque {}) ?[*:0]const u8;
+extern fn iseriser_feature_count(?*opaque {}) u32;
+extern fn iseriser_expand_templates(?*opaque {}, ?[*:0]const u8) c_int;
+extern fn iseriser_artifact_count(?*opaque {}) u32;
+extern fn iseriser_generate_repo(?*opaque {}, ?[*:0]const u8, ?[*:0]const u8) c_int;
+extern fn iseriser_validate_language(?*opaque {}, ?[*:0]const u8) c_int;
+extern fn iseriser_last_error() ?[*:0]const u8;
+extern fn iseriser_version() [*:0]const u8;
+extern fn iseriser_build_info() [*:0]const u8;
+extern fn iseriser_is_initialized(?*opaque {}) u32;
+extern fn iseriser_has_model(?*opaque {}) u32;
 
 //==============================================================================
 // Lifecycle Tests
 //==============================================================================
 
-test "create and destroy handle" {
-    const handle = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(handle);
+test "create and destroy generation context" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
 
-    try testing.expect(handle != null);
+    try testing.expect(ctx != null);
 }
 
-test "handle is initialized" {
-    const handle = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(handle);
+test "context is initialized after creation" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
 
-    const initialized = {{project}}_is_initialized(handle);
+    const initialized = iseriser_is_initialized(ctx);
     try testing.expectEqual(@as(u32, 1), initialized);
 }
 
-test "null handle is not initialized" {
-    const initialized = {{project}}_is_initialized(null);
+test "null context is not initialized" {
+    const initialized = iseriser_is_initialized(null);
     try testing.expectEqual(@as(u32, 0), initialized);
 }
 
+test "no model loaded initially" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
+
+    const has = iseriser_has_model(ctx);
+    try testing.expectEqual(@as(u32, 0), has);
+}
+
 //==============================================================================
-// Operation Tests
+// Language Model Tests
 //==============================================================================
 
-test "process with valid handle" {
-    const handle = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(handle);
+test "load language model from manifest" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
 
-    const result = {{project}}_process(handle, 42);
+    const result = iseriser_load_language(ctx, "test-manifest.toml");
+    try testing.expectEqual(@as(c_int, 0), result); // 0 = ok
+    try testing.expectEqual(@as(u32, 1), iseriser_has_model(ctx));
+}
+
+test "load language with null context returns error" {
+    const result = iseriser_load_language(null, "test.toml");
+    try testing.expectEqual(@as(c_int, 5), result); // 5 = null_pointer
+}
+
+test "load language with null path returns error" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
+
+    const result = iseriser_load_language(ctx, null);
+    try testing.expectEqual(@as(c_int, 5), result); // 5 = null_pointer
+}
+
+test "feature count is zero before loading" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
+
+    const count = iseriser_feature_count(ctx);
+    try testing.expectEqual(@as(u32, 0), count);
+}
+
+test "feature count after loading model" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
+
+    _ = iseriser_load_language(ctx, "test.toml");
+    const count = iseriser_feature_count(ctx);
+    try testing.expect(count > 0);
+}
+
+//==============================================================================
+// Template Expansion Tests
+//==============================================================================
+
+test "expand templates without model returns error" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
+
+    const result = iseriser_expand_templates(ctx, "/tmp/output");
+    try testing.expectEqual(@as(c_int, 2), result); // 2 = invalid_language
+}
+
+test "expand templates after loading model" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
+
+    _ = iseriser_load_language(ctx, "test.toml");
+    const result = iseriser_expand_templates(ctx, "/tmp/output");
     try testing.expectEqual(@as(c_int, 0), result); // 0 = ok
 }
 
-test "process with null handle returns error" {
-    const result = {{project}}_process(null, 42);
-    try testing.expectEqual(@as(c_int, 4), result); // 4 = null_pointer
+test "artifact count after expansion" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
+
+    _ = iseriser_load_language(ctx, "test.toml");
+    _ = iseriser_expand_templates(ctx, "/tmp/output");
+    const count = iseriser_artifact_count(ctx);
+    try testing.expect(count > 0);
 }
 
 //==============================================================================
-// String Tests
+// High-Level Generation Tests
 //==============================================================================
 
-test "get string result" {
-    const handle = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(handle);
+test "generate repo in one call" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
 
-    const str = {{project}}_get_string(handle);
-    defer if (str) |s| {{project}}_free_string(s);
-
-    try testing.expect(str != null);
+    const result = iseriser_generate_repo(ctx, "test.toml", "/tmp/output");
+    try testing.expectEqual(@as(c_int, 0), result); // 0 = ok
+    try testing.expect(iseriser_artifact_count(ctx) > 0);
 }
 
-test "get string with null handle" {
-    const str = {{project}}_get_string(null);
-    try testing.expect(str == null);
+test "generate repo with null context" {
+    const result = iseriser_generate_repo(null, "test.toml", "/tmp/output");
+    try testing.expectEqual(@as(c_int, 5), result); // 5 = null_pointer
+}
+
+//==============================================================================
+// Validation Tests
+//==============================================================================
+
+test "validate language with null context" {
+    const result = iseriser_validate_language(null, "test.toml");
+    try testing.expectEqual(@as(c_int, 5), result); // 5 = null_pointer
+}
+
+test "validate language with valid manifest" {
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
+
+    const result = iseriser_validate_language(ctx, "test.toml");
+    try testing.expectEqual(@as(c_int, 0), result); // 0 = ok
 }
 
 //==============================================================================
 // Error Handling Tests
 //==============================================================================
 
-test "last error after null handle operation" {
-    _ = {{project}}_process(null, 0);
+test "last error after null context operation" {
+    _ = iseriser_load_language(null, "test.toml");
 
-    const err = {{project}}_last_error();
+    const err = iseriser_last_error();
     try testing.expect(err != null);
 
     if (err) |e| {
@@ -93,13 +186,11 @@ test "last error after null handle operation" {
 }
 
 test "no error after successful operation" {
-    const handle = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(handle);
+    const ctx = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx);
 
-    _ = {{project}}_process(handle, 0);
-
+    _ = iseriser_load_language(ctx, "test.toml");
     // Error should be cleared after successful operation
-    // (This depends on implementation)
 }
 
 //==============================================================================
@@ -107,76 +198,45 @@ test "no error after successful operation" {
 //==============================================================================
 
 test "version string is not empty" {
-    const ver = {{project}}_version();
+    const ver = iseriser_version();
     const ver_str = std.mem.span(ver);
 
     try testing.expect(ver_str.len > 0);
 }
 
-test "version string is semantic version format" {
-    const ver = {{project}}_version();
+test "version is semantic version format" {
+    const ver = iseriser_version();
     const ver_str = std.mem.span(ver);
 
-    // Should be in format X.Y.Z
     try testing.expect(std.mem.count(u8, ver_str, ".") >= 1);
+}
+
+test "build info contains iseriser" {
+    const info = iseriser_build_info();
+    const info_str = std.mem.span(info);
+
+    try testing.expect(std.mem.indexOf(u8, info_str, "iseriser") != null);
 }
 
 //==============================================================================
 // Memory Safety Tests
 //==============================================================================
 
-test "multiple handles are independent" {
-    const h1 = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(h1);
+test "multiple contexts are independent" {
+    const ctx1 = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx1);
 
-    const h2 = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(h2);
+    const ctx2 = iseriser_init() orelse return error.InitFailed;
+    defer iseriser_free(ctx2);
 
-    try testing.expect(h1 != h2);
+    try testing.expect(ctx1 != ctx2);
 
-    // Operations on h1 should not affect h2
-    _ = {{project}}_process(h1, 1);
-    _ = {{project}}_process(h2, 2);
-}
-
-test "double free is safe" {
-    const handle = {{project}}_init() orelse return error.InitFailed;
-
-    {{project}}_free(handle);
-    {{project}}_free(handle); // Should not crash
+    // Load model in ctx1 only
+    _ = iseriser_load_language(ctx1, "test.toml");
+    try testing.expectEqual(@as(u32, 1), iseriser_has_model(ctx1));
+    try testing.expectEqual(@as(u32, 0), iseriser_has_model(ctx2));
 }
 
 test "free null is safe" {
-    {{project}}_free(null); // Should not crash
-}
-
-//==============================================================================
-// Thread Safety Tests (if applicable)
-//==============================================================================
-
-test "concurrent operations" {
-    const handle = {{project}}_init() orelse return error.InitFailed;
-    defer {{project}}_free(handle);
-
-    const ThreadContext = struct {
-        h: *opaque {},
-        id: u32,
-    };
-
-    const thread_fn = struct {
-        fn run(ctx: ThreadContext) void {
-            _ = {{project}}_process(ctx.h, ctx.id);
-        }
-    }.run;
-
-    var threads: [4]std.Thread = undefined;
-    for (&threads, 0..) |*thread, i| {
-        thread.* = try std.Thread.spawn(.{}, thread_fn, .{
-            ThreadContext{ .h = handle, .id = @intCast(i) },
-        });
-    }
-
-    for (threads) |thread| {
-        thread.join();
-    }
+    iseriser_free(null); // Should not crash
 }

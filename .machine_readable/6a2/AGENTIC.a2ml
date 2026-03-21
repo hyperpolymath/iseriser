@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# AGENTIC.a2ml — AI agent constraints and capabilities
-# Defines what AI agents can and cannot do in this repository.
+# AGENTIC.a2ml — AI agent constraints and capabilities for iseriser
+# Iseriser is the meta-framework that generates new -iser projects.
 
 [metadata]
 version = "0.1.0"
-last-updated = "{{CURRENT_DATE}}"
+last-updated = "2026-03-21"
 
 [agent-permissions]
 can-edit-source = true
@@ -22,6 +22,8 @@ can-create-files = true
 # - Never use banned languages (TypeScript, Python, Go, etc.)
 # - Never place state files in repository root (must be in .machine_readable/)
 # - Never use AGPL license (use PMPL-1.0-or-later)
+# - Never hardcode per-language logic in templates — always derive from LanguageModel
+# - Never generate repos outside the canonical ~/Documents/hyperpolymath-repos/ location
 
 [maintenance-integrity]
 fail-closed = true

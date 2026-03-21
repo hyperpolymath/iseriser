@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# ANCHOR.a2ml - authoritative anchor for this repository
+# ANCHOR.a2ml - authoritative anchor for iseriser
 
 [metadata]
 version = "1.0.0"
-last-updated = "{{CURRENT_DATE}}"
+last-updated = "2026-03-21"
 
 [anchor]
 schema = "hyperpolymath.anchor/1"
@@ -13,29 +13,30 @@ repo = "hyperpolymath/iseriser"
 authority = "upstream-canonical"
 
 purpose = [
-  "Define canonical semantics and policy boundaries for this repository.",
-  "Declare what downstream/satellite repos can extend but not redefine.",
-  "Provide a stable golden path and invariant contract for release readiness.",
+  "Define canonical semantics and policy boundaries for the iseriser meta-framework.",
+  "Declare what generated -iser repos inherit but cannot override.",
+  "Provide a stable golden path for -iser generation and template expansion.",
 ]
 
 [identity]
-project = "{{PROJECT_NAME}}"
-kind = "{{PROJECT_KIND}}"                # language | library | service | tool
-one-sentence = "{{PROJECT_PURPOSE}}"
-domain = "{{PROJECT_DOMAIN}}"
+project = "iseriser"
+kind = "tool"
+one-sentence = "Meta-framework that generates new -iser projects from language descriptions"
+domain = "code-generation, meta-tooling, language-interop"
 
 [semantic-authority]
 policy = "canonical"
 
 owns = [
-  "Project semantics and specification",
-  "Invariant definitions and contractiles",
-  "Reference implementation behavior",
+  "Template definitions for all generated -iser repos",
+  "Language model schema and feature taxonomy",
+  "Generation pipeline semantics and invariants",
+  "ABI/FFI template correctness proofs",
 ]
 
 [implementation-policy]
-allowed = ["Rust", "Idris2", "Zig", "Scheme", "Shell", "Just", "AsciiDoc", "Markdown"]
-forbidden = ["Node.js", "npm"]
+allowed = ["Rust", "Idris2", "Zig", "Scheme", "Shell", "Just", "AsciiDoc", "Markdown", "Handlebars"]
+forbidden = ["Node.js", "npm", "TypeScript", "Python", "Go"]
 
 [golden-path]
 smoke-test-command = [
@@ -47,6 +48,7 @@ success-criteria = [
   "Core tests pass",
   "Quality gates pass",
   "No unresolved critical security findings",
+  "Generated repos pass cargo check",
 ]
 
 [satellite-policy]
@@ -57,6 +59,5 @@ must-have-golden-path = true
 
 [semantic-authority-files]
 language-spec = "SPECIFICATION.md"
-formal-proofs = "docs/proofs/PROOFS.adoc"
-type-theory = "docs/theory/THEORY.adoc"
-algorithms = "docs/theory/ALGORITHMS.adoc"
+formal-proofs = "src/interface/abi/"
+architecture = "docs/architecture/TOPOLOGY.md"

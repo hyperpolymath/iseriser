@@ -1,32 +1,64 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-= iseriser Roadmap
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Iseriser Roadmap
 :toc:
 :icons: font
 
 == Phase 0: Scaffold (COMPLETE)
-* [x] RSR template with full CI/CD
-* [x] CLI with subcommands
-* [x] Manifest parser
-* [x] Codegen stubs
-* [x] ABI module stubs
-* [x] README with architecture
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with init/validate/generate/build/run/info subcommands
+* [x] Manifest parser (`iseriser.toml` via TOML + serde)
+* [x] Codegen stubs (generate_all, build, run placeholders)
+* [x] ABI module stubs (Rust-side type mirrors)
+* [x] Idris2 ABI template files (Types.idr, Layout.idr, Foreign.idr)
+* [x] Zig FFI template files (build.zig, main.zig, integration_test.zig)
+* [x] README with architecture, use cases, and -iser family table
+* [x] Machine-readable governance (STATE, META, ECOSYSTEM, contractiles)
 
-== Phase 1: Core Implementation
-* [ ] Implement target-language-specific code generation
-* [ ] Write Idris2 ABI proofs for core invariants
-* [ ] Build Zig FFI bridge
-* [ ] First working end-to-end example
-* [ ] Integration tests
+== Phase 1: Language Model Parser
+* [ ] Define `LanguageDescription` struct: name, type system features, compilation target, key primitives, calling convention
+* [ ] Parse language descriptions from `iseriser.toml` `[language]` section
+* [ ] Validate language descriptions against known feature sets
+* [ ] Map language features to template variables (e.g., `has_dependent_types` -> ABI proof depth)
+* [ ] Support language feature composition (e.g., "like Chapel but with linear types")
+* [ ] Unit tests for language model parsing and validation
 
-== Phase 2: Polish
-* [ ] Error messages and diagnostics
+== Phase 2: Template Engine
+* [ ] Integrate Handlebars templates for all generated artifacts
+* [ ] Create master template set: Cargo.toml, main.rs, lib.rs, manifest/mod.rs, codegen/mod.rs, abi/mod.rs
+* [ ] Create Idris2 ABI templates with language-aware type mappings
+* [ ] Create Zig FFI templates with language-aware calling conventions
+* [ ] Create CI/CD workflow templates (parameterised by language features)
+* [ ] Create documentation templates (README.adoc, ROADMAP.adoc, TOPOLOGY.md)
+* [ ] Create RSR governance templates (.machine_readable/ hierarchy)
+* [ ] Template validation: verify all placeholders are resolved before output
+
+== Phase 3: Bespoke Codegen Generation
+* [ ] Generate manifest parsers with language-specific fields (e.g., Chapel `[locale]`, Julia `[type-dispatch]`)
+* [ ] Generate codegen engines with language-specific template expansion
+* [ ] Generate ABI modules with language-appropriate type mappings
+* [ ] Generate example manifests and test fixtures per target language
+* [ ] End-to-end test: iseriser generates chapeliser, chapeliser passes `cargo test`
+* [ ] End-to-end test: iseriser generates julianiser, julianiser parses a Julia manifest
+
+== Phase 4: Self-Hosting
+* [ ] Iseriser generates iseriser — the meta-framework can regenerate itself
+* [ ] Generated iseriser passes all tests of the hand-written iseriser
+* [ ] Diff analysis: hand-written vs. generated, converge to zero diff
+* [ ] Bootstrap CI: iseriser regenerates itself on every commit, verifies no regressions
+
+== Phase 5: Idris2 Proofs of Template Correctness
+* [ ] Prove that template expansion preserves type safety (no ill-typed Rust output)
+* [ ] Prove that generated ABI layouts match Zig FFI expectations
+* [ ] Prove that generated manifest parsers accept valid TOML and reject invalid
+* [ ] Prove that generated CI/CD workflows reference correct file paths
+* [ ] Integration with `proven` library for shared proof infrastructure
+
+== Phase 6: Ecosystem Integration
+* [ ] PanLL panel: "New -Iser" wizard panel for interactive language description
+* [ ] BoJ-server cartridge: `iseriser.generate` MCP tool for bot-driven -iser creation
+* [ ] VeriSimDB backing store: persist language models and generation history
+* [ ] Batch generation mode: regenerate all 28 -iser repos from updated templates
+* [ ] Publish to crates.io as `iseriser` CLI
 * [ ] Shell completions (bash, zsh, fish)
-* [ ] CI/CD for the generated artifacts
-* [ ] Performance benchmarks
-* [ ] Additional examples
-
-== Phase 3: Ecosystem
-* [ ] PanLL panel integration
-* [ ] BoJ-server cartridge
-* [ ] VeriSimDB backing store for results
-* [ ] Publish to crates.io
+* [ ] Error messages and diagnostics for template expansion failures
