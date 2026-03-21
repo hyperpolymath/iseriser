@@ -1,0 +1,23 @@
+= NewLang Example
+
+This directory contains an example iseriser manifest that generates
+a complete -iser for a fictional language called "NewLang".
+
+== Usage
+
+[source,bash]
+----
+cd /path/to/iseriser
+cargo run -- generate -m examples/newlang/iseriser.toml -o /tmp/generated
+----
+
+This produces a complete `newlangiser/` repository under `/tmp/generated/`
+with Cargo.toml, src/, Idris2 ABI, Zig FFI, tests, CI/CD, and docs.
+
+== Language Description
+
+* *Name:* NewLang
+* *Paradigm:* functional
+* *Type system:* algebraic
+* *Target:* native
+* *Key primitives:* atom, channel, record

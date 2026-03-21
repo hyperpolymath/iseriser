@@ -1,33 +1,57 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
-// Code generation for any target language from iseriser manifest.
+// Code generation engine for iseriser.
+//
+// Submodules:
+//   - parser:     Validates language descriptions (semantic rules)
+//   - scaffold:   Generates complete -iser repository structures
+//   - customizer: Applies language-feature-specific modifications
 
-use anyhow::{Context, Result};
-use std::fs;
+pub mod customizer;
+pub mod parser;
+pub mod scaffold;
+
+use anyhow::Result;
 use std::path::Path;
 
+use crate::abi::ScaffoldResult;
 use crate::manifest::Manifest;
 
-/// Generate all artifacts: any target language wrapper, Zig FFI, C headers.
-pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<()> {
-    let out = Path::new(output_dir);
-    fs::create_dir_all(out).context("Failed to create output directory")?;
-    // TODO: implement any target language-specific code generation
-    println!("  [stub] any target language codegen for '{}' — implementation pending", manifest.workload.name);
-    Ok(())
-}
+/// Validate, scaffold, and write a complete -iser repository.
+///
+/// This is the main entry point for the generation pipeline:
+///   1. Deep-validate the language description (parser)
+///   2. Generate the full file set (scaffold)
+///   3. Apply language-specific customizations (customizer — called by scaffold)
+///   4. Write everything to disk (scaffold)
+pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<ScaffoldResult> {
+    // Step 1: Deep validation
+    let report = parser::validate_or_bail(manifest)?;
 
-/// Build generated artifacts.
-pub fn build(manifest: &Manifest, _release: bool) -> Result<()> {
-    println!("Building {} workload: {}", "iseriser", manifest.workload.name);
-    // TODO: invoke any target language compiler
-    Ok(())
-}
+    // Print warnings (non-fatal)
+    for warning in &report.warnings {
+        eprintln!("warning: {}", warning);
+    }
 
-/// Run the workload.
-pub fn run(manifest: &Manifest, _args: &[String]) -> Result<()> {
-    println!("Running {} workload: {}", "iseriser", manifest.workload.name);
-    // TODO: execute generated binary
-    Ok(())
+    // Step 2 + 3 + 4: Scaffold (includes customization and disk write)
+    let result = scaffold::scaffold_repo(manifest, Path::new(output_dir));
+
+    match &result {
+        ScaffoldResult::Success(repo) => {
+            println!(
+                "Generated {} ({} files) at {}",
+                repo.name,
+                repo.file_count(),
+                repo.root.display()
+            );
+        }
+        _ => {
+            if let Some(msg) = result.error_message() {
+                eprintln!("error: {}", msg);
+            }
+        }
+    }
+
+    Ok(result)
 }

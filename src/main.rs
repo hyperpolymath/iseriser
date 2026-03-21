@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
-// iseriser CLI — Meta-framework: generate new -iser projects
-// Part of the hyperpolymath -iser family. See README.adoc for architecture.
+// iseriser CLI — Meta-framework: generate new -iser projects from
+// language descriptions.
+// Part of the hyperpolymath -iser family.  See README.adoc for architecture.
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+mod abi;
 mod codegen;
 mod manifest;
 
@@ -26,31 +28,17 @@ enum Commands {
         #[arg(short, long, default_value = ".")]
         path: String,
     },
-    /// Validate a iseriser.toml manifest.
+    /// Validate an iseriser.toml manifest (structural + semantic).
     Validate {
         #[arg(short, long, default_value = "iseriser.toml")]
         manifest: String,
     },
-    /// Generate any target language wrapper, Zig FFI bridge, and C headers from the manifest.
+    /// Generate a complete -iser repository from the manifest.
     Generate {
         #[arg(short, long, default_value = "iseriser.toml")]
         manifest: String,
-        #[arg(short, long, default_value = "generated/iseriser")]
+        #[arg(short, long, default_value = ".")]
         output: String,
-    },
-    /// Build the generated artifacts.
-    Build {
-        #[arg(short, long, default_value = "iseriser.toml")]
-        manifest: String,
-        #[arg(long)]
-        release: bool,
-    },
-    /// Run the iseriserd workload.
-    Run {
-        #[arg(short, long, default_value = "iseriser.toml")]
-        manifest: String,
-        #[arg(trailing_var_arg = true)]
-        args: Vec<String>,
     },
     /// Show information about a manifest.
     Info {
@@ -69,21 +57,18 @@ fn main() -> Result<()> {
         Commands::Validate { manifest } => {
             let m = manifest::load_manifest(&manifest)?;
             manifest::validate(&m)?;
-            println!("Manifest valid: {}", m.workload.name);
+            let report = codegen::parser::validate_or_bail(&m)?;
+            println!("Manifest valid: {}", m.project.name);
+            if !report.warnings.is_empty() {
+                for w in &report.warnings {
+                    eprintln!("warning: {}", w);
+                }
+            }
         }
         Commands::Generate { manifest, output } => {
             let m = manifest::load_manifest(&manifest)?;
             manifest::validate(&m)?;
             codegen::generate_all(&m, &output)?;
-            println!("Generated any target language artifacts in: {}", output);
-        }
-        Commands::Build { manifest, release } => {
-            let m = manifest::load_manifest(&manifest)?;
-            codegen::build(&m, release)?;
-        }
-        Commands::Run { manifest, args } => {
-            let m = manifest::load_manifest(&manifest)?;
-            codegen::run(&m, &args)?;
         }
         Commands::Info { manifest } => {
             let m = manifest::load_manifest(&manifest)?;
