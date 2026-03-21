@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Intendfile — Design intent declarations for iseriser
+# Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+@abstract:
+What iseriser INTENDS to become. These are bespoke design goals
+specific to the Code generation meta-framework for the -iser ecosystem domain.
+@end
+
+## Domain-Specific Intent
+
+### self-generation\n- description: iseriser should be able to regenerate itself\n- target: Bootstrapping from language description\n- status: aspiration\n\n### ecosystem-coherence\n- description: Ensure all generated -isers share consistent ABI/FFI interfaces\n- target: Cross-iser interoperability\n- status: aspiration
+
+## Cross-Cutting Intent
+
+### iser-ecosystem-compatibility
+- description: Must interoperate with other -iser projects via shared ABI
+- target: Idris2 ABI + Zig FFI standard interface
+- status: in-progress
+
+### proven-integration
+- description: All formal proofs should be verifiable by the proven framework
+- target: Integration with hyperpolymath/proven
+- status: aspiration

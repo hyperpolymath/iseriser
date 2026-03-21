@@ -11,28 +11,30 @@
   (project-context
     (name "iseriser")
     (description "Meta-framework that generates new -iser projects from language descriptions")
-    (status "codebase-in-progress")
-    (priority "critical — tooling foundation for all 28 -iser repos")
-    (ecosystem "-iser family (https://github.com/hyperpolymath/iseriser)"))
+    (status "phase-1-complete")
+    (priority "—")
+    (ecosystem "-iser family (https://github.com/hyperpolymath/iseriser)")
+    (domain "Code generation meta-framework for the -iser ecosystem"))
 
   (current-position
-    (phase "scaffold-documented")
-    (completion-percentage 12)
-    (milestone "Architecture defined, CLI scaffolded, bespoke Idris2 ABI and Zig FFI written, TOPOLOGY and ROADMAP complete"))
+    (phase "phase-1-complete")
+    (completion-percentage 45)
+    (milestone "Phase 1 complete — scaffold, CLI, manifest parser, codegen stubs, ABI types, RSR template"))
 
   (route-to-mvp
-    (step 1 "Implement LanguageDescription parser in manifest/mod.rs")
-    (step 2 "Build Handlebars template set for all generated artifact types")
-    (step 3 "Wire template engine to language model in codegen/mod.rs")
-    (step 4 "Write Idris2 ABI proofs for template expansion correctness")
-    (step 5 "End-to-end test: iseriser generates chapeliser, passes cargo test")
-    (step 6 "Self-hosting: iseriser generates iseriser")
-    (step 7 "Batch mode: regenerate all 28 -iser repos from updated templates"))
+    (step 1 "Phase 1 — scaffold, CLI, manifest parser, ABI types [COMPLETE]")
+    (step 2 "Phase 2 — core domain logic implementation")
+    (step 3 "Phase 3 — Idris2 ABI formal proofs")
+    (step 4 "Phase 4 — Zig FFI bridge implementation")
+    (step 5 "Phase 5 — integration tests with real targets")
+    (step 6 "Phase 6 — documentation and examples")
+    (step 7 "Phase 7 — Chainguard container + CI hardening")
+    (step 8 "Phase 8 — first release (v0.1.0)"))
 
   (blockers-and-issues
-    (none "Project is in scaffold phase — no blockers yet"))
+    (none "No blockers — Phase 1 complete, ready for Phase 2"))
 
   (critical-next-actions
-    (action "Implement LanguageDescription struct and TOML parsing")
-    (action "Create Handlebars template files for Cargo.toml, main.rs, lib.rs")
-    (action "First end-to-end generation test")))
+    (action "Begin Phase 2 — implement core domain logic for iseriser")
+    (action "Write property-based tests for manifest parsing")
+    (action "Define Idris2 ABI proof obligations for Phase 3")))
