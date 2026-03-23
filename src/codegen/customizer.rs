@@ -360,7 +360,11 @@ mod tests {
     use super::*;
     use crate::abi::*;
 
-    fn make_model(paradigm: Paradigm, target: CompilationTarget, type_sys: TypeSystemFeature) -> LanguageModel {
+    fn make_model(
+        paradigm: Paradigm,
+        target: CompilationTarget,
+        type_sys: TypeSystemFeature,
+    ) -> LanguageModel {
         LanguageModel {
             name: "TestLang".to_string(),
             paradigm,
@@ -372,39 +376,75 @@ mod tests {
 
     #[test]
     fn test_functional_adds_adt_mapper() {
-        let model = make_model(Paradigm::Functional, CompilationTarget::Native, TypeSystemFeature::Algebraic);
+        let model = make_model(
+            Paradigm::Functional,
+            CompilationTarget::Native,
+            TypeSystemFeature::Algebraic,
+        );
         let mut files = Vec::new();
         apply_customizations(&model, &mut files);
-        assert!(files.iter().any(|f| f.path.to_str().unwrap().contains("adt_mapper")));
+        assert!(
+            files
+                .iter()
+                .any(|f| f.path.to_str().unwrap().contains("adt_mapper"))
+        );
     }
 
     #[test]
     fn test_array_adds_array_bridge() {
-        let model = make_model(Paradigm::Array, CompilationTarget::Native, TypeSystemFeature::ArrayTypes);
+        let model = make_model(
+            Paradigm::Array,
+            CompilationTarget::Native,
+            TypeSystemFeature::ArrayTypes,
+        );
         let mut files = Vec::new();
         apply_customizations(&model, &mut files);
-        assert!(files.iter().any(|f| f.path.to_str().unwrap().contains("array_bridge")));
+        assert!(
+            files
+                .iter()
+                .any(|f| f.path.to_str().unwrap().contains("array_bridge"))
+        );
     }
 
     #[test]
     fn test_beam_adds_nif_boilerplate() {
-        let model = make_model(Paradigm::Functional, CompilationTarget::Beam, TypeSystemFeature::Algebraic);
+        let model = make_model(
+            Paradigm::Functional,
+            CompilationTarget::Beam,
+            TypeSystemFeature::Algebraic,
+        );
         let mut files = Vec::new();
         apply_customizations(&model, &mut files);
-        assert!(files.iter().any(|f| f.path.to_str().unwrap().contains("beam_nif")));
+        assert!(
+            files
+                .iter()
+                .any(|f| f.path.to_str().unwrap().contains("beam_nif"))
+        );
     }
 
     #[test]
     fn test_dependent_types_add_deep_proof_docs() {
-        let model = make_model(Paradigm::Functional, CompilationTarget::Native, TypeSystemFeature::Dependent);
+        let model = make_model(
+            Paradigm::Functional,
+            CompilationTarget::Native,
+            TypeSystemFeature::Dependent,
+        );
         let mut files = Vec::new();
         apply_customizations(&model, &mut files);
-        assert!(files.iter().any(|f| f.path.to_str().unwrap().contains("deep-abi-proofs")));
+        assert!(
+            files
+                .iter()
+                .any(|f| f.path.to_str().unwrap().contains("deep-abi-proofs"))
+        );
     }
 
     #[test]
     fn test_imperative_native_minimal_extras() {
-        let model = make_model(Paradigm::Imperative, CompilationTarget::Native, TypeSystemFeature::Simple);
+        let model = make_model(
+            Paradigm::Imperative,
+            CompilationTarget::Native,
+            TypeSystemFeature::Simple,
+        );
         let mut files = Vec::new();
         apply_customizations(&model, &mut files);
         // Imperative + native + simple = no extras

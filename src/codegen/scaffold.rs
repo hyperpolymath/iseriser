@@ -106,7 +106,11 @@ fn write_files(root: &Path, files: &[GeneratedFile]) -> Result<()> {
 // ---------------------------------------------------------------------------
 
 /// Generate `Cargo.toml` for the new -iser.
-fn generate_cargo_toml(manifest: &Manifest, model: &LanguageModel, iser_name: &str) -> GeneratedFile {
+fn generate_cargo_toml(
+    manifest: &Manifest,
+    model: &LanguageModel,
+    iser_name: &str,
+) -> GeneratedFile {
     let content = format!(
         r#"# SPDX-License-Identifier: PMPL-1.0-or-later
 [package]
@@ -1046,7 +1050,10 @@ fn idris2_module_name(model: &LanguageModel) -> String {
 /// E.g. "task" -> "TaskPrim", "forall" -> "ForallPrim".
 fn to_idris_constructor(prim: &str) -> String {
     let mut chars = prim.chars();
-    let first = chars.next().map(|c| c.to_uppercase().to_string()).unwrap_or_default();
+    let first = chars
+        .next()
+        .map(|c| c.to_uppercase().to_string())
+        .unwrap_or_default();
     format!("{}{}Prim", first, chars.as_str())
 }
 
@@ -1086,10 +1093,18 @@ description = "Chapel distributed computing -iser"
         let manifest = test_manifest();
         let tmp = tempfile::tempdir().unwrap();
         let result = scaffold_repo(&manifest, tmp.path());
-        assert!(result.is_success(), "scaffold failed: {:?}", result.error_message());
+        assert!(
+            result.is_success(),
+            "scaffold failed: {:?}",
+            result.error_message()
+        );
         let repo = result.repo().unwrap();
         assert_eq!(repo.name, "chapeliser");
-        assert!(repo.file_count() >= 20, "expected 20+ files, got {}", repo.file_count());
+        assert!(
+            repo.file_count() >= 20,
+            "expected 20+ files, got {}",
+            repo.file_count()
+        );
     }
 
     #[test]
@@ -1098,10 +1113,7 @@ description = "Chapel distributed computing -iser"
         let tmp = tempfile::tempdir().unwrap();
         let result = scaffold_repo(&manifest, tmp.path());
         let repo = result.repo().unwrap();
-        assert!(
-            repo.is_complete(),
-            "repo missing mandatory categories"
-        );
+        assert!(repo.is_complete(), "repo missing mandatory categories");
     }
 
     #[test]

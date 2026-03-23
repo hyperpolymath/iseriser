@@ -32,10 +32,7 @@ pub enum ValidationError {
     /// A key primitive is invalid (empty or too long).
     InvalidPrimitive(String),
     /// The repo name does not match the expected derived name.
-    RepoNameMismatch {
-        expected: String,
-        actual: String,
-    },
+    RepoNameMismatch { expected: String, actual: String },
     /// The compilation target is unusual for the paradigm (warning-level).
     UnusualTarget {
         paradigm: Paradigm,
@@ -49,7 +46,10 @@ impl std::fmt::Display for ValidationError {
             ValidationError::InvalidLanguageName(name) => {
                 write!(f, "Invalid language name: '{}'", name)
             }
-            ValidationError::IncompatibleTypeSystem { paradigm, type_system } => {
+            ValidationError::IncompatibleTypeSystem {
+                paradigm,
+                type_system,
+            } => {
                 write!(
                     f,
                     "Type system '{}' is incompatible with paradigm '{}'",
@@ -110,7 +110,11 @@ pub fn validate_language_description(manifest: &Manifest) -> ValidationReport {
     // 1. Language name: must be non-empty, ASCII alphanumeric + hyphens
     if model.name.is_empty() {
         errors.push(ValidationError::InvalidLanguageName(model.name.clone()));
-    } else if !model.name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '+') {
+    } else if !model
+        .name
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '+')
+    {
         errors.push(ValidationError::InvalidLanguageName(model.name.clone()));
     }
 
@@ -145,10 +149,7 @@ pub fn validate_language_description(manifest: &Manifest) -> ValidationReport {
 ///   - "logic" paradigm with "none" type system is technically valid
 ///     but unusual (most logic languages have types)
 ///   - "array" paradigm with "dependent" types is uncommon
-fn check_paradigm_type_compatibility(
-    model: &LanguageModel,
-    _errors: &mut Vec<ValidationError>,
-) {
+fn check_paradigm_type_compatibility(model: &LanguageModel, _errors: &mut Vec<ValidationError>) {
     // Currently all combinations are valid.  This function is a hook
     // for future constraints as the -iser ecosystem grows.
     // The Idris2 ABI proofs handle the hard constraints at compile time;
@@ -158,10 +159,7 @@ fn check_paradigm_type_compatibility(
 
 /// Check that the paradigm and target are consistent.
 /// Flags unusual but not impossible combinations as warnings.
-fn check_paradigm_target_consistency(
-    model: &LanguageModel,
-    warnings: &mut Vec<ValidationError>,
-) {
+fn check_paradigm_target_consistency(model: &LanguageModel, warnings: &mut Vec<ValidationError>) {
     // Logic languages on GPU is unusual
     if model.paradigm == Paradigm::Logic && model.compilation_target == CompilationTarget::Gpu {
         warnings.push(ValidationError::UnusualTarget {
@@ -184,7 +182,10 @@ pub fn validate_or_bail(manifest: &Manifest) -> Result<ValidationReport> {
     let report = validate_language_description(manifest);
     if !report.is_valid() {
         let msgs: Vec<String> = report.errors.iter().map(|e| e.to_string()).collect();
-        anyhow::bail!("Language description validation failed:\n  {}", msgs.join("\n  "));
+        anyhow::bail!(
+            "Language description validation failed:\n  {}",
+            msgs.join("\n  ")
+        );
     }
     Ok(report)
 }
@@ -281,6 +282,11 @@ description = "Prolog -iser"
         let m = parse_manifest(toml).unwrap();
         let report = validate_language_description(&m);
         assert!(report.is_valid());
-        assert!(report.warnings.iter().any(|w| matches!(w, ValidationError::UnusualTarget { .. })));
+        assert!(
+            report
+                .warnings
+                .iter()
+                .any(|w| matches!(w, ValidationError::UnusualTarget { .. }))
+        );
     }
 }

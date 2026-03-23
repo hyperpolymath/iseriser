@@ -232,7 +232,11 @@ impl GeneratedRepo {
     /// Check that the repo contains the mandatory artifact categories
     /// (mirrors the Idris2 `GenerationComplete` proof).
     pub fn is_complete(&self) -> bool {
-        let paths: Vec<String> = self.files.iter().map(|f| f.path.display().to_string()).collect();
+        let paths: Vec<String> = self
+            .files
+            .iter()
+            .map(|f| f.path.display().to_string())
+            .collect();
         let has = |needle: &str| paths.iter().any(|p| p.contains(needle));
 
         has("Cargo.toml")

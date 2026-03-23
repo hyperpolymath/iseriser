@@ -117,8 +117,7 @@ impl Manifest {
 pub fn load_manifest(path: &str) -> Result<Manifest> {
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("Failed to read manifest: {}", path))?;
-    parse_manifest(&content)
-        .with_context(|| format!("Failed to parse manifest: {}", path))
+    parse_manifest(&content).with_context(|| format!("Failed to parse manifest: {}", path))
 }
 
 /// Parse a manifest from a TOML string (useful for testing).
@@ -168,7 +167,10 @@ pub fn validate(manifest: &Manifest) -> Result<()> {
 pub fn init_manifest(path: &str) -> Result<()> {
     let manifest_path = Path::new(path).join("iseriser.toml");
     if manifest_path.exists() {
-        anyhow::bail!("iseriser.toml already exists at {}", manifest_path.display());
+        anyhow::bail!(
+            "iseriser.toml already exists at {}",
+            manifest_path.display()
+        );
     }
     let template = r#"# iseriser manifest — describe a target language to generate an -iser for.
 # SPDX-License-Identifier: PMPL-1.0-or-later
