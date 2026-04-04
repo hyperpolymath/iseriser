@@ -19,6 +19,7 @@ use clap::{Parser, Subcommand};
 mod abi;
 mod codegen;
 mod manifest;
+mod scan;
 
 /// iseriser — Meta-framework: generate new -iser projects
 #[derive(Parser)]
@@ -53,6 +54,15 @@ enum Commands {
         #[arg(short, long, default_value = "iseriser.toml")]
         manifest: String,
     },
+    /// Scan a repository and recommend applicable -iser tools.
+    Scan {
+        /// Path to the repository to scan (default: current directory).
+        #[arg(short, long, default_value = ".")]
+        path: String,
+        /// Output recommendations as JSON instead of a table.
+        #[arg(long, default_value_t = false)]
+        json: bool,
+    },
 }
 
 fn main() -> Result<()> {
@@ -81,6 +91,14 @@ fn main() -> Result<()> {
         Commands::Info { manifest } => {
             let m = manifest::load_manifest(&manifest)?;
             manifest::print_info(&m);
+        }
+        Commands::Scan { path, json } => {
+            let recommendations = scan::scan_repo(&path)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&recommendations)?);
+            } else {
+                scan::print_table(&recommendations);
+            }
         }
     }
     Ok(())

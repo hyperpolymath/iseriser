@@ -352,6 +352,7 @@ dependencies = [
  "clap",
  "handlebars",
  "serde",
+ "serde_json",
  "tempfile",
  "thiserror",
  "toml",

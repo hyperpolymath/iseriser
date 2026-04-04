@@ -20,6 +20,7 @@
 pub mod abi;
 pub mod codegen;
 pub mod manifest;
+pub mod scan;
 
 pub use abi::{
     CompilationTarget, GeneratedFile, GeneratedRepo, LanguageModel, Paradigm, ScaffoldResult,
