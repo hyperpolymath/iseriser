@@ -5,7 +5,7 @@
 (state
   (metadata
     (version "0.1.0")
-    (last-updated "2026-03-21")
+    (last-updated "2026-04-04")
     (author "Jonathan D.A. Jewell"))
 
   (project-context
@@ -18,8 +18,11 @@
 
   (current-position
     (phase "phase-1-complete")
-    (completion-percentage 45)
-    (milestone "Phase 1 complete — scaffold, CLI, manifest parser, codegen stubs, ABI types, RSR template"))
+    (completion-percentage 48)
+    (milestone "Phase 1 complete — scaffold, CLI, manifest parser, codegen stubs, ABI types, RSR template")
+    (testing
+      (benchmarks "benches/iseriser_bench.rs (8 criterion benchmarks)")
+      (coverage "Criterion benchmarks for codegen performance, manifest parsing")))
 
   (route-to-mvp
     (step 1 "Phase 1 — scaffold, CLI, manifest parser, ABI types [COMPLETE]")
@@ -33,6 +36,12 @@
 
   (blockers-and-issues
     (none "No blockers — Phase 1 complete, ready for Phase 2"))
+
+  (session-history
+    (snapshot "2026-04-04"
+      (accomplishments
+        ("Session 9 dogfooding: Added benches/iseriser_bench.rs with 8 criterion benchmarks")
+        ("Completion bumped from 45% → 48% (benchmark infrastructure)"))))
 
   (critical-next-actions
     (action "Begin Phase 2 — implement core domain logic for iseriser")
