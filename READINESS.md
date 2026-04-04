@@ -1,0 +1,74 @@
+<!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
+<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
+
+# iseriser Component Readiness Assessment
+
+**Standard:** [Component Readiness Grades (CRG) v2.2](https://github.com/hyperpolymath/standards/tree/main/component-readiness-grades)
+**Current Grade:** B
+**Assessed:** 2026-04-04
+**Assessor:** Jonathan D.A. Jewell + Claude Sonnet 4.6
+
+---
+
+## Summary
+
+| Component      | Grade | Release Stage | Evidence Summary                                                      |
+|----------------|-------|---------------|-----------------------------------------------------------------------|
+| `scan`         | B     | Beta          | Scanned 29 -iser repos across 6 distinct language stacks              |
+| `generate`     | C     | Alpha-stable  | Generates -iser scaffolding; used to create iseriser itself           |
+| `validate`     | C     | Alpha-stable  | Validates manifest; CI passing on self                                |
+| CLI / dispatch | C     | Alpha-stable  | Full command routing; dogfooded on 29 -iser repos                     |
+
+**Overall:** Grade B for the `scan` subcommand (primary use case). Grade C for generator/validator.
+
+---
+
+## Grade B Evidence — `scan` External Targets
+
+iseriser `scan` has been executed against 29 -iser repos, spanning 6 distinct language/architecture families:
+
+1. **Rust CLIs** (conflow, a2ml-rs, panic-attack/assemblyline) — Cargo workspace, multi-crate
+2. **Elixir/OTP** (hypatia, burble) — mix.exs umbrella, GenServer pattern
+3. **Gleam/BEAM** (k9_gleam, a2ml_gleam) — gleam.toml, BEAM target
+4. **Deno/TypeScript tooling** (k9-coordination-protocol generator) — Deno runtime
+5. **Julia scientific** (statistease, developer-ecosystem/julia-ecosystem) — Project.toml
+6. **Multi-language monorepos** (developer-ecosystem, standards, nextgen-languages) — mixed roots
+
+Issues found and fed back during scan development:
+- Missing eclexiaiser.toml detection in sub-service dirs (fixed: now uses maxdepth 3)
+- k9iser path resolution relative to manifest (fixed: manifest-relative paths)
+- Groove manifest validation tolerates `"type": "custom"` with warning (deliberate)
+
+---
+
+## Grade C Evidence — `generate`
+
+- Successfully scaffolds new -iser repos from template
+- Generated: typedqliser, chapeliser, verisimiser, eclexiaiser, +25 others
+- Dogfooded: iseriser was generated using itself (bootstrap complete)
+- Known limitation: generated ABI stubs are templates only, not proven Idris2
+
+**Promotion path to B:** Generate on 6 external project types with diverse requirements and verify the scaffolded code compiles/runs correctly in each.
+
+---
+
+## Grade C Evidence — `validate`
+
+- Validates iseriser.toml manifests (schema, required fields, path resolution)
+- CI passing on own manifest
+- Deployed in dogfood-gate on repos with iseriser.toml
+
+**Promotion path to B:** Deploy and validate against 6+ diverse external -iser manifests with different language stacks.
+
+---
+
+## Concerns and Maintenance Notes
+
+1. **ABI stubs** — Generated Idris2 ABI stubs require manual completion; only scaffold
+2. **Zig FFI templates** — Generated FFI templates compile but don't implement semantics
+3. **`scan` on non-Rust repos** — Performance impact when traversing large repos with many files
+4. **Chapel metalayer** — Planned distributed scan; not yet implemented
+
+---
+
+## Run `just crg-badge` to generate the shields.io badge for your README.
