@@ -25,3 +25,17 @@
 ```bash
 cargo test --all
 ```
+
+## Session 9 additions (2026-04-04)
+
+### What Was Added
+
+| Area | Tests Added | Location |
+|------|-------------|----------|
+| Benchmarks | 8 criterion bench functions across 4 groups: parse (minimal/rich/gleam manifests), validate (valid/rich), `to_language_model` ABI conversion (chapel/julia), `scan_repo` walking real repo tree | `benches/iseriser_bench.rs` |
+
+### Updated Test Counts
+
+| Suite | Count | Status |
+|-------|-------|--------|
+| Benchmarks | 8 | All compile and baseline |
