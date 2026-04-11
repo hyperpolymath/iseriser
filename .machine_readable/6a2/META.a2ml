@@ -1,56 +1,27 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
-;; Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-;; META.a2ml — Meta-level information for iseriser
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# META.a2ml — Iseriser meta-level information
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
 
-(meta
-  (version "0.1.0")
-  (last-updated "2026-03-21")
+[project-info]
+license = "PMPL-1.0-or-later"
+author = "Jonathan D.A. Jewell (hyperpolymath)"
 
-  (architecture-decisions
-    (adr "001-meta-framework"
-      (status "accepted")
-      (context "Need a factory to generate consistent -iser repos for each new language")
-      (decision "Iseriser takes a language description and scaffolds a complete -iser repo")
-      (consequences "Adding a new language to the ecosystem takes minutes not days; all -isers share identical structure"))
+[architecture-decisions]
+decisions = [
+  # No ADRs recorded
+]
 
-    (adr "002-language-model"
-      (status "accepted")
-      (context "Need a structured representation of a target language's interop surface")
-      (decision "LanguageModel captures name, type system features, compilation target, primitives, calling convention")
-      (consequences "Template engine can make decisions based on language features (e.g., deeper ABI proofs for dependent types)"))
+[development-practices]
+versioning = "SemVer"
+documentation = "AsciiDoc"
+build-tool = "just"
 
-    (adr "003-abi-ffi-standard"
-      (status "accepted")
-      (context "Need verified interop between Rust CLI, generation engine, and generated output")
-      (decision "Idris2 ABI for formal proofs of generation correctness, Zig FFI for C-ABI bridge")
-      (consequences "Compile-time correctness guarantees; zero runtime overhead from proofs"))
-
-    (adr "004-template-engine"
-      (status "accepted")
-      (context "Need a flexible template system for generating diverse file types")
-      (decision "Handlebars templates with language-model variables")
-      (consequences "Templates are readable and maintainable; language-specific logic via conditionals"))
-
-    (adr "005-self-hosting"
-      (status "proposed")
-      (context "Iseriser should be able to generate itself to prove completeness")
-      (decision "Phase 4 roadmap: iseriser generates iseriser, diff converges to zero")
-      (consequences "Ultimate validation that the template set is complete and correct")))
-
-  (development-practices
-    (language "Rust" (purpose "CLI and orchestration"))
-    (language "Idris2" (purpose "ABI formal proofs — LanguageModel, TypeSystemFeature, GeneratedArtifact types"))
-    (language "Zig" (purpose "FFI C-ABI generation engine"))
-    (build-tool "cargo")
-    (template-engine "Handlebars (handlebars crate)")
-    (ci "GitHub Actions (17 workflows)"))
-
-  (design-rationale
-    (principle "Language-model-driven"
-      (explanation "All generation decisions flow from the language model — no hardcoded per-language logic in templates"))
-    (principle "Formally verified generation"
-      (explanation "Idris2 dependent types prove that templates expand to well-typed output and ABI layouts are consistent"))
-    (principle "Complete repo generation"
-      (explanation "Generated -isers include source, tests, CI/CD, documentation, and RSR governance — ready to cargo build from day one"))
-    (principle "Self-hosting as proof"
-      (explanation "If iseriser can generate itself, the template set is provably complete"))))
+[maintenance-axes]
+scoping-first = true
+axis-1 = "must > intend > like"
+axis-2 = "corrective > adaptive > perfective"
+axis-3 = "systems > compliance > effects"
