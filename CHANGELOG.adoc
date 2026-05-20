@@ -8,6 +8,15 @@ All notable changes to iseriser will be documented in this file.
 This format is based on https://keepachangelog.com/en/1.1.0/[Keep a Changelog],
 and this project adheres to https://semver.org/spec/v2.0.0.html[Semantic Versioning].
 
+== [Unreleased]
+
+=== Added (2026-05-20)
+* `cartridge` subcommand — scaffolds a complete boj-server cartridge skeleton (`<iser>-mcp/`) from an `iseriser.toml` manifest. Emits 13 files: top-level (README + cartridge.json + mod.js + panels/manifest.json), Idris2 ABI (README + `<iser>-mcp.ipkg` + `<Iser>Mcp/Safe<Iser>.idr` with the exposure-gate contract), Zig FFI (README + `build.zig` + `<iser>_ffi.zig` implementing the ADR-0006 5-symbol C ABI), and the unified gated adapter (README + `build.zig` + `<iser>_adapter.zig` routing REST/SSE/GraphQL/gRPC-compat behind the transaction gate). Modelled on the k9iser-mcp pilot (boj-server#73). Verified end-to-end: `idris2 --build`, `zig build test` on both `ffi/` and `adapter/`. Implements hyperpolymath/standards#89 Phase 2b. (PR #24)
+
+=== Changed (2026-05-20)
+* Scaffolder no longer emits `adapter/<name>_adapter.zig` into new -iser repos. The unified transaction-gated adapter belongs to the boj-server cartridge for the -iser (`boj-server/cartridges/<name>-mcp/adapter/`), not to the -iser repo itself. Use the new `cartridge` subcommand to scaffold the cartridge. (PR #23, reverts the wrong-place emission added in #12.)
+* Cartridge scaffolder emits `depends = base, contrib` on the generated `.ipkg` to match the pilot convention and ensure cartridge authors have `Data.List` / `Data.String` helpers available out of the box. (PR #25, corrects an inadvertent omission in #24.)
+
 == [0.1.0] - 2026-03-21
 
 === Phase 1 — RSR Compliance Sweep

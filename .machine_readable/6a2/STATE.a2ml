@@ -5,36 +5,62 @@
 [metadata]
 project = "iseriser"
 version = "0.1.0"
-last-updated = "2026-04-04"
+last-updated = "2026-05-20"
 status = "active"
-session = "converted from scheme — 2026-04-11"
+session = "standards#89 Phase 2b — cartridge scaffolder shipped"
 
 [project-context]
 name = "Iseriser"
-purpose = """Meta-framework that generates new -iser projects from language descriptions"""
-completion-percentage = 48
+purpose = """Meta-framework that generates new -iser projects from language descriptions, plus the boj-server cartridge skeleton that wires each -iser into the unified regeneration-cartridge pattern."""
+completion-percentage = 62
 
 [position]
-phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
-maturity = "experimental"  # experimental | alpha | beta | production | lts
+phase = "phase-2b-complete"  # design | implementation | testing | maintenance | archived
+maturity = "alpha"           # experimental | alpha | beta | production | lts
+
+[capabilities]
+# CLI subcommands shipped (as of 2026-05-20).
+subcommands = [
+  "init",                  # initialise an iseriser.toml manifest
+  "validate",              # structural + semantic validation
+  "generate",              # scaffold a complete -iser repo
+  "cartridge",             # scaffold a boj-server cartridge skeleton (standards#89 Phase 2b)
+  "info",                  # print a summary of a manifest
+  "scan",                  # walk a repo and recommend -iser tools
+  "abi-verify",            # diff Zig FFI vs Idris2 ABI manifest (standards#92 Phase 1)
+  "abi-emit-manifest",     # derive ABI manifest from Safe*.idr (standards#92 Phase 1b)
+]
 
 [route-to-mvp]
 milestones = [
-  # No milestones recorded
+  "Phase 1 complete (2026-03-21) — scaffold, CLI, manifest parser, codegen, ABI types",
+  "standards#92 Phase 1 + 1b complete (2026-05-20) — abi-verify + abi-emit-manifest shipped",
+  "standards#89 Phase 2b complete (2026-05-20) — cartridge subcommand emits the full boj-server cartridge skeleton (PR #24)",
 ]
 
 [blockers-and-issues]
+# All open work is correctly parked. No active iseriser-side blockers.
 issues = [
-  "No blockers — Phase 1 complete, ready for Phase 2",
+  "standards#90 — regen.yml fan-out across the 28 -iser repos remains owed; gated on standards#91 (gateway tier-2)",
+  "standards#91 — http-capability-gateway tier-2 production-wiring; ~8-12wk programme; the real blocker for the public surface going live",
+  "standards#92 — Class B/C/D drift across ~15 cartridges (sub-issues #150-156); active PR train on the boj-server side",
 ]
 
 [critical-next-actions]
 actions = [
-  "Begin Phase 2 — implement core domain logic for iseriser",
-  "Write property-based tests for manifest parsing",
-  "Define Idris2 ABI proof obligations for Phase 3",
+  "Standby for standards#91 to land before opening the 28-repo regen.yml fan-out",
+  "Continue the standards#92 drift sweep as Class B/C/D sub-issues land",
+  "Phase 3 (TBD) — explore generating the Zig FFI directly from the Idris2 ABI rather than the current scaffolded-once + hand-evolved pattern",
+]
+
+[recent-prs]
+# 2026-05-20 session — full provenance.
+prs = [
+  "#23 — revert wrong-place adapter emission (standards#89 sub-issue 1 follow-up)",
+  "#24 — cartridge scaffolder (standards#89 Phase 2b)",
+  "#25 — cartridge ipkg dep correction: depends = base, contrib",
 ]
 
 [maintenance-status]
-last-run-utc = "2026-04-04T00:00:00Z"
-last-result = "unknown"  # unknown | pass | warn | fail
+last-run-utc = "2026-05-20T11:30:00Z"
+last-result = "pass"  # unknown | pass | warn | fail
