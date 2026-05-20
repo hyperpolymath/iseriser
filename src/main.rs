@@ -49,6 +49,18 @@ enum Commands {
         #[arg(short, long, default_value = ".")]
         output: String,
     },
+    /// Generate a boj-server cartridge skeleton (adapter + FFI + ABI +
+    /// cartridge.json + panels + mod.js) for the manifest's -iser.
+    /// Output goes to `<output>/<iser>-mcp/`.  Place inside
+    /// `boj-server/cartridges/` — the emitted Zig build files reference
+    /// the shared invoke-shim via that relative location.
+    /// standards#89 Phase 2b.
+    Cartridge {
+        #[arg(short, long, default_value = "iseriser.toml")]
+        manifest: String,
+        #[arg(short, long, default_value = ".")]
+        output: String,
+    },
     /// Show information about a manifest.
     Info {
         #[arg(short, long, default_value = "iseriser.toml")]
@@ -119,6 +131,11 @@ fn main() -> Result<()> {
             let m = manifest::load_manifest(&manifest)?;
             manifest::validate(&m)?;
             codegen::generate_all(&m, &output)?;
+        }
+        Commands::Cartridge { manifest, output } => {
+            let m = manifest::load_manifest(&manifest)?;
+            manifest::validate(&m)?;
+            codegen::generate_cartridge(&m, &output)?;
         }
         Commands::Info { manifest } => {
             let m = manifest::load_manifest(&manifest)?;
