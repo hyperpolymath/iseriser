@@ -16,7 +16,7 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use serde::Serialize;
 
-use crate::abi::manifest_schema::{AbiManifest, to_snake_case};
+use crate::abi::manifest_schema::{AbiManifest, to_snake_case, zig_variant_candidates};
 use crate::abi::zig_ffi_parser::{ZigEnum, ZigFfi, parse as parse_zig};
 
 #[derive(Debug, Clone, Serialize)]
@@ -95,17 +95,34 @@ pub fn verify(
         };
         let mut manifest_keys: BTreeSet<String> = BTreeSet::new();
         for v in &manifest_enum.variants {
-            let zig_name = to_snake_case(&v.name);
-            manifest_keys.insert(zig_name.clone());
-            match zig_enum.variants.get(&zig_name) {
+            let candidates = zig_variant_candidates(&v.name);
+            // Pick the first candidate that appears in the Zig enum;
+            // if none do, the variant is missing.
+            let resolved: Option<(String, i64)> = candidates
+                .iter()
+                .find_map(|c| zig_enum.variants.get(c).map(|&val| (c.clone(), val)));
+            // Record every candidate as "claimed by the manifest" so the
+            // accept-by-omission check downstream doesn't flag a Zig
+            // variant that the manifest legitimately covers via either
+            // its primary name or its reserved-word workaround.
+            for c in &candidates {
+                manifest_keys.insert(c.clone());
+            }
+            match resolved {
                 None => findings.push(Finding {
                     kind: "variant-missing-in-zig".into(),
                     detail: format!(
-                        "enum `{}` variant `{}` (Zig: `{}`) is in the manifest but absent from the Zig FFI",
-                        manifest_enum.name, v.name, zig_name
+                        "enum `{}` variant `{}` (Zig candidates: {}) is in the manifest but absent from the Zig FFI",
+                        manifest_enum.name,
+                        v.name,
+                        candidates
+                            .iter()
+                            .map(|c| format!("`{}`", c))
+                            .collect::<Vec<_>>()
+                            .join(" / ")
                     ),
                 }),
-                Some(&actual) if actual != v.value => findings.push(Finding {
+                Some((zig_name, actual)) if actual != v.value => findings.push(Finding {
                     kind: "variant-value-mismatch".into(),
                     detail: format!(
                         "enum `{}` variant `{}` (Zig: `{}`) — manifest says {}, Zig FFI says {}",
@@ -171,11 +188,21 @@ pub fn verify(
         // Build the accepted-pair set from the manifest (only `allowed: true`
         // counts; `allowed: false` is the manifest's way of pinning a
         // safety invariant — see e.g. `ContentLoaded → Previewing` in
-        // ssg-mcp).
+        // ssg-mcp). Variants are resolved through `zig_variant_candidates`
+        // so a Zig-reserved-word-renamed variant (e.g. Error → err)
+        // matches its manifest entry.
+        let resolve = |idris_name: &str| -> String {
+            for c in zig_variant_candidates(idris_name) {
+                if zig_pairs.iter().any(|(f, t)| f == &c || t == &c) {
+                    return c;
+                }
+            }
+            to_snake_case(idris_name)
+        };
         let mut manifest_allowed: BTreeSet<(String, String)> = BTreeSet::new();
         for row in &tt.rows {
-            let f = to_snake_case(&row.from);
-            let t = to_snake_case(&row.to);
+            let f = resolve(&row.from);
+            let t = resolve(&row.to);
             if row.allowed {
                 manifest_allowed.insert((f, t));
             } else if zig_pairs.contains(&(f.clone(), t.clone())) {
@@ -205,8 +232,8 @@ pub fn verify(
                 // explicitly list — accept-by-omission is itself drift.
                 let listed_as_forbidden = tt.rows.iter().any(|r| {
                     !r.allowed
-                        && to_snake_case(&r.from) == pair.0
-                        && to_snake_case(&r.to) == pair.1
+                        && zig_variant_candidates(&r.from).contains(&pair.0)
+                        && zig_variant_candidates(&r.to).contains(&pair.1)
                 });
                 if !listed_as_forbidden {
                     findings.push(Finding {

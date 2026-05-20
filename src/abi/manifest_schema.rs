@@ -68,6 +68,51 @@ pub fn to_snake_case(s: &str) -> String {
     out
 }
 
+/// Zig 0.15.x reserved words that can collide with a snake_case-converted
+/// Idris2 variant name. When the converted name matches one of these,
+/// the cartridge convention is to rename the variant in Zig — the
+/// verifier accepts the cartridge convention as a valid alternative.
+const ZIG_RESERVED: &[&str] = &[
+    "addrspace", "align", "allowzero", "and", "anyframe", "anytype", "asm",
+    "async", "await", "break", "callconv", "catch", "comptime", "const",
+    "continue", "defer", "else", "enum", "errdefer", "error", "export",
+    "extern", "fn", "for", "if", "inline", "linksection", "noalias",
+    "noinline", "nosuspend", "null", "opaque", "or", "orelse", "packed",
+    "pub", "resume", "return", "struct", "suspend", "switch", "test",
+    "threadlocal", "try", "union", "unreachable", "usingnamespace", "var",
+    "volatile", "while",
+];
+
+pub fn is_zig_reserved(word: &str) -> bool {
+    ZIG_RESERVED.contains(&word)
+}
+
+/// Cartridge-convention workaround for a Zig reserved word. Verified
+/// against the actual `*_ffi.zig` corpus on `boj-server/main`:
+///   `error` → `err` (airtable-mcp, postgresql-mcp, others)
+///   _other_ → `<name>_` generic suffix fallback (Zig accepts this and
+///   no current cartridge uses a non-`error` reserved word; will be
+///   refined if a real cartridge picks a different convention)
+fn zig_reserved_workaround(reserved: &str) -> String {
+    match reserved {
+        "error" => "err".to_string(),
+        other => format!("{}_", other),
+    }
+}
+
+/// Candidate Zig identifiers for a variant name. Returns the snake_case
+/// form first; if that's a Zig reserved word, the cartridge-convention
+/// workaround is appended as a fallback. The verifier accepts a match
+/// against any candidate.
+pub fn zig_variant_candidates(idris_name: &str) -> Vec<String> {
+    let snake = to_snake_case(idris_name);
+    if is_zig_reserved(&snake) {
+        vec![snake.clone(), zig_reserved_workaround(&snake)]
+    } else {
+        vec![snake]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -81,5 +126,39 @@ mod tests {
         assert_eq!(to_snake_case("SsgError"), "ssg_error");
         assert_eq!(to_snake_case("ReadyToDeploy"), "ready_to_deploy");
         assert_eq!(to_snake_case("Hugo"), "hugo");
+    }
+
+    #[test]
+    fn detects_zig_reserved_words() {
+        assert!(is_zig_reserved("error"));
+        assert!(is_zig_reserved("test"));
+        assert!(is_zig_reserved("struct"));
+        assert!(!is_zig_reserved("foo"));
+        assert!(!is_zig_reserved("err"));
+        // `type` is a Zig PRIMITIVE, not a reserved keyword, so the
+        // identifier is legal — no workaround needed.
+        assert!(!is_zig_reserved("type"));
+    }
+
+    #[test]
+    fn candidates_pass_through_non_reserved() {
+        let c = zig_variant_candidates("Empty");
+        assert_eq!(c, vec!["empty".to_string()]);
+    }
+
+    #[test]
+    fn candidates_include_workaround_for_reserved() {
+        // The real airtable-mcp / postgresql-mcp case: Error → err.
+        let c = zig_variant_candidates("Error");
+        assert_eq!(c, vec!["error".to_string(), "err".to_string()]);
+    }
+
+    #[test]
+    fn candidates_use_generic_suffix_for_other_reserved() {
+        // No current cartridge uses these; lock in the fallback behaviour
+        // for a genuinely-reserved keyword (`test` is reserved; `type` is
+        // a primitive and would not trigger the workaround).
+        let c = zig_variant_candidates("Test");
+        assert_eq!(c, vec!["test".to_string(), "test_".to_string()]);
     }
 }
