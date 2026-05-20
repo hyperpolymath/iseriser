@@ -473,7 +473,7 @@ brief      = "{cartridge} cartridge — {lang} -iser regeneration"
 
 sourcedir  = "."
 modules    = {mcp}.Safe{module}
-depends    = base
+depends    = base, contrib
 "#,
         pkg = lower_pkg,
         cartridge = ctx.cartridge_name,
