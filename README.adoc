@@ -319,6 +319,27 @@ cargo test   # tests pass immediately
 cargo run -- init
 ----
 
+=== Iseriser CLI subcommands
+
+In addition to scaffolding new -isers, iseriser itself ships with:
+
+[cols="1,3"]
+|===
+| `init` | Initialise an `iseriser.toml` manifest in the current directory.
+| `validate` | Structural + semantic validation of an `iseriser.toml`.
+| `generate` | Scaffold a complete -iser repo from the manifest.
+| `info` | Print a summary of a manifest.
+| `scan` | Walk a repository and recommend applicable -iser tools.
+| `abi-verify` | (Phase 1) Diff a cartridge's Zig FFI against its Idris2-derived ABI manifest; exit 0=clean, 2=drift. See `examples/abi-manifests/README.adoc` for the drift taxonomy.
+| `abi-emit-manifest` | (Phase 1b) Emit the ABI manifest JSON from a cartridge's `Safe*.idr` source. The Idris2 source is the single authority — manifest is derived, not hand-authored. Combine with `abi-verify` to gate Zig FFI drift in CI.
+|===
+
+The `abi-*` pair implements
+https://github.com/hyperpolymath/standards/issues/92[standards#92]
+(Phase 1 + 1b); see
+`examples/abi-manifests/README.adoc` for the schema, the drift
+taxonomy, and end-to-end usage.
+
 == Generated Repo Structure
 
 When iseriser generates a new -iser, it produces:
