@@ -1,0 +1,94 @@
+= ABI manifests
+:source-highlighter: pygments
+
+Phase 1 of https://github.com/hyperpolymath/standards/issues/89[standards#89]
+sub-issue 3 / https://github.com/hyperpolymath/standards/issues/92[standards#92].
+
+== Purpose
+
+The Idris2 `Safe*.idr` source defines a cartridge's ABI contract (state
+enum encoding + transition relation). The Zig FFI mirror hand-duplicates
+this contract. Today the cross-check is test-only.
+
+`iseriser abi-verify` turns the cross-check into a structural CI gate: it
+diffs an Idris2-derived ABI manifest against the Zig FFI source and
+reports drift in three categories:
+
+* `variant-value-mismatch` / `variant-missing-in-zig` / `variant-extra-in-zig`
+  — enum encoding drift.
+* `transition-allowed-but-rejected` — manifest allows a transition the
+  Zig switch rejects.
+* `transition-forbidden-but-accepted` — manifest forbids a transition
+  the Zig switch accepts (this is the safety-critical class: e.g.
+  `ContentLoaded → Previewing`, `Generated → Applied`).
+* `transition-accepted-but-undeclared` — Zig accepts a transition the
+  manifest neither allows nor forbids (accept-by-omission is drift).
+* `transition-table-uses-else` — Zig switch uses `else =>`; the gate
+  refuses to certify non-exhaustive switches.
+
+== Phase boundary
+
+Phase 1 (this commit) is a *verification harness*, not codegen. The
+manifests are hand-authored from the Idris2 source. Phase 1b will emit
+the manifest from the Idris2 build at compile time; Phase 2 will wire
+the verifier into per-cartridge CI; Phase 3 generates the Zig FFI from
+the manifest; Phase 4 proves the FFI signatures at the Idris2 type
+level.
+
+== Usage
+
+[source,bash]
+----
+# From an iseriser checkout:
+cargo run -- abi-verify \
+  --manifest examples/abi-manifests/ssg-mcp.json \
+  --zig-ffi  ../boj-server/cartridges/ssg-mcp/ffi/ssg_ffi.zig
+
+# JSON output for CI ingestion:
+cargo run -- abi-verify --json --manifest <m> --zig-ffi <f>
+----
+
+Exit code `0` means clean; `2` means drift (with the report on stderr
+in the human form, or stdout JSON when `--json` is set).
+
+== Reference manifests
+
+* `ssg-mcp.json` — covers `SsgState` (7 variants), `SsgEngine`
+  (5 variants), and the 11-row transition table from
+  `SafeSsg.idr::canTransition`. Pins the two safety invariants
+  `ContentLoaded → Previewing` (must build first) and
+  `Built → Deployed` (must preview first) as `allowed: false`.
+* `k9iser-mcp.json` — covers `K9State` (6 variants), `K9Format`
+  (5 variants), and the 10-row transition table from
+  `SafeK9iser.idr::canTransition`. Pins `Generated → Applied` (must
+  validate first) and `ManifestLoaded → Validated` (must generate
+  first) as `allowed: false`.
+
+Both manifests verify clean against the corresponding Zig FFI on
+boj-server `main` at the cut date of this PR.
+
+== Schema
+
+[source,json]
+----
+{
+  "schema_version": "1.0",
+  "cartridge": "<name>",
+  "source_idris": "path/to/Safe<Name>.idr",
+  "enums": [
+    { "name": "CamelCase",
+      "variants": [ { "name": "CamelCase", "value": 0 }, ... ] }
+  ],
+  "transition_table": {
+    "state_enum": "CamelCase",
+    "rows": [
+      { "from": "CamelCase", "to": "CamelCase", "allowed": true|false }
+    ]
+  }
+}
+----
+
+Variant names are the Idris2-side CamelCase. The verifier maps each
+to its Zig snake_case form via the hyperpolymath cartridge convention
+(`ManifestLoaded → manifest_loaded`, `K9Error → k9_error`,
+`SsgError → ssg_error`, `ReadyToDeploy → ready_to_deploy`).

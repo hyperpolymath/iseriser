@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "cartridge": "ssg-mcp",
+  "source_idris": "boj-server/cartridges/ssg-mcp/abi/SsgMcp/SafeSsg.idr",
+  "enums": [
+    {
+      "name": "SsgState",
+      "variants": [
+        { "name": "Empty",         "value": 0 },
+        { "name": "ContentLoaded", "value": 1 },
+        { "name": "Built",         "value": 2 },
+        { "name": "Previewing",    "value": 3 },
+        { "name": "ReadyToDeploy", "value": 4 },
+        { "name": "Deployed",      "value": 5 },
+        { "name": "SsgError",      "value": 6 }
+      ]
+    },
+    {
+      "name": "SsgEngine",
+      "variants": [
+        { "name": "Hugo",   "value": 1 },
+        { "name": "Zola",   "value": 2 },
+        { "name": "Astro",  "value": 3 },
+        { "name": "Casket", "value": 4 },
+        { "name": "Custom", "value": 99 }
+      ]
+    }
+  ],
+  "transition_table": {
+    "state_enum": "SsgState",
+    "rows": [
+      { "from": "Empty",         "to": "ContentLoaded", "allowed": true },
+      { "from": "ContentLoaded", "to": "Built",         "allowed": true },
+      { "from": "Built",         "to": "Built",         "allowed": true },
+      { "from": "Built",         "to": "Previewing",    "allowed": true },
+      { "from": "Previewing",    "to": "ReadyToDeploy", "allowed": true },
+      { "from": "ReadyToDeploy", "to": "Deployed",      "allowed": true },
+      { "from": "Deployed",      "to": "Empty",         "allowed": true },
+      { "from": "ReadyToDeploy", "to": "Empty",         "allowed": true },
+      { "from": "ContentLoaded", "to": "SsgError",      "allowed": true },
+      { "from": "ReadyToDeploy", "to": "SsgError",      "allowed": true },
+      { "from": "SsgError",      "to": "Empty",         "allowed": true },
+      { "from": "ContentLoaded", "to": "Previewing",    "allowed": false },
+      { "from": "Built",         "to": "Deployed",      "allowed": false }
+    ]
+  }
+}
