@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "cartridge": "k9iser-mcp",
+  "source_idris": "boj-server/cartridges/k9iser-mcp/abi/K9iserMcp/SafeK9iser.idr",
+  "enums": [
+    {
+      "name": "K9State",
+      "variants": [
+        { "name": "Empty",          "value": 0 },
+        { "name": "ManifestLoaded", "value": 1 },
+        { "name": "Generated",      "value": 2 },
+        { "name": "Validated",      "value": 3 },
+        { "name": "Applied",        "value": 4 },
+        { "name": "K9Error",        "value": 5 }
+      ]
+    },
+    {
+      "name": "K9Format",
+      "variants": [
+        { "name": "Toml",   "value": 1 },
+        { "name": "Yaml",   "value": 2 },
+        { "name": "Json",   "value": 3 },
+        { "name": "Ini",    "value": 4 },
+        { "name": "Custom", "value": 99 }
+      ]
+    }
+  ],
+  "transition_table": {
+    "state_enum": "K9State",
+    "rows": [
+      { "from": "Empty",          "to": "ManifestLoaded", "allowed": true },
+      { "from": "ManifestLoaded", "to": "Generated",      "allowed": true },
+      { "from": "Generated",      "to": "Generated",      "allowed": true },
+      { "from": "Generated",      "to": "Validated",      "allowed": true },
+      { "from": "Validated",      "to": "Applied",        "allowed": true },
+      { "from": "Applied",        "to": "Empty",          "allowed": true },
+      { "from": "Validated",      "to": "Empty",          "allowed": true },
+      { "from": "ManifestLoaded", "to": "K9Error",        "allowed": true },
+      { "from": "Generated",      "to": "K9Error",        "allowed": true },
+      { "from": "K9Error",        "to": "Empty",          "allowed": true },
+      { "from": "ManifestLoaded", "to": "Validated",      "allowed": false },
+      { "from": "Generated",      "to": "Applied",        "allowed": false }
+    ]
+  }
+}

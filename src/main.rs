@@ -63,6 +63,19 @@ enum Commands {
         #[arg(long, default_value_t = false)]
         json: bool,
     },
+    /// Verify a cartridge's Zig FFI against its Idris2-derived ABI manifest.
+    /// Phase 1 of standards#92: structural CI gate, not codegen.
+    AbiVerify {
+        /// Path to the ABI manifest JSON.
+        #[arg(long)]
+        manifest: String,
+        /// Path to the Zig FFI source file.
+        #[arg(long)]
+        zig_ffi: String,
+        /// Emit the report as JSON on stdout instead of the human form.
+        #[arg(long, default_value_t = false)]
+        json: bool,
+    },
 }
 
 fn main() -> Result<()> {
@@ -98,6 +111,20 @@ fn main() -> Result<()> {
                 println!("{}", serde_json::to_string_pretty(&recommendations)?);
             } else {
                 scan::print_table(&recommendations);
+            }
+        }
+        Commands::AbiVerify { manifest, zig_ffi, json } => {
+            let report = abi::verify::verify_paths(
+                std::path::Path::new(&manifest),
+                std::path::Path::new(&zig_ffi),
+            )?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&report)?);
+            } else {
+                report.print();
+            }
+            if !report.is_clean() {
+                std::process::exit(2);
             }
         }
     }
