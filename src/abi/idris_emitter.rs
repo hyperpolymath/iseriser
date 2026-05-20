@@ -214,7 +214,23 @@ fn find_data_keyword(src: &str) -> Option<usize> {
 /// After the enum name, collect the variant list. Handles both
 /// `= A | B | C` (one-line) and `\n  = A\n  | B\n  | C` (multi-line).
 /// Returns the variant names + the number of bytes consumed from `src`.
+///
+/// Also handles GADT-style declarations (`data Foo : Type -> Type where …`)
+/// by skipping them: they are proof/relation types, not exported enums,
+/// and have no place in the ABI manifest. Returns an empty variant list
+/// with the byte-count needed to walk past the GADT block.
 fn collect_data_body(src: &str) -> Result<(Vec<String>, usize)> {
+    // GADT detection: the body starts with `:` (signature form), not `=`
+    // (variant-list form). Examples seen in the wild:
+    //   `data MonotonicDegradation : State -> State -> Type where
+    //      StayHealthy : MonotonicDegradation Healthy Healthy
+    //      …`
+    // These declare proof relations, not data with variants.
+    let trimmed = src.trim_start();
+    if trimmed.starts_with(':') {
+        return Ok((Vec::new(), skip_gadt_block(src)));
+    }
+
     // Find the `=` that opens the variant list.
     let eq_idx = src
         .find('=')
@@ -264,6 +280,51 @@ fn collect_data_body(src: &str) -> Result<(Vec<String>, usize)> {
         variants.push(head.to_string());
     }
     Ok((variants, consumed))
+}
+
+/// Skip past a GADT-style `data Foo : … where …` declaration. The block
+/// ends at the first non-indented, non-blank line (or end of input). The
+/// declaration itself contributes nothing to the manifest.
+fn skip_gadt_block(src: &str) -> usize {
+    // First: consume the type signature line(s) up to `where` (or end of
+    // declaration if there is no `where`, e.g. `data Empty : Type`).
+    let where_pos = src.find("where");
+    let header_end = match where_pos {
+        Some(w) => {
+            // Consume through the rest of that line.
+            src[w..]
+                .find('\n')
+                .map(|i| w + i + 1)
+                .unwrap_or(src.len())
+        }
+        None => {
+            // No `where` — single-line `data Foo : ...`. Consume through eol.
+            src.find('\n').map(|i| i + 1).unwrap_or(src.len())
+        }
+    };
+
+    // No constructor block to walk if we already hit EOF.
+    if header_end >= src.len() {
+        return src.len();
+    }
+
+    // Now consume the indented constructor block (if any).
+    let mut consumed = header_end;
+    for line in src[header_end..].split_inclusive('\n') {
+        let trimmed = line.trim_end_matches('\n');
+        // Blank lines are tolerated inside the block; they don't end it.
+        if trimmed.is_empty() {
+            consumed += line.len();
+            continue;
+        }
+        // A line not starting with whitespace ends the GADT block.
+        let starts_with_ws = trimmed.starts_with(' ') || trimmed.starts_with('\t');
+        if !starts_with_ws {
+            break;
+        }
+        consumed += line.len();
+    }
+    consumed
 }
 
 /// Parse all `<fn> <variant> = <int>` equations grouped by function name.
@@ -539,5 +600,56 @@ fooToInt B = 1
 ";
         let m = emit_from_idris_src(src, "demo", "Foo.idr").unwrap();
         assert_eq!(m.enums[0].variants.len(), 2);
+    }
+
+    #[test]
+    fn skips_gadt_data_declaration() {
+        // vordr-mcp shape: a real ADT `IntegrityState` plus a GADT proof
+        // relation `MonotonicDegradation` over it. The GADT must be
+        // skipped — it has no `=`-form variant list — but the surrounding
+        // enum and the to-int mapping must still be picked up.
+        let src = "
+data IntegrityState = Healthy | Drifted | Tampered | Unknown
+
+data MonotonicDegradation : IntegrityState -> IntegrityState -> Type where
+  StayHealthy  : MonotonicDegradation Healthy Healthy
+  HealthyDrift : MonotonicDegradation Healthy Drifted
+  HealthyTamp  : MonotonicDegradation Healthy Tampered
+  DriftedStay  : MonotonicDegradation Drifted Drifted
+  DriftedTamp  : MonotonicDegradation Drifted Tampered
+  TamperedStay : MonotonicDegradation Tampered Tampered
+
+stateToInt : IntegrityState -> Int
+stateToInt Healthy   = 0
+stateToInt Drifted   = 1
+stateToInt Tampered  = 2
+stateToInt Unknown   = 3
+";
+        let m = emit_from_idris_src(src, "vordr-mcp", "SafeVordr.idr").unwrap();
+        // The GADT must have been skipped, not emitted as an enum.
+        assert_eq!(m.enums.len(), 1, "expected only IntegrityState in manifest");
+        let e = &m.enums[0];
+        assert_eq!(e.name, "IntegrityState");
+        let names: Vec<&str> = e.variants.iter().map(|v| v.name.as_str()).collect();
+        assert_eq!(names, vec!["Healthy", "Drifted", "Tampered", "Unknown"]);
+        assert_eq!(e.variants[3].value, 3);
+    }
+
+    #[test]
+    fn skips_signature_only_gadt_data_declaration() {
+        // Degenerate GADT with no `where` block (single-line empty type)
+        // followed by a real ADT that must still be picked up.
+        let src = "
+data Phantom : Type
+
+data Real = Yes | No
+
+realToInt : Real -> Int
+realToInt Yes = 1
+realToInt No  = 0
+";
+        let m = emit_from_idris_src(src, "demo", "P.idr").unwrap();
+        assert_eq!(m.enums.len(), 1);
+        assert_eq!(m.enums[0].name, "Real");
     }
 }
