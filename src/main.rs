@@ -76,6 +76,25 @@ enum Commands {
         #[arg(long, default_value_t = false)]
         json: bool,
     },
+    /// Emit an ABI manifest JSON from a cartridge's Idris2 `Safe*.idr`.
+    /// Phase 1b of standards#92: makes the Idris2 source the single
+    /// authority; the manifest is derived, not hand-authored.
+    AbiEmitManifest {
+        /// Path to the Idris2 source file.
+        #[arg(long)]
+        idris: String,
+        /// Cartridge name (e.g. `ssg-mcp`) — written to manifest.cartridge.
+        #[arg(long)]
+        cartridge: String,
+        /// Path-as-recorded-in-the-manifest for `source_idris` (defaults
+        /// to `--idris`). Set this to the repo-relative form when running
+        /// from outside the repo root.
+        #[arg(long)]
+        source_path: Option<String>,
+        /// Output file (default: stdout).
+        #[arg(long)]
+        out: Option<String>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -125,6 +144,25 @@ fn main() -> Result<()> {
             }
             if !report.is_clean() {
                 std::process::exit(2);
+            }
+        }
+        Commands::AbiEmitManifest { idris, cartridge, source_path, out } => {
+            let source_path_for_manifest = source_path.as_deref().unwrap_or(&idris);
+            let manifest = abi::idris_emitter::emit_from_idris_path(
+                std::path::Path::new(&idris),
+                &cartridge,
+                source_path_for_manifest,
+            )?;
+            let json = serde_json::to_string_pretty(&manifest)?;
+            match out {
+                Some(path) => {
+                    std::fs::write(&path, format!("{}\n", json))?;
+                    eprintln!("abi-emit-manifest: wrote {} ({} enums, {} transitions)",
+                        path,
+                        manifest.enums.len(),
+                        manifest.transition_table.as_ref().map(|t| t.rows.len()).unwrap_or(0));
+                }
+                None => println!("{}", json),
             }
         }
     }
