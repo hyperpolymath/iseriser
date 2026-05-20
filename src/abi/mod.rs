@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::PathBuf;
 
+pub mod idris_emitter;
 pub mod manifest_schema;
 pub mod verify;
 pub mod zig_ffi_parser;

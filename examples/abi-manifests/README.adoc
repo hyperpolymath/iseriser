@@ -28,12 +28,54 @@ reports drift in three categories:
 
 == Phase boundary
 
-Phase 1 (this commit) is a *verification harness*, not codegen. The
-manifests are hand-authored from the Idris2 source. Phase 1b will emit
-the manifest from the Idris2 build at compile time; Phase 2 will wire
-the verifier into per-cartridge CI; Phase 3 generates the Zig FFI from
-the manifest; Phase 4 proves the FFI signatures at the Idris2 type
-level.
+Phase 1 (the `abi-verify` subcommand) is a *verification harness*, not
+codegen. Phase 1b (the `abi-emit-manifest` subcommand, this section)
+emits the manifest from the Idris2 source — so the Idris2 source is
+now the *single authority* and hand-authoring drops out. Phase 2 will
+wire the emit→verify pair into per-cartridge CI; Phase 3 generates the
+Zig FFI from the manifest; Phase 4 proves the FFI signatures at the
+Idris2 type level.
+
+=== Emit a manifest from Idris2
+
+[source,bash]
+----
+iseriser abi-emit-manifest \
+  --idris       ../boj-server/cartridges/ssg-mcp/abi/SsgMcp/SafeSsg.idr \
+  --cartridge   ssg-mcp \
+  --source-path "boj-server/cartridges/ssg-mcp/abi/SsgMcp/SafeSsg.idr" \
+  --out         /tmp/ssg-mcp.json
+# then pipe straight into the verifier:
+iseriser abi-verify --manifest /tmp/ssg-mcp.json --zig-ffi ../boj-server/cartridges/ssg-mcp/ffi/ssg_ffi.zig
+----
+
+The emitter parses:
+
+* `data <Enum> = A | B | C` (one-line or multi-line form, with or
+  without parameterised variants like `Custom String`)
+* `<fn> : <Enum> -> Int` type signatures (to associate enums with
+  their `*ToInt` functions, since the convention is loose — `SsgEngine`
+  uses `engineToInt`, `K9Format` uses `formatToInt`)
+* `<fn> <variant> = <int>` value-encoding equations (including
+  parameterised forms like `(Custom _) = 99`)
+* `canTransition <From> <To> = True` allowed-transition equations
+  (`canTransition _ _ = False` catch-all is skipped — accept-by-omission
+  is caught by the verifier separately)
+
+=== What the emitter does NOT preserve
+
+Hand-authored manifests can include `allowed: false` rows that
+*explicitly* pin safety-critical invariants — e.g.
+`ContentLoaded → Previewing` in ssg-mcp, or `Generated → Applied` in
+k9iser-mcp. These have documentation value but no enforcement value:
+the verifier's `transition-accepted-but-undeclared` finding catches
+the same drift class. The emitter does not generate them — round-tripping
+through emit replaces the explicit `allowed:false` rows with
+accept-by-omission protection.
+
+The hand-authored reference manifests in this directory keep the
+`allowed:false` rows as readable documentation. CI uses the emitted
+form (no `allowed:false` rows; same safety).
 
 == Usage
 
