@@ -1,0 +1,153 @@
+= Cartridge skeleton scaffolder
+:source-highlighter: pygments
+
+Phase 2b of https://github.com/hyperpolymath/standards/issues/89[standards#89]
+sub-issue 1 / https://github.com/hyperpolymath/standards/issues/90[standards#90].
+
+== Purpose
+
+`iseriser cartridge` scaffolds a complete `boj-server` cartridge skeleton
+for an -iser, modelled on the
+https://github.com/hyperpolymath/boj-server/tree/main/cartridges/k9iser-mcp[k9iser-mcp
+pilot] (boj-server#73).
+
+The output is a 13-file directory tree ready to be placed inside
+`boj-server/cartridges/`. Out of the box:
+
+- The 5-symbol ADR-0006 cartridge C ABI is wired up.
+- The unified transaction-gated adapter routes REST + SSE + GraphQL +
+  gRPC-compat behind the exposure gate (Idris2 contract + Zig mirror +
+  4-row truth-table tests).
+- Both Zig build trees compile and pass `zig build test` against the
+  shared invoke-shim.
+- The Idris2 ABI type-checks via `idris2 --build`.
+
+Per-tool dispatch bodies are stubs returning a placeholder JSON body —
+replace as the cartridge grows.
+
+== Topology
+
+The unified transaction-gated adapter belongs to the boj-server
+cartridge for the -iser, NOT to the -iser repo itself:
+
+[source]
+----
+boj-server/cartridges/<iser-name>-mcp/   <-- scaffolded by `iseriser cartridge`
+├── cartridge.json                       # registration manifest (boj.dev schema v1)
+├── mod.js                               # Deno module (JS-worker fallback path)
+├── README.adoc
+├── panels/
+│   └── manifest.json                    # observability panel registration
+├── abi/                                 # Idris2 — source of truth
+│   ├── README.adoc
+│   ├── <iser>-mcp.ipkg
+│   └── <Iser>Mcp/
+│       └── Safe<Iser>.idr               # exposure-gate contract + tool enum
+├── ffi/                                 # Zig — ADR-0006 5-symbol C ABI
+│   ├── README.adoc
+│   ├── build.zig
+│   └── <iser>_ffi.zig                   # boj_cartridge_{init,deinit,name,version,invoke}
+└── adapter/                             # Zig — unified gated adapter
+    ├── README.adoc
+    ├── build.zig
+    └── <iser>_adapter.zig               # loopback :9390, 4-protocol routing
+----
+
+The -iser repo itself (`hyperpolymath/<iser-name>iser`) emits the
+`.github/workflows/<iser>-regen.yml` central-trigger workflow (via
+`iseriser generate`); the workflow fires the boj-server cartridge over
+the gateway.
+
+== Usage
+
+Given an `iseriser.toml` manifest for the target language:
+
+[source,toml]
+----
+[project]
+name = "chapeliser"
+version = "0.1.0"
+
+[language]
+name = "Chapel"
+paradigm = "imperative"
+type-system = "simple"
+compilation-target = "native"
+key-primitives = ["task", "locale", "domain"]
+
+[output]
+repo-name = "chapeliser"
+github-org = "hyperpolymath"
+description = "Chapel distributed-computing -iser"
+----
+
+Scaffold the cartridge into your local `boj-server` clone:
+
+[source,shell]
+----
+iseriser cartridge \
+  --manifest iseriser.toml \
+  --output /path/to/boj-server/cartridges
+----
+
+Output:
+
+[source]
+----
+Generated cartridge chapeliser-mcp (13 files) at /path/to/boj-server/cartridges/chapeliser-mcp
+----
+
+Verify the scaffold builds end-to-end:
+
+[source,shell]
+----
+cd /path/to/boj-server/cartridges/chapeliser-mcp
+
+# Idris2 ABI type-checks (NB: use --build for .ipkg files, not --check)
+idris2 --build abi/chapeliser-mcp.ipkg
+
+# Zig FFI: ADR-0006 5-symbol ABI + dispatch table
+( cd ffi && zig build test )
+
+# Unified adapter: classify / toolFor / dispatch / gate truth-table
+( cd adapter && zig build test )
+----
+
+Expected on a clean scaffold: `idris2 --build` returns RC=0, FFI tests
+4/4 pass, adapter tests 5/5 pass.
+
+== Customising the cartridge
+
+The skeleton has one example tool (`<iser>_generate`) wired through the
+full pipeline. To add tools:
+
+1. Declare the tool in `abi/<Iser>Mcp/Safe<Iser>.idr` — extend `McpTool`
+   and `toolName`.
+2. Add a `cartridge.json` `tools[]` entry with the JSON-schema
+   `inputSchema`.
+3. Wire the dispatch arm in `ffi/<iser>_ffi.zig`'s `boj_cartridge_invoke`
+   — `shim.toolIs(tool_name, "<new_tool>")` returns the appropriate
+   stub or real body.
+4. For tools requiring state (sessions, locks, etc.), follow the
+   `k9iser-mcp` pilot's pattern: declare a state machine in the Idris2
+   module + mirror it in Zig.
+
+The adapter (REST + SSE + GraphQL + gRPC-compat routing) needs no
+changes — it forwards every tool to the FFI dispatch table via
+`boj_cartridge_invoke`.
+
+== Cross-references
+
+- https://github.com/hyperpolymath/standards/issues/89[standards#89] —
+  epic: -iser regeneration-cartridge pattern.
+- https://github.com/hyperpolymath/standards/issues/90[standards#90] —
+  sub-issue 1: scaffold side (this work).
+- https://github.com/hyperpolymath/standards/issues/91[standards#91] —
+  sub-issue 2: http-capability-gateway tier-2 production-wiring. The
+  estate-wide fan-out of the regeneration-cartridge pattern across the
+  28 existing -isers is gated on this.
+- https://github.com/hyperpolymath/boj-server/tree/main/cartridges/k9iser-mcp[boj-server/cartridges/k9iser-mcp]
+  — the reference pilot (boj-server#73).
+- ADR-0004 (boj-server) — http-capability-gateway tier-2. Cartridge
+  adapters are internal/loopback; the public surface is the gateway.
+- ADR-0006 (boj-server) — five-symbol cartridge C ABI.

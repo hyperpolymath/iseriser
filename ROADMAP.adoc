@@ -15,6 +15,27 @@
 * [x] README with architecture, use cases, and -iser family table
 * [x] Machine-readable governance (STATE, META, ECOSYSTEM, contractiles)
 
+== Phase 2b: BoJ-server cartridge skeleton (COMPLETE — 2026-05-20)
+* [x] `iseriser cartridge` subcommand — scaffolds a complete boj-server cartridge for an -iser
+* [x] Emits 13 files: `cartridge.json`, `mod.js`, `panels/manifest.json`, top-level `README.adoc`
+* [x] Idris2 ABI: `<iser>-mcp.ipkg` + `<Iser>Mcp/Safe<Iser>.idr` (exposure-gate contract + tool enum)
+* [x] Zig FFI: ADR-0006 5-symbol C ABI (`boj_cartridge_init/deinit/name/version/invoke`) via `cartridge_shim`
+* [x] Unified gated adapter: REST + SSE + GraphQL + gRPC-compat behind the transaction gate
+* [x] End-to-end verified: `idris2 --build` on emitted ipkg, `zig build test` on `ffi/` (4/4) and `adapter/` (5/5)
+* [x] Documented: `examples/cartridge-skeleton/README.adoc`
+* [x] Implements https://github.com/hyperpolymath/standards/issues/89[standards#89] sub-issue 1, scaffold side
+
+NOTE: Estate-wide fan-out of the regeneration-cartridge pattern across the 28 existing -isers is OWED, but is correctly gated on https://github.com/hyperpolymath/standards/issues/91[standards#91] (http-capability-gateway tier-2 production-wiring). Until #91 lands, the unified core stays internal/loopback.
+
+== ABI verification harness (standards#92 Phase 1 + 1b — COMPLETE — 2026-05-20)
+* [x] `abi-verify` subcommand — diffs an Idris2-derived ABI manifest against a cartridge's Zig FFI; reports drift across five categories. Phase 1.
+* [x] `abi-emit-manifest` subcommand — emits the manifest from `Safe*.idr` so the Idris2 source is the single authority. Phase 1b.
+* [x] Zig reserved-word converter (iseriser#15)
+* [x] GADT-style `data … where` declarations skipped in the emitter (iseriser#20)
+* [x] Multi-cap acronym variants accept the runtogether form (iseriser#21)
+* [x] Non-canonical Zig switch arms (`false` shorthand) tolerated (iseriser#22)
+* [x] Documented: `examples/abi-manifests/README.adoc`
+
 == Phase 1: Language Model Parser
 * [ ] Define `LanguageDescription` struct: name, type system features, compilation target, key primitives, calling convention
 * [ ] Parse language descriptions from `iseriser.toml` `[language]` section
