@@ -246,7 +246,21 @@ fn parse_switch_arms(body: &str) -> Result<BTreeMap<String, Vec<String>>> {
 
 /// Parse `to == .<v1> or to == .<v2> or to == .<v3>` → `["v1","v2","v3"]`.
 /// Also accepts the singleton form `to == .<v>`.
+///
+/// Terminal-state shorthand: a body of `false` (with optional trailing
+/// `,` / `;` and surrounding whitespace) is accepted as the empty
+/// allowed-set — i.e. "no outgoing transitions allowed from this
+/// state". Cartridges like bsp-mcp, container-mcp, dap-mcp, lsp-mcp,
+/// vault-mcp use this form for their `exited` / terminal arms.
 fn parse_arm_targets(body: &str) -> Result<Vec<String>> {
+    let trimmed = body
+        .trim()
+        .trim_end_matches(',')
+        .trim_end_matches(';')
+        .trim();
+    if trimmed == "false" {
+        return Ok(Vec::new());
+    }
     let mut out = Vec::new();
     for chunk in body.split(" or ") {
         let chunk = chunk.trim();
@@ -337,5 +351,47 @@ mod tests {
         let f = parse(src).unwrap();
         let tt = f.transition_table.unwrap();
         assert!(tt.arms.contains_key("_else"));
+    }
+
+    #[test]
+    fn tolerates_terminal_false_arm() {
+        // bsp-mcp / container-mcp / dap-mcp / lsp-mcp / vault-mcp shape:
+        // the terminal state's arm body is the literal `false` (meaning
+        // no outgoing transitions allowed), not a `to == .<v>` chunk.
+        // Without this tolerance the verifier mis-classifies the cartridge
+        // as a parser error rather than the correct "empty allowed-set"
+        // semantics.
+        let src = r#"
+            pub const BspState = enum(c_int) {
+                uninitialized = 0,
+                initializing = 1,
+                ready = 2,
+                exited = 3,
+            };
+            fn isValidTransition(from: BspState, to: BspState) bool {
+                return switch (from) {
+                    .uninitialized => to == .initializing,
+                    .initializing  => to == .ready or to == .exited,
+                    .ready         => to == .exited,
+                    .exited        => false,
+                };
+            }
+        "#;
+        let f = parse(src).unwrap();
+        let tt = f.transition_table.unwrap();
+        // The terminal arm parses and lands in the arms map with an
+        // empty allowed-set; it MUST be present (otherwise the verifier
+        // would surface accept-by-omission as drift) but it MUST be
+        // empty (no targets).
+        assert_eq!(tt.arms.get("exited"), Some(&Vec::<String>::new()));
+        // The other arms still parse correctly.
+        assert_eq!(
+            tt.arms.get("uninitialized"),
+            Some(&vec!["initializing".to_string()])
+        );
+        assert_eq!(
+            tt.arms.get("initializing"),
+            Some(&vec!["ready".to_string(), "exited".to_string()])
+        );
     }
 }
