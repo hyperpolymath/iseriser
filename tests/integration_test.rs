@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Integration tests for iseriser.
@@ -111,7 +111,7 @@ fn test_full_pipeline_chapel() {
     let cargo = std::fs::read_to_string(root.join("Cargo.toml")).unwrap();
     assert!(cargo.contains("chapeliser"), "Cargo.toml missing repo name");
     assert!(
-        cargo.contains("PMPL-1.0-or-later"),
+        cargo.contains("MPL-2.0"),
         "Cargo.toml missing license"
     );
 }

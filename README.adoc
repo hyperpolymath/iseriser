@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 = The -iser Ecosystem
 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
@@ -9,7 +9,7 @@ Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 :url-hub: https://hyperpolymath.github.io/iseriser/
 :url-org: https://github.com/hyperpolymath
 
-image:https://img.shields.io/badge/license-PMPL--1.0--or--later-blue[License: PMPL-1.0-or-later,link=LICENSE]
+image:https://img.shields.io/badge/license-PMPL--1.0--or--later-blue[License: MPL-2.0,link=LICENSE]
 image:https://img.shields.io/badge/Palimpsest-Covenant-purple[Palimpsest Covenant]
 image:https://img.shields.io/badge/-iser_family-29_repos-brightgreen[29 repos]
 image:https://img.shields.io/badge/ABI-Idris2-red[Idris2 ABI]
@@ -408,7 +408,7 @@ must pass the full CI suite including Hypatia neurosymbolic scanning.
 
 == License
 
-SPDX-License-Identifier: `PMPL-1.0-or-later`
+SPDX-License-Identifier: `MPL-2.0`
 
 Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 

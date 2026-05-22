@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Template customizer.
@@ -67,7 +67,7 @@ fn apply_paradigm_extras(model: &LanguageModel, files: &mut Vec<GeneratedFile>) 
 fn generate_adt_mapper(model: &LanguageModel) -> GeneratedFile {
     let iser_name = model.iser_name();
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // ADT mapping utilities for {iser_name}.
@@ -95,7 +95,7 @@ pub trait ToAdt {{
 fn generate_array_bridge(model: &LanguageModel) -> GeneratedFile {
     let iser_name = model.iser_name();
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Array/tensor bridge for {iser_name}.
@@ -130,7 +130,7 @@ pub struct ArrayDescriptor {{
 fn generate_dataflow_bridge(model: &LanguageModel) -> GeneratedFile {
     let iser_name = model.iser_name();
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Dataflow bridge for {iser_name}.
@@ -159,7 +159,7 @@ pub struct Channel {{
 fn generate_logic_bridge(model: &LanguageModel) -> GeneratedFile {
     let iser_name = model.iser_name();
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Logic bridge for {iser_name}.
@@ -215,7 +215,7 @@ fn apply_target_extras(model: &LanguageModel, files: &mut Vec<GeneratedFile>) {
 fn generate_beam_nif_boilerplate(model: &LanguageModel) -> GeneratedFile {
     let iser_name = model.iser_name();
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // BEAM NIF boilerplate for {iser_name}.
@@ -241,7 +241,7 @@ pub struct NifResource {{
 fn generate_jni_boilerplate(model: &LanguageModel) -> GeneratedFile {
     let iser_name = model.iser_name();
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // JNI boilerplate for {iser_name}.
@@ -265,7 +265,7 @@ pub struct JniEnv {{
 fn generate_wasm_bindings(model: &LanguageModel) -> GeneratedFile {
     let iser_name = model.iser_name();
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // WASM bindings for {iser_name}.
@@ -291,7 +291,7 @@ pub struct WasmMemory {{
 fn generate_js_bridge(model: &LanguageModel) -> GeneratedFile {
     let iser_name = model.iser_name();
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // JavaScript bridge for {iser_name}.

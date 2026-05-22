@@ -7,7 +7,7 @@
 // provides the low-level generation engine: language model parsing, template expansion,
 // and artifact writing — all accessible via C ABI for cross-language interop.
 //
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 const std = @import("std");

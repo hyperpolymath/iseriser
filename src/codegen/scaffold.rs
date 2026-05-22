@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Repository scaffolding engine.
@@ -114,14 +114,14 @@ fn generate_cargo_toml(
     iser_name: &str,
 ) -> GeneratedFile {
     let content = format!(
-        r#"# SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"# SPDX-License-Identifier: MPL-2.0
 [package]
 name = "{iser_name}"
 version = "{version}"
 edition = "2024"
 authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 description = "{description}"
-license = "PMPL-1.0-or-later"
+license = "MPL-2.0"
 repository = "https://github.com/{org}/{iser_name}"
 keywords = ["{lang_lower}", "interop", "code-generation", "iser"]
 categories = ["command-line-utilities", "development-tools"]
@@ -153,7 +153,7 @@ tempfile = "3"
 /// Generate `src/main.rs` — the CLI entry point.
 fn generate_main_rs(model: &LanguageModel, iser_name: &str) -> GeneratedFile {
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // {iser_name} CLI — {lang_name} interop -iser.
@@ -238,7 +238,7 @@ fn main() -> Result<()> {{
 /// Generate `src/lib.rs` — the library crate root.
 fn generate_lib_rs(model: &LanguageModel, iser_name: &str) -> GeneratedFile {
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // {iser_name} library API.
@@ -279,7 +279,7 @@ fn generate_manifest_mod_rs(model: &LanguageModel) -> GeneratedFile {
     );
 
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Manifest parser for {iser_name}.toml.
@@ -376,7 +376,7 @@ pub fn print_info(manifest: &Manifest) {{
 fn generate_codegen_mod_rs(model: &LanguageModel) -> GeneratedFile {
     let lang = &model.name;
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Code generation for {lang} interop.
@@ -422,7 +422,7 @@ fn generate_abi_mod_rs(model: &LanguageModel) -> GeneratedFile {
     };
 
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // ABI module for {iser_name}.
@@ -477,7 +477,7 @@ data DeepProof : Type where
     };
 
     let content = format!(
-        r#"-- SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"-- SPDX-License-Identifier: MPL-2.0
 -- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 --
 ||| ABI Type Definitions for {iser_name}
@@ -540,7 +540,7 @@ resultToInt NullPointer = 3
 fn generate_idris2_layout(model: &LanguageModel) -> GeneratedFile {
     let module_prefix = idris2_module_name(model);
     let content = format!(
-        r#"-- SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"-- SPDX-License-Identifier: MPL-2.0
 -- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 --
 ||| Memory Layout Verification for {iser_name}
@@ -577,7 +577,7 @@ fn generate_idris2_foreign(model: &LanguageModel) -> GeneratedFile {
     let module_prefix = idris2_module_name(model);
     let iser_name = model.iser_name();
     let content = format!(
-        r#"-- SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"-- SPDX-License-Identifier: MPL-2.0
 -- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 --
 ||| Foreign Function Interface declarations for {iser_name}
@@ -621,7 +621,7 @@ export
 /// Generate `ffi/zig/build.zig` for the new -iser.
 fn generate_zig_build(model: &LanguageModel, iser_name: &str) -> GeneratedFile {
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // Build configuration for {iser_name} Zig FFI.
@@ -663,7 +663,7 @@ pub fn build(b: *std.Build) void {{
 /// Generate `ffi/zig/src/main.zig` — the FFI implementation.
 fn generate_zig_main(model: &LanguageModel, iser_name: &str) -> GeneratedFile {
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // {iser_name} FFI Implementation.
@@ -721,7 +721,7 @@ test "lifecycle" {{
 /// Generate `ffi/zig/test/integration_test.zig`.
 fn generate_zig_integration_test(model: &LanguageModel, iser_name: &str) -> GeneratedFile {
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // Integration tests for {iser_name} Zig FFI.
@@ -758,7 +758,7 @@ test "version string" {{
 /// Generate `tests/integration_test.rs` for the new -iser.
 fn generate_integration_test(model: &LanguageModel, iser_name: &str) -> GeneratedFile {
     let content = format!(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Integration tests for {iser_name}.
@@ -804,7 +804,7 @@ fn test_codegen_output() {{
 /// `k9iser-regen.yml` from the pilot (standards#89 sub-issue 1 / rsr-template-repo#58).
 fn generate_regen_workflow(iser_name: &str) -> GeneratedFile {
     let content = format!(
-        r#"# SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"# SPDX-License-Identifier: MPL-2.0
 # {iser_name}-regen.yml — triggers central regeneration via boj-server cartridge.
 #
 # Part of the -iser regeneration-cartridge pattern (hyperpolymath/standards#89).
@@ -859,7 +859,7 @@ jobs:
 /// Generate `.github/workflows/ci.yml` for the new -iser.
 fn generate_ci_workflow(_model: &LanguageModel, iser_name: &str) -> GeneratedFile {
     let content = format!(
-        r#"# SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"# SPDX-License-Identifier: MPL-2.0
 # CI workflow for {iser_name} — generated by iseriser
 name: CI
 
@@ -937,7 +937,7 @@ cargo build --release
 
 == License
 
-SPDX-License-Identifier: PMPL-1.0-or-later
+SPDX-License-Identifier: MPL-2.0
 
 Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 "#,
@@ -1033,10 +1033,10 @@ Generated by iseriser for {lang_name} interop.
     }
 }
 
-/// Generate `LICENSE` — PMPL-1.0-or-later.
+/// Generate `LICENSE` — MPL-2.0.
 fn generate_license() -> GeneratedFile {
     // Use a shortened license header; the full text would come from the template repo.
-    let content = r#"Palimpsest License (PMPL-1.0-or-later)
+    let content = r#"Palimpsest License (MPL-2.0)
 
 Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Cartridge scaffolder — emits a complete boj-server cartridge skeleton
@@ -270,7 +270,7 @@ fn generate_cartridge_json(ctx: &TemplateCtx) -> GeneratedFile {
     let content = ctx.render(
         r#"{
   "$schema": "https://boj.dev/schemas/cartridge/v1.json",
-  "spdx": "PMPL-1.0-or-later",
+  "spdx": "MPL-2.0",
   "copyright": "Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>",
   "name": "__CARTRIDGE_NAME__",
   "version": "0.1.0",
@@ -334,7 +334,7 @@ fn generate_cartridge_json(ctx: &TemplateCtx) -> GeneratedFile {
 
 fn generate_mod_js(ctx: &TemplateCtx) -> GeneratedFile {
     let content = ctx.render(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // __CARTRIDGE_NAME__/mod.js — JS-worker fallback path for the cartridge.
@@ -384,7 +384,7 @@ fn generate_panels_manifest(ctx: &TemplateCtx) -> GeneratedFile {
     let content = ctx.render(
         r##"{
   "$schema": "https://panll.dev/schemas/panel-manifest/v1.json",
-  "spdx": "PMPL-1.0-or-later",
+  "spdx": "MPL-2.0",
   "cartridge": "__CARTRIDGE_NAME__",
   "domain": "__LANG_NAME__ -iser regeneration",
   "version": "0.1.0",
@@ -463,12 +463,12 @@ module's contract by the adapter's truth-table tests.
 fn generate_ipkg(ctx: &TemplateCtx) -> GeneratedFile {
     let lower_pkg = ctx.cartridge_name.replace('-', "");
     let content = format!(
-        r#"-- SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"-- SPDX-License-Identifier: MPL-2.0
 package {pkg}
 
 authors    = "Jonathan D.A. Jewell"
 version    = 0.1.0
-license    = "PMPL-1.0-or-later"
+license    = "MPL-2.0"
 brief      = "{cartridge} cartridge — {lang} -iser regeneration"
 
 sourcedir  = "."
@@ -489,7 +489,7 @@ depends    = base, contrib
 
 fn generate_safe_idr(ctx: &TemplateCtx) -> GeneratedFile {
     let content = ctx.render(
-        r#"-- SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"-- SPDX-License-Identifier: MPL-2.0
 -- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 ||| __MCP_MODULE__.Safe__MODULE_NAME__: cartridge interface contract.
 |||
@@ -614,7 +614,7 @@ resolve.
 
 fn generate_ffi_build_zig(ctx: &TemplateCtx) -> GeneratedFile {
     let content = ctx.render(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // __CARTRIDGE_NAME__ — Zig FFI build configuration (Zig 0.15+).
@@ -677,7 +677,7 @@ pub fn build(b: *std.Build) void {
 
 fn generate_ffi_zig(ctx: &TemplateCtx) -> GeneratedFile {
     let content = ctx.render(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // __CARTRIDGE_NAME__ — Zig FFI: implements the ADR-0006 5-symbol cartridge
@@ -815,7 +815,7 @@ public surface is the http-capability-gateway (ADR-0004) in front.
 
 fn generate_adapter_build_zig(ctx: &TemplateCtx) -> GeneratedFile {
     let content = ctx.render(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // __CARTRIDGE_NAME__/adapter/build.zig
@@ -868,7 +868,7 @@ pub fn build(b: *std.Build) void {
 
 fn generate_adapter_zig(ctx: &TemplateCtx) -> GeneratedFile {
     let content = ctx.render(
-        r#"// SPDX-License-Identifier: PMPL-1.0-or-later
+        r#"// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 //
 // __CARTRIDGE_NAME__/adapter/__ISER_NAME___adapter.zig
