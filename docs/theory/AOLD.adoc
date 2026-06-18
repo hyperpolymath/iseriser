@@ -1,0 +1,153 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Aspect-Oriented Language Design (AOLD)
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:toclevels: 3
+:icons: font
+
+[.lead]
+**AOLD is the design philosophy behind the -iser family.** Instead of choosing
+one general-purpose language and living with its global trade-offs, AOLD treats
+each specialist language's _unique strength_ as a weavable **aspect** that you
+can bolt onto an existing codebase on demand — and remove just as easily.
+
+== The problem AOLD answers
+
+Every language makes one global bet. Chapel bets everything on distributed
+data-parallelism; Pony on data-race-free actors; Dafny on
+correct-by-construction proof; Futhark on GPU array kernels; OTP on
+fault-tolerant supervision. Each is _extraordinary_ at its one thing and
+ordinary (or absent) at everything else.
+
+In practice that bet is hard to take:
+
+. **Steep learning curve** — to get the superpower you must rewrite in, or deeply
+  learn, the specialist language.
+. **All-or-nothing adoption** — there is rarely an incremental path; you commit
+  the whole system or none of it.
+. **Integration tax** — wiring the specialist runtime into your existing
+  Rust/C/Zig project is non-trivial and easy to get subtly wrong.
+
+So the superpowers stay locked behind their languages, and most projects never
+touch them.
+
+== The core idea: languages as aspects
+
+AOLD unlocks the superpower _without_ taking the global bet. An **-iser** is a
+Rust CLI that injects exactly one specialist language's capability into the code
+you already write, through a uniform, proof-carrying pipeline:
+
+[literal]
+....
+  your manifest  ──►  Idris2 ABI  ──►  Zig FFI  ──►  target-language codegen  ──►  build / run
+  (what you want)    (prove the      (C-ABI       (emit the specialist        (you never
+                      interface)      bridge)       language's code)            wrote any)
+....
+
+You describe _what_ you want in a declarative TOML manifest. The -iser validates
+it against a formally verified **Idris2 ABI**, bridges to your application across
+a **Zig FFI** seam, generates the specialist-language code, and builds it. You
+get the aspect; you never learn the language.
+
+== The "mech suit" mental model
+
+The cleanest way to think about an -iser is as a **mech suit for your
+application**. Your program/database/tool stays exactly what it is — its own
+language, its own logic. The -iser is an _exoskeleton_ that grants it one exotic
+capability it did not have: distribution, GPU acceleration, data-race freedom,
+fault tolerance, machine-checked correctness, energy-awareness, reversibility.
+
+Three properties make it a suit rather than a rewrite:
+
+* **Addable** — you bolt it on around the existing code, at the boundary.
+* **Removable / reversible** — take the suit off and the original program is
+  unchanged. Nothing is load-bearing on the aspect that cannot be unwound.
+* **Composable** — suits stack. See `iSOS.adoc` for how multiple aspects layer
+  on one host (the _Integrated Stack of Stacks_).
+
+== What AOLD is _not_
+
+[cols="1,3",options="header"]
+|===
+| It is not… | …because
+
+| aggregate-library (aLib)
+| aLib is the **dual** of AOLD. aLib finds the minimal _overlap_ common to all
+  systems (subtractive: the greatest common denominator, conformance-tested).
+  AOLD adds the exotic _differentiator_ of one system (additive: the specialist
+  edge). aLib reduces to the shared core; -isers extend with the rare capability.
+
+| the dyadic toolchain/language design of Ephapax
+| Ephapax is about the design of a single language and its paired toolchain.
+  AOLD is about _weaving many languages' aspects_ onto a foreign host.
+
+| an AffineScript-style "face"
+| A "face" is a uniform surface over a substrate. An aspect is a _capability
+  injection_ at a proof-carrying seam, not a presentation layer.
+
+| nextgen-language-evangeliser
+| That project advocates for next-generation languages as wholes. The -iser
+  atlas (`ATLAS.adoc`) routes you to a _capability_, not to a language to adopt.
+|===
+
+== The aspect taxonomy
+
+Each -iser is one aspect. The family is the palette.
+
+[cols="2,3,2",options="header"]
+|===
+| -iser | Aspect (the superpower it weaves in) | Host gains
+
+| typedqliser | Formal type safety (10 graded levels) over a query language | injection-/null-/schema-safe queries
+| chapeliser | Chapel distributed data-parallelism | single-machine workload → cluster
+| verisimiser | VeriSimDB octad capabilities | drift / provenance / temporal over any DB
+| julianiser | Julia numerical performance | 100× speedups for Python/R pipelines
+| futharkiser | Futhark GPU array kernels | data-parallel ops → GPU
+| idrisiser | Idris2 dependent-type proofs | proven-correct wrappers from interfaces
+| dafniser | Dafny correct-by-construction | verified critical functions
+| tlaiser | TLA+/PlusCal model checking | state machines checked for safety/liveness
+| alloyiser | Alloy relational model finding | formal models from API specs
+| lustreiser | Lustre synchronous dataflow | verified real-time embedded code
+| ponyiser | Pony reference capabilities | data-race freedom for concurrent code
+| otpiser | OTP/BEAM supervision | fault-tolerance trees, let-it-crash resilience
+| halideiser | Halide schedule optimisation | optimised image/video pipelines
+| bqniser | BQN array primitives | array patterns rewritten as optimised idioms
+| nimiser | Nim metaprogramming | high-performance C libraries
+| atsiser | ATS linear types | zero-cost memory safety wrapping C
+| affinescriptiser | AffineScript affine + dependent types | WASM-targeted resource safety
+| a2mliser | A2ML cryptographic attestation | tamper-evident markup / configuration
+| ephapaxiser | Ephapax single-use linear semantics | enforce use-exactly-once on resources
+| eclexiaiser | Eclexia cost modelling | energy / carbon / resource-cost awareness
+| k9iser | K9 contracts | configs become self-validating
+| oblibeniser | Oblíbený reversibility | operations made reversible + auditable
+| phronesiser | Phronesis ethical constraints | provably-safe guardrails for AI agents
+| wokelangiser | WokeLang consent + a11y patterns | consent flows and accessibility
+| betlangiser | Betlang ternary probabilistic modelling | uncertainty over deterministic code
+| mylangiser | My-Lang progressive disclosure | layered interfaces over complex APIs
+| anvomidaviser | Anvomidav ISU notation | figure-skating programs as formal artefacts
+|===
+
+`iseriser` is the meta-framework that scaffolds new aspects into this palette.
+
+== The proof-carrying seam
+
+An aspect is only worth bolting on if its guarantee survives the journey into
+your host. AOLD makes that survivable by construction:
+
+* The **Idris2 ABI** is where the aspect's invariant is _proven_ — e.g.
+  chapeliser proves `PartitionComplete` (every item is placed) and
+  `PartitionDisjoint` (no item is placed twice) and `GatherConservation`
+  (no result is lost).
+* The **Zig FFI** is the zero-overhead C-ABI bridge that carries data across the
+  boundary without re-introducing unsafety.
+* **invariant-path** is the conscience: it _traces the proven invariant across
+  the seam into the host_ and flags any point where the guarantee is silently
+  over-generalised (the classic `theorem → guarantee → "universal claim"`
+  slide). See `iSOS.adoc`.
+
+== See also
+
+* `iSOS.adoc` — how aspects compose into an Integrated Stack of Stacks.
+* `../ATLAS.adoc` — the routing map: pick the -iser for your need.
+* `../../README.adoc` — the family overview and install/usage.

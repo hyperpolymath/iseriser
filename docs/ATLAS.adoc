@@ -1,0 +1,120 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= The -iser Atlas — find the right -iser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:toclevels: 2
+:icons: font
+:url-org: https://github.com/hyperpolymath
+
+[.lead]
+**This is the map.** If you have a codebase and a need, this page routes you to
+the -iser that grants it — the "right place" index for the augmentation family.
+It is the coordination layer for Aspect-Oriented Language Design (see
+`theory/AOLD.adoc`) and the Integrated Stack of Stacks (`theory/iSOS.adoc`).
+
+== How to read this
+
+Every -iser injects _one_ specialist language's superpower into the code you
+already have, via `manifest → Idris2 ABI → Zig FFI → codegen → build/run`. You
+do not learn the language. Find your need in the left column; go to the -iser in
+the middle.
+
+== Route by need
+
+[cols="3,2,3",options="header"]
+|===
+| I want to… | Use | Aspect / language essence
+
+| …distribute a single-machine workload across a cluster | {url-org}/chapeliser[chapeliser] | Chapel data-parallelism
+| …push array/number crunching onto the GPU | {url-org}/futharkiser[futharkiser] | Futhark kernels
+| …make a Python/R pipeline ~100× faster | {url-org}/julianiser[julianiser] | Julia
+| …add fault tolerance / supervision to concurrent code | {url-org}/otpiser[otpiser] | OTP/BEAM
+| …get data-race freedom for concurrency | {url-org}/ponyiser[ponyiser] | Pony reference capabilities
+| …optimise an image/video pipeline | {url-org}/halideiser[halideiser] | Halide schedules
+| …rewrite array patterns as optimised primitives | {url-org}/bqniser[bqniser] | BQN
+| …generate high-performance C libraries | {url-org}/nimiser[nimiser] | Nim metaprogramming
+| …prove critical functions correct-by-construction | {url-org}/dafniser[dafniser] | Dafny
+| …model-check a state machine | {url-org}/tlaiser[tlaiser] | TLA+/PlusCal
+| …find counterexamples in an API model | {url-org}/alloyiser[alloyiser] | Alloy
+| …get proven-correct wrappers from interfaces | {url-org}/idrisiser[idrisiser] | Idris2 dependent types
+| …verify real-time embedded logic | {url-org}/lustreiser[lustreiser] | Lustre
+| …add formal type safety to a query language | {url-org}/typedqliser[typedqliser] | graded type systems
+| …wrap C in zero-cost memory safety | {url-org}/atsiser[atsiser] | ATS linear types
+| …enforce use-exactly-once on resources | {url-org}/ephapaxiser[ephapaxiser] | Ephapax linear semantics
+| …target WASM with affine + dependent types | {url-org}/affinescriptiser[affinescriptiser] | AffineScript
+| …augment any database (drift/provenance/temporal) | {url-org}/verisimiser[verisimiser] | VeriSimDB octad
+| …make configs self-validating | {url-org}/k9iser[k9iser] | K9 contracts
+| …add cryptographic attestation to markup/config | {url-org}/a2mliser[a2mliser] | A2ML
+| …make operations reversible + auditable | {url-org}/oblibeniser[oblibeniser] | Oblíbený
+| …add energy/carbon/cost awareness | {url-org}/eclexiaiser[eclexiaiser] | Eclexia
+| …put provably-safe ethical guardrails on an AI agent | {url-org}/phronesiser[phronesiser] | Phronesis
+| …add consent flows + accessibility | {url-org}/wokelangiser[wokelangiser] | WokeLang
+| …model uncertainty over deterministic code | {url-org}/betlangiser[betlangiser] | Betlang ternary probability
+| …expose a complex API progressively | {url-org}/mylangiser[mylangiser] | My-Lang
+| …formalise ISU figure-skating notation | {url-org}/anvomidaviser[anvomidaviser] | Anvomidav
+| …scaffold a brand-new -iser for another language | {url-org}/iseriser[iseriser] | the meta-framework
+|===
+
+NOTE: Status across the family is _scaffold → pre-alpha_; `chapeliser`,
+`verisimiser`, and `typedqliser` are the most developed. Each -iser's own
+`ROADMAP.adoc` is the source of truth for its maturity. (The family READMEs
+historically over-stated test counts; trust the per-repo `cargo test` output.)
+
+== What -iserisation is — and is not
+
+[cols="1,3",options="header"]
+|===
+| -iserisation is… | …and it is _not_
+
+| **augmentation**: bolt one specialist language's power onto a foreign host
+| **aggregate-library**: aLib is the _dual_ — the minimal _overlap_ common to all
+  systems. -isers add the exotic edge; aLib distils the shared core.
+
+| a **coordination atlas**: the index that sends you to the right capability
+| nextgen-language-evangeliser: that advocates adopting whole next-gen languages;
+  the atlas routes you to a _capability_, no adoption required.
+
+| a family of **proof-carrying seams** (Idris2 ABI + Zig FFI)
+| the dyadic language/toolchain design of Ephapax, or an AffineScript "face".
+|===
+
+== The pattern in one diagram
+
+[literal]
+....
+        your app  ──►  <name>.toml  ──►  the -iser CLI
+                                            │
+                          ┌─────────────────┼─────────────────┐
+                          ▼                 ▼                 ▼
+                    Idris2 ABI           Zig FFI        target codegen
+                  (prove interface)   (C-ABI bridge)   (specialist lang)
+                          └─────────────────┴─────────────────┘
+                                            ▼
+                              your app, now wearing the aspect
+....
+
+== Getting started
+
+[source,bash]
+----
+# install any -iser (standalone Rust binary)
+cargo install chapeliser        # …or any name above
+
+# the shared five-command interface
+<iser> init        # write a manifest for your project
+<iser> validate    # check it against the Idris2 ABI spec
+<iser> generate    # emit the specialist-language code
+<iser> build       # build the generated output
+<iser> run         # run it
+----
+
+To create an aspect for a language that has no -iser yet, use the meta-framework:
+`iseriser generate -m <language>.toml -o ./<name>iser` (see
+`examples/newlang/iseriser.toml`).
+
+== See also
+
+* `theory/AOLD.adoc` — the design philosophy (languages as aspects).
+* `theory/iSOS.adoc` — the architecture (composing aspects).
+* `../README.adoc` — family overview, architecture diagram, full install/usage.

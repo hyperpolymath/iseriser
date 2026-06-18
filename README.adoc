@@ -22,6 +22,20 @@ image:https://img.shields.io/badge/FFI-Zig-orange[Zig FFI]
 
 '''
 
+[TIP]
+====
+**New here? Start with the coordination layer:**
+
+* link:docs/ATLAS.adoc[**The -iser Atlas**] — route a need straight to the right
+  -iser ("I want to… → use…").
+* link:docs/theory/AOLD.adoc[**Aspect-Oriented Language Design**] — the design
+  philosophy (each language's superpower as a bolt-on _aspect_; the "mech suit"
+  model; why this is the _dual_ of aggregate-library).
+* link:docs/theory/iSOS.adoc[**Integrated Stack of Stacks**] — how aspects
+  _compose_ over one shared Idris2-ABI/Zig-FFI seam, kept honest by
+  invariant-path.
+====
+
 == What is the -iser Pattern?
 
 An **-iser** is a Rust CLI that bridges the gap between a _specialist language_

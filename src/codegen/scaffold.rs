@@ -66,6 +66,7 @@ pub fn scaffold_repo(manifest: &Manifest, output_dir: &Path) -> ScaffoldResult {
     files.push(generate_license());
     files.push(generate_gitignore());
     files.push(generate_editorconfig());
+    files.push(generate_mustfile());
 
     // Apply language-specific customizations
     customizer::apply_customizations(&model, &mut files);
@@ -1067,6 +1068,33 @@ Thumbs.db
     .to_string();
     GeneratedFile {
         path: PathBuf::from(".gitignore"),
+        content,
+    }
+}
+
+/// Generate the root `Mustfile` — the RSR-mandatory declarative contract of
+/// checks that MUST pass. Each check maps to a recipe emitted in the Justfile,
+/// so a freshly scaffolded repo is born standards-compliant (REQUIRED-FILES.adoc).
+fn generate_mustfile() -> GeneratedFile {
+    let content = r#"# SPDX-License-Identifier: MPL-2.0
+# Mustfile — hyperpolymath mandatory checks
+# See: https://github.com/hyperpolymath/mustfile
+#
+# Declarative contract of checks that MUST pass. Each maps to a recipe
+# that already exists in this repo's Justfile.
+version: 1
+
+checks:
+  - name: security
+    run: just lint
+  - name: tests
+    run: just test
+  - name: format
+    run: just fmt
+"#
+    .to_string();
+    GeneratedFile {
+        path: PathBuf::from("Mustfile"),
         content,
     }
 }
