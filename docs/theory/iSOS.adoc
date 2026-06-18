@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= iSOS — the Integrated Stack of Stacks
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:toclevels: 3
+:icons: font
+
+[.lead]
+**iSOS is the architecture that lets AOLD aspects compose.** Where `AOLD.adoc`
+explains _why_ each specialist language becomes a bolt-on aspect, iSOS explains
+_how_ the aspects fit together: every -iser is a self-contained stack, and
+because they all speak one shared contract, they compose into a
+**stack of stacks**.
+
+== One contract, many stacks
+
+Each -iser is a complete vertical stack:
+
+[literal]
+....
+   specialist language   (Chapel, Futhark, Pony, Dafny, OTP, …)
+        ▲
+   target-language codegen
+        ▲
+   Zig FFI            ── C-ABI bridge
+        ▲
+   Idris2 ABI         ── formal proof of the interface
+        ▲
+   manifest           ── the declarative "what"
+....
+
+The stacks differ wildly at the top (the specialist language) but are
+_identical at the seam_: every -iser exposes its capability across the same
+**Idris2-ABI + Zig-FFI** contract. That shared seam is what makes them
+composable rather than 28 unrelated tools.
+
+== Why the seam is the whole game
+
+A general-purpose language forces a single global ABI/runtime; you cannot graft
+another language's runtime on without a foreign-function minefield. iSOS inverts
+this: the ABI is _specified and proven_ in Idris2, and _bridged_ in Zig, so any
+host that can call C can host any aspect — and any two aspects can sit on the
+same host without knowing about each other.
+
+* **Idris2 owns the ABI.** Dependent types pin down memory layout, calling
+  convention, and the aspect's invariants as compile-time obligations.
+* **Zig owns the FFI.** A zero-overhead, memory-safe C-ABI bridge with built-in
+  cross-compilation and no runtime dependency.
+* The host owns _nothing it didn't already own_. The aspect is additive.
+
+== invariant-path: the conscience of the stack
+
+Composing proofs is where guarantees usually die. A theorem proved _inside_ an
+aspect (`PartitionDisjoint` holds for the Chapel partition) is easy to quietly
+restate, one boundary later, as a universal claim it never earned ("the pipeline
+is correct"). That illegitimate strengthening —
+
+[literal]
+....
+   theorem  →  guarantee  →  "general truth"
+   local result  →  universal claim
+   assumption-bound result  →  unconditional fact
+....
+
+— is exactly what **invariant-path** is built to catch. It is a _claim-path
+debugger_, not a truth engine: it traces how a claim travels from its source
+(the Idris2 proof) to where it is relied upon (the host call site), and flags
+each point where the invariant is carried further than it was proved. In iSOS,
+invariant-path is how you keep a _stack of_ proofs honest when no single proof
+spans the whole tower.
+
+== Composing aspects — stacking mech suits
+
+Because the seam is uniform, aspects layer. Two worked patterns from the estate:
+
+* **boj-server (Box of Justice).** A server whose core correctness is _proven_ in
+  Idris2, then extended across the Zig seam to graft on **OTP/BEAM scalability**
+  (the otpiser-style aspect) — fault-tolerant concurrency added to a proven core
+  _without rewriting_ it. Proof at the bottom, resilience bolted on top.
+* **panic-attacker → chapeliser.** A high-rigor static-analysis + dynamic-attack
+  tool whose "mass-panic" mode is **chapelised** to distribute analysis across a
+  cluster — the same host gaining a distribution aspect on demand.
+
+The general shape — _a proven core, augmented with an esoteric language's power
+through a proof-carrying seam_ — recurs. iSOS is the recognition that this shape
+generalises, and the -iser family is its systematic build-out.
+
+== Relationship to the rest of the estate
+
+* **AOLD** (`AOLD.adoc`) — the philosophy; aspects as the unit of design.
+* **iSOS** (this doc) — the architecture; the shared seam that composes them.
+* **aggregate-library** — the _dual_: the minimal overlap _common_ to all
+  systems, not the specialist edge of one. iSOS adds; aLib intersects.
+* **rsr-template `src/aspects/`** — the structural "Aspects Pillar" every RSR repo
+  carries, where a host project declares which aspects it wears.
+
+== See also
+
+* `AOLD.adoc` — the design philosophy and the aspect taxonomy.
+* `../ATLAS.adoc` — route a need to the right aspect.
