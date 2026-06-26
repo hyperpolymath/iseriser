@@ -14,6 +14,11 @@ build:
 test:
     cargo test
 
+# Type-check the Idris2 ABI formal proofs (requires idris2 >= 0.7.0)
+proofs:
+    cd src/interface/abi && idris2 --build iseriser-abi.ipkg
+    @echo "Idris2 ABI proofs type-check cleanly"
+
 # Run clippy lints
 lint:
     cargo clippy -- -D warnings
