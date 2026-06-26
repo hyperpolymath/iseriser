@@ -15,6 +15,8 @@ module Iseriser.ABI.Types
 import Data.Bits
 import Data.So
 import Data.Vect
+import Data.String
+import Decidable.Equality
 
 %default total
 
@@ -26,12 +28,12 @@ import Data.Vect
 public export
 data Platform = Linux | Windows | MacOS | BSD | WASM
 
-||| Compile-time platform detection
+||| The platform this build targets. Defaults to Linux; the Rust/Zig build
+||| layer overrides this via the codegen target selection. (Previously a
+||| `%runElab` stub that required ElabReflection and did not compile.)
 public export
 thisPlatform : Platform
-thisPlatform =
-  %runElab do
-    pure Linux  -- Default, override with compiler flags
+thisPlatform = Linux
 
 --------------------------------------------------------------------------------
 -- Language Model Types
@@ -134,13 +136,31 @@ record GeneratedArtifact where
   ||| Size in bytes of the rendered content
   sizeBytes : Nat
 
-||| Proof that a generated artifact has all placeholders resolved.
-||| No `{{` or `}}` sequences remain in the content.
+||| Decidable predicate: the rendered content carries no unresolved
+||| Handlebars placeholder markers (`{{` opening or `}}` closing).
+public export
+noUnresolvedMarkers : GeneratedArtifact -> Bool
+noUnresolvedMarkers art =
+  not (isInfixOf "{{" art.content) && not (isInfixOf "}}" art.content)
+
+||| Proof that a generated artifact has all placeholders resolved: the
+||| content contains no `{{` or `}}` markers. This is a genuine obligation —
+||| `Resolved` cannot be constructed while template delimiters remain.
+||| (Previously `Resolved` carried no proof and was inhabited by anything.)
 public export
 data FullyResolved : GeneratedArtifact -> Type where
   Resolved : {art : GeneratedArtifact} ->
-    -- In a real implementation, this would search for unresolved markers
+    So (noUnresolvedMarkers art) ->
     FullyResolved art
+
+||| Decide whether an artifact is fully resolved, returning a real proof
+||| when it is and Nothing when unresolved markers remain.
+public export
+checkResolved : (art : GeneratedArtifact) -> Maybe (FullyResolved art)
+checkResolved art =
+  case choose (noUnresolvedMarkers art) of
+    Left ok => Just (Resolved ok)
+    Right _ => Nothing
 
 --------------------------------------------------------------------------------
 -- Result Codes
@@ -172,7 +192,9 @@ resultToInt TemplateError = 3
 resultToInt OutputError = 4
 resultToInt NullPointer = 5
 
-||| Results are decidably equal
+||| Results are decidably equal. The off-diagonal cases discharge the
+||| disequality explicitly; the previous `decEq _ _ = No absurd` did not
+||| compile (no `Uninhabited (x = y)` instance exists for these).
 public export
 DecEq Result where
   decEq Ok Ok = Yes Refl
@@ -181,7 +203,36 @@ DecEq Result where
   decEq TemplateError TemplateError = Yes Refl
   decEq OutputError OutputError = Yes Refl
   decEq NullPointer NullPointer = Yes Refl
-  decEq _ _ = No absurd
+  decEq Ok Error = No (\case Refl impossible)
+  decEq Ok InvalidLanguage = No (\case Refl impossible)
+  decEq Ok TemplateError = No (\case Refl impossible)
+  decEq Ok OutputError = No (\case Refl impossible)
+  decEq Ok NullPointer = No (\case Refl impossible)
+  decEq Error Ok = No (\case Refl impossible)
+  decEq Error InvalidLanguage = No (\case Refl impossible)
+  decEq Error TemplateError = No (\case Refl impossible)
+  decEq Error OutputError = No (\case Refl impossible)
+  decEq Error NullPointer = No (\case Refl impossible)
+  decEq InvalidLanguage Ok = No (\case Refl impossible)
+  decEq InvalidLanguage Error = No (\case Refl impossible)
+  decEq InvalidLanguage TemplateError = No (\case Refl impossible)
+  decEq InvalidLanguage OutputError = No (\case Refl impossible)
+  decEq InvalidLanguage NullPointer = No (\case Refl impossible)
+  decEq TemplateError Ok = No (\case Refl impossible)
+  decEq TemplateError Error = No (\case Refl impossible)
+  decEq TemplateError InvalidLanguage = No (\case Refl impossible)
+  decEq TemplateError OutputError = No (\case Refl impossible)
+  decEq TemplateError NullPointer = No (\case Refl impossible)
+  decEq OutputError Ok = No (\case Refl impossible)
+  decEq OutputError Error = No (\case Refl impossible)
+  decEq OutputError InvalidLanguage = No (\case Refl impossible)
+  decEq OutputError TemplateError = No (\case Refl impossible)
+  decEq OutputError NullPointer = No (\case Refl impossible)
+  decEq NullPointer Ok = No (\case Refl impossible)
+  decEq NullPointer Error = No (\case Refl impossible)
+  decEq NullPointer InvalidLanguage = No (\case Refl impossible)
+  decEq NullPointer TemplateError = No (\case Refl impossible)
+  decEq NullPointer OutputError = No (\case Refl impossible)
 
 --------------------------------------------------------------------------------
 -- Opaque Handles
@@ -193,11 +244,15 @@ public export
 data Handle : Type where
   MkHandle : (ptr : Bits64) -> {auto 0 nonNull : So (ptr /= 0)} -> Handle
 
-||| Safely create a handle from a pointer value
+||| Safely create a handle from a pointer value. Uses `choose` to obtain a
+||| real `So (ptr /= 0)` witness for the non-null branch. (Previously
+||| `Just (MkHandle ptr)` left the `auto` proof unsolved and did not compile.)
 public export
 createHandle : Bits64 -> Maybe Handle
-createHandle 0 = Nothing
-createHandle ptr = Just (MkHandle ptr)
+createHandle ptr =
+  case choose (ptr /= 0) of
+    Left ok => Just (MkHandle ptr {nonNull = ok})
+    Right _ => Nothing
 
 ||| Extract pointer value from handle
 public export
@@ -250,13 +305,48 @@ data ArtifactCategory : Type where
   Documentation : ArtifactCategory
   RSRGovernance : ArtifactCategory
 
+||| Artifact categories are decidably equal — needed for membership checks.
+public export
+Eq ArtifactCategory where
+  CargoToml     == CargoToml     = True
+  RustSource    == RustSource    = True
+  Idris2ABI     == Idris2ABI     = True
+  ZigFFI        == ZigFFI        = True
+  CIWorkflows   == CIWorkflows   = True
+  Documentation == Documentation = True
+  RSRGovernance == RSRGovernance = True
+  _             == _             = False
+
+||| The seven categories every generated -iser repo must contain.
+public export
+requiredCategories : List ArtifactCategory
+requiredCategories =
+  [ CargoToml, RustSource, Idris2ABI, ZigFFI
+  , CIWorkflows, Documentation, RSRGovernance ]
+
+||| Decidable predicate: every required category appears in `cats`.
+public export
+allCategoriesPresent : List ArtifactCategory -> Bool
+allCategoriesPresent cats = all (\c => elem c cats) requiredCategories
+
 ||| Proof that a generation produced all required artifact categories.
+||| `AllCategoriesPresent` now carries a genuine obligation: each of the
+||| seven `requiredCategories` must be a member of the produced list.
+||| (Previously the constructor proved nothing.)
 public export
 data GenerationComplete : List ArtifactCategory -> Type where
-  AllCategoriesPresent :
-    (cats : List ArtifactCategory) ->
-    -- In a real implementation, this would check membership of all 7 categories
+  AllCategoriesPresent : {cats : List ArtifactCategory} ->
+    So (allCategoriesPresent cats) ->
     GenerationComplete cats
+
+||| Decide generation completeness, returning a real proof when all seven
+||| categories are present and Nothing when any is missing.
+public export
+checkComplete : (cats : List ArtifactCategory) -> Maybe (GenerationComplete cats)
+checkComplete cats =
+  case choose (allCategoriesPresent cats) of
+    Left ok => Just (AllCategoriesPresent ok)
+    Right _ => Nothing
 
 --------------------------------------------------------------------------------
 -- Verification
@@ -279,7 +369,6 @@ namespace Verify
   verifyArtifacts : List GeneratedArtifact -> Either String ()
   verifyArtifacts [] = Right ()
   verifyArtifacts (a :: as) =
-    -- Check that artifact path and content are non-empty
     if length (outputPath a) == 0
       then Left "Artifact has empty output path"
       else verifyArtifacts as

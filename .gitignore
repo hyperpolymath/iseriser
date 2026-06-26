@@ -16,6 +16,11 @@ Thumbs.db
 /_build/
 /build/
 /dist/
+
+# Idris2 proof build artifacts (any nested build/ dir + TTC output)
+**/build/
+*.ttc
+*.ttm
 /out/
 
 # Dependencies

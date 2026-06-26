@@ -1,1 +1,52 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 = Proofs Unit
+:toc:
+
+The iseriser formal proofs live with the ABI they constrain, under
+`src/interface/abi/Iseriser/ABI/`, and are built as a single Idris2 package.
+
+== What is proven
+
+`Types.idr`::
+  Core ABI types plus genuine proof obligations: `FullyResolved` (no `{{`/`}}`
+  markers remain in rendered content), `GenerationComplete` (all seven required
+  artifact categories present), and a total `DecEq Result`.
+
+`Layout.idr`::
+  C-ABI struct layouts with a sound `decDivides` divisibility decision
+  procedure, `decFieldsAligned`, and `checkCABI`. The three concrete FFI
+  layouts (`languageModelDataLayout`, `templateDataLayout`,
+  `generationContextLayout`) carry explicit alignment witnesses.
+
+`Proofs.idr`::
+  Machine-checked theorems (not runtime tests). The type checker must discharge
+  them at compile time:
+  * `languageModelDataCompliant`, `templateDataCompliant`,
+    `generationContextCompliant` — each concrete struct layout is provably
+    C-ABI aligned (built from per-field `offset = k * alignment` witnesses).
+  * `okIsZero`, `nullPointerIsFive` — the `Result` → C-int encoding the Zig FFI
+    depends on.
+  * `fullSetComplete`, `shortSetIncomplete` — completeness predicate accepts the
+    full category set and rejects a short one.
+
+== Running the proofs
+
+[source,sh]
+----
+just proofs
+# or directly:
+cd src/interface/abi && idris2 --build iseriser-abi.ipkg
+----
+
+Requires Idris2 >= 0.7.0. A clean build means every theorem above is verified;
+any regression (a misaligned offset, a wrong result code, a broken decision
+procedure) turns the build red.
+
+== Residual proof work
+
+* The general theorem "`alignUp size align` is always divisible by `align`" is
+  currently *decided* (`alignUpDivides`, via `decDivides`) rather than proven for
+  all inputs; a closed proof needs the `Data.Nat` div/mod lemmas. The concrete
+  layouts that matter are proven outright, so this is a generality gap, not a
+  soundness gap.

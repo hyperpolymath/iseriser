@@ -1,0 +1,11 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the iseriser ABI formal proofs.
+-- Build/check with:  idris2 --build iseriser-abi.ipkg   (from src/interface/abi/)
+package iseriser-abi
+
+sourcedir = "."
+
+modules = Iseriser.ABI.Types
+        , Iseriser.ABI.Layout
+        , Iseriser.ABI.Foreign
+        , Iseriser.ABI.Proofs
