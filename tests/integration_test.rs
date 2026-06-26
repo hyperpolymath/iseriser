@@ -97,8 +97,12 @@ fn test_full_pipeline_chapel() {
     assert!(root.join("Cargo.toml").exists(), "Cargo.toml missing");
     assert!(root.join("src/main.rs").exists(), "src/main.rs missing");
     assert!(
-        root.join("src/interface/abi/Types.idr").exists(),
+        root.join("src/interface/abi/Chapeliser/ABI/Types.idr").exists(),
         "Types.idr missing"
+    );
+    assert!(
+        root.join("src/interface/abi/chapeliser-abi.ipkg").exists(),
+        "chapeliser-abi.ipkg missing"
     );
     assert!(
         root.join("ffi/zig/src/main.zig").exists(),
@@ -219,15 +223,18 @@ fn test_full_pipeline_dependent_types() {
         "dependent type language should have deep ABI proof docs"
     );
 
-    // Verify the Idris2 Types.idr mentions deep proofs
-    let types_idr = repo
+    // Verify the generated ABI ships the real machine-checked proof module
+    // (the C-ABI compliance theorem), which superseded the old vacuous
+    // `DeepProof` stub. This theorem is non-vacuous: it pins each field offset
+    // via `DivideBy k Refl`, so a misaligned layout fails to typecheck.
+    let proofs_idr = repo
         .files
         .iter()
-        .find(|f| f.path.to_str().unwrap().contains("Types.idr"))
-        .unwrap();
+        .find(|f| f.path.to_str().unwrap().contains("Proofs.idr"))
+        .expect("Proofs.idr should be generated");
     assert!(
-        types_idr.content.contains("DeepProof"),
-        "Types.idr should contain DeepProof for dependent types"
+        proofs_idr.content.contains("CABICompliant"),
+        "Proofs.idr should contain the C-ABI compliance theorem"
     );
 }
 
