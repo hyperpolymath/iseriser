@@ -9,3 +9,4 @@ modules = Iseriser.ABI.Types
         , Iseriser.ABI.Layout
         , Iseriser.ABI.Foreign
         , Iseriser.ABI.Proofs
+        , Iseriser.ABI.Semantics
