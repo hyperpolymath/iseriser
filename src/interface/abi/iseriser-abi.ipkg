@@ -10,3 +10,4 @@ modules = Iseriser.ABI.Types
         , Iseriser.ABI.Foreign
         , Iseriser.ABI.Proofs
         , Iseriser.ABI.Semantics
+        , Iseriser.ABI.Invariants
