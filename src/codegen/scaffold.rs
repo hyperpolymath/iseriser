@@ -1637,7 +1637,7 @@ description = "Chapel distributed computing -iser"
             !repo
                 .files
                 .iter()
-                .any(|f| f.path == std::path::Path::new("src/interface/abi/Types.idr"))
+                .any(|f| f.path == *"src/interface/abi/Types.idr")
         );
     }
 
