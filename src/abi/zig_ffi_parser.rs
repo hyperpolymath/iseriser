@@ -103,9 +103,9 @@ fn parse_enum_body(body: &str) -> Result<BTreeMap<String, i64>> {
             .next()
             .ok_or_else(|| anyhow!("variant `{}` missing `= <int>` value", name))?
             .trim();
-        let value: i64 = value_str
-            .parse()
-            .with_context(|| format!("variant `{}` value `{}` is not an integer", name, value_str))?;
+        let value: i64 = value_str.parse().with_context(|| {
+            format!("variant `{}` value `{}` is not an integer", name, value_str)
+        })?;
         if variants.insert(name.clone(), value).is_some() {
             return Err(anyhow!("duplicate variant `{}` in enum body", name));
         }
@@ -148,8 +148,7 @@ fn parse_transition_table(src: &str) -> Result<Option<ZigTransitionTable>> {
             _ => {}
         }
     }
-    let end =
-        end_idx.ok_or_else(|| anyhow!("`switch (from)` body is unterminated"))?;
+    let end = end_idx.ok_or_else(|| anyhow!("`switch (from)` body is unterminated"))?;
     let body = &body_src[..end];
     let arms = parse_switch_arms(body)?;
     Ok(Some(ZigTransitionTable {
@@ -234,9 +233,8 @@ fn parse_switch_arms(body: &str) -> Result<BTreeMap<String, Vec<String>>> {
             .strip_prefix('.')
             .ok_or_else(|| anyhow!("switch arm `{}` does not start with `.`", from))?
             .to_string();
-        let tos = parse_arm_targets(body_part).with_context(|| {
-            format!("parsing targets of switch arm for `{}`", from)
-        })?;
+        let tos = parse_arm_targets(body_part)
+            .with_context(|| format!("parsing targets of switch arm for `{}`", from))?;
         if arms.insert(from.clone(), tos).is_some() {
             return Err(anyhow!("duplicate switch arm for `{}`", from));
         }

@@ -97,7 +97,8 @@ fn test_full_pipeline_chapel() {
     assert!(root.join("Cargo.toml").exists(), "Cargo.toml missing");
     assert!(root.join("src/main.rs").exists(), "src/main.rs missing");
     assert!(
-        root.join("src/interface/abi/Chapeliser/ABI/Types.idr").exists(),
+        root.join("src/interface/abi/Chapeliser/ABI/Types.idr")
+            .exists(),
         "Types.idr missing"
     );
     assert!(
@@ -114,10 +115,7 @@ fn test_full_pipeline_chapel() {
     // Verify Cargo.toml content
     let cargo = std::fs::read_to_string(root.join("Cargo.toml")).unwrap();
     assert!(cargo.contains("chapeliser"), "Cargo.toml missing repo name");
-    assert!(
-        cargo.contains("MPL-2.0"),
-        "Cargo.toml missing license"
-    );
+    assert!(cargo.contains("MPL-2.0"), "Cargo.toml missing license");
 }
 
 // ---------------------------------------------------------------------------

@@ -812,7 +812,6 @@ jobs:
     }
 }
 
-
 /// Generate `.github/workflows/ci.yml` for the new -iser.
 fn generate_ci_workflow(_model: &LanguageModel, iser_name: &str) -> GeneratedFile {
     let content = format!(
@@ -1634,10 +1633,12 @@ description = "Chapel distributed computing -iser"
             );
         }
         // Guard against the old flat, non-compiling form regressing.
-        assert!(!repo
-            .files
-            .iter()
-            .any(|f| f.path == PathBuf::from("src/interface/abi/Types.idr")));
+        assert!(
+            !repo
+                .files
+                .iter()
+                .any(|f| f.path == std::path::Path::new("src/interface/abi/Types.idr"))
+        );
     }
 
     /// End-to-end: a freshly generated -iser's Idris2 ABI must compile clean.
@@ -1697,20 +1698,30 @@ description = "Chapel distributed computing -iser"
         assert!(repo_root.join("src/main.rs").exists());
         // ABI modules live at <Mod>/ABI/*.idr so the path matches the namespace,
         // plus the <iser>-abi.ipkg that builds them.
-        assert!(repo_root
-            .join("src/interface/abi/Chapeliser/ABI/Types.idr")
-            .exists());
-        assert!(repo_root
-            .join("src/interface/abi/Chapeliser/ABI/Proofs.idr")
-            .exists());
-        assert!(repo_root
-            .join("src/interface/abi/chapeliser-abi.ipkg")
-            .exists());
+        assert!(
+            repo_root
+                .join("src/interface/abi/Chapeliser/ABI/Types.idr")
+                .exists()
+        );
+        assert!(
+            repo_root
+                .join("src/interface/abi/Chapeliser/ABI/Proofs.idr")
+                .exists()
+        );
+        assert!(
+            repo_root
+                .join("src/interface/abi/chapeliser-abi.ipkg")
+                .exists()
+        );
         assert!(repo_root.join("ffi/zig/src/main.zig").exists());
         assert!(repo_root.join(".github/workflows/ci.yml").exists());
         // standards#89 sub-issue 1: regen trigger only.
         // The unified adapter belongs to the boj-server cartridge, not this repo.
-        assert!(repo_root.join(".github/workflows/chapeliser-regen.yml").exists());
+        assert!(
+            repo_root
+                .join(".github/workflows/chapeliser-regen.yml")
+                .exists()
+        );
         assert!(repo_root.join("README.adoc").exists());
         assert!(repo_root.join("LICENSE").exists());
     }

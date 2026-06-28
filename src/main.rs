@@ -149,7 +149,11 @@ fn main() -> Result<()> {
                 scan::print_table(&recommendations);
             }
         }
-        Commands::AbiVerify { manifest, zig_ffi, json } => {
+        Commands::AbiVerify {
+            manifest,
+            zig_ffi,
+            json,
+        } => {
             let report = abi::verify::verify_paths(
                 std::path::Path::new(&manifest),
                 std::path::Path::new(&zig_ffi),
@@ -163,7 +167,12 @@ fn main() -> Result<()> {
                 std::process::exit(2);
             }
         }
-        Commands::AbiEmitManifest { idris, cartridge, source_path, out } => {
+        Commands::AbiEmitManifest {
+            idris,
+            cartridge,
+            source_path,
+            out,
+        } => {
             let source_path_for_manifest = source_path.as_deref().unwrap_or(&idris);
             let manifest = abi::idris_emitter::emit_from_idris_path(
                 std::path::Path::new(&idris),
@@ -174,10 +183,16 @@ fn main() -> Result<()> {
             match out {
                 Some(path) => {
                     std::fs::write(&path, format!("{}\n", json))?;
-                    eprintln!("abi-emit-manifest: wrote {} ({} enums, {} transitions)",
+                    eprintln!(
+                        "abi-emit-manifest: wrote {} ({} enums, {} transitions)",
                         path,
                         manifest.enums.len(),
-                        manifest.transition_table.as_ref().map(|t| t.rows.len()).unwrap_or(0));
+                        manifest
+                            .transition_table
+                            .as_ref()
+                            .map(|t| t.rows.len())
+                            .unwrap_or(0)
+                    );
                 }
                 None => println!("{}", json),
             }

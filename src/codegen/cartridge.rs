@@ -89,10 +89,7 @@ impl CartridgeRepo {
 /// Scaffold a boj-server cartridge skeleton for the given manifest.
 ///
 /// Writes `<output_dir>/<iser_name>-mcp/` and all its contents.
-pub fn scaffold_cartridge(
-    manifest: &Manifest,
-    output_dir: &Path,
-) -> CartridgeScaffoldResult {
+pub fn scaffold_cartridge(manifest: &Manifest, output_dir: &Path) -> CartridgeScaffoldResult {
     let model = manifest.to_language_model();
     let iser_name = model.iser_name();
     let cartridge_name = format!("{}-mcp", iser_name);

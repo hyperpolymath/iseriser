@@ -68,8 +68,8 @@ pub fn print_table(recs: &[Recommendation]) {
         return;
     }
     println!(
-        "{:<22} {:<10} {:<9} {}",
-        "ISER", "CONFIDENCE", "APPLIED", "REASON"
+        "{:<22} {:<10} {:<9} REASON",
+        "ISER", "CONFIDENCE", "APPLIED"
     );
     println!("{}", "-".repeat(90));
     for r in recs {
@@ -113,10 +113,12 @@ fn path_contains(root: &Path, subdir: &str, pattern: &str) -> bool {
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| {
-            e.path().extension().map_or(false, |ext| {
+            e.path().extension().is_some_and(|ext| {
                 matches!(
                     ext.to_str(),
-                    Some("rs" | "ex" | "exs" | "res" | "ts" | "js" | "zig" | "idr" | "gleam" | "elm")
+                    Some(
+                        "rs" | "ex" | "exs" | "res" | "ts" | "js" | "zig" | "idr" | "gleam" | "elm"
+                    )
                 )
             })
         })
@@ -184,8 +186,7 @@ fn check_eclexiaiser(root: &Path, recs: &mut Vec<Recommendation>) {
         recs.push(Recommendation {
             iser: "eclexiaiser".into(),
             confidence: "high",
-            reason: "Containerfile found — eclexiaiser adds provenance and policy checking."
-                .into(),
+            reason: "Containerfile found — eclexiaiser adds provenance and policy checking.".into(),
             already_applied: is_applied(root, "eclexiaiser"),
         });
     }
@@ -231,7 +232,11 @@ fn check_wokelangiser(root: &Path, recs: &mut Vec<Recommendation>) {
         };
         recs.push(Recommendation {
             iser: "wokelangiser".into(),
-            confidence: if has_res && has_i18n { "high" } else { "medium" },
+            confidence: if has_res && has_i18n {
+                "high"
+            } else {
+                "medium"
+            },
             reason: reason.into(),
             already_applied: is_applied(root, "wokelangiser"),
         });
@@ -261,14 +266,18 @@ fn check_alloyiser(root: &Path, recs: &mut Vec<Recommendation>) {
         recs.push(Recommendation {
             iser: "alloyiser".into(),
             confidence: "high",
-            reason: "API schema files (OpenAPI/GraphQL/Protobuf) found — alloyiser adds model checking.".into(),
+            reason:
+                "API schema files (OpenAPI/GraphQL/Protobuf) found — alloyiser adds model checking."
+                    .into(),
             already_applied: is_applied(root, "alloyiser"),
         });
     } else if has_complex_invariants {
         recs.push(Recommendation {
             iser: "alloyiser".into(),
             confidence: "medium",
-            reason: "Complex invariants described in source comments — alloyiser can formalise them.".into(),
+            reason:
+                "Complex invariants described in source comments — alloyiser can formalise them."
+                    .into(),
             already_applied: is_applied(root, "alloyiser"),
         });
     }
@@ -298,14 +307,16 @@ fn check_tlaiser(root: &Path, recs: &mut Vec<Recommendation>) {
         recs.push(Recommendation {
             iser: "tlaiser".into(),
             confidence: "high",
-            reason: "State machine patterns + concurrent protocol code — tlaiser adds TLA⁺ specs.".into(),
+            reason: "State machine patterns + concurrent protocol code — tlaiser adds TLA⁺ specs."
+                .into(),
             already_applied: is_applied(root, "tlaiser"),
         });
     } else if has_state_enum {
         recs.push(Recommendation {
             iser: "tlaiser".into(),
             confidence: "medium",
-            reason: "State machine / FSM patterns found — tlaiser can specify temporal behaviour.".into(),
+            reason: "State machine / FSM patterns found — tlaiser can specify temporal behaviour."
+                .into(),
             already_applied: is_applied(root, "tlaiser"),
         });
     } else if has_concurrency {
@@ -342,7 +353,8 @@ fn check_idrisiser(root: &Path, recs: &mut Vec<Recommendation>) {
         recs.push(Recommendation {
             iser: "idrisiser".into(),
             confidence: "medium",
-            reason: "Public API functions found with no formal proof wrappers (no src/abi/).".into(),
+            reason: "Public API functions found with no formal proof wrappers (no src/abi/)."
+                .into(),
             already_applied: is_applied(root, "idrisiser"),
         });
     }
@@ -370,14 +382,16 @@ fn check_typedqliser(root: &Path, recs: &mut Vec<Recommendation>) {
         recs.push(Recommendation {
             iser: "typedqliser".into(),
             confidence: "high",
-            reason: "Raw SQL strings found in source — typedqliser adds compile-time type safety.".into(),
+            reason: "Raw SQL strings found in source — typedqliser adds compile-time type safety."
+                .into(),
             already_applied: is_applied(root, "typedqliser"),
         });
     } else if has_query_builder {
         recs.push(Recommendation {
             iser: "typedqliser".into(),
             confidence: "medium",
-            reason: "Query builder patterns found — typedqliser can strengthen type guarantees.".into(),
+            reason: "Query builder patterns found — typedqliser can strengthen type guarantees."
+                .into(),
             already_applied: is_applied(root, "typedqliser"),
         });
     }
@@ -410,7 +424,8 @@ fn check_chapeliser(root: &Path, recs: &mut Vec<Recommendation>) {
         recs.push(Recommendation {
             iser: "chapeliser".into(),
             confidence: "medium",
-            reason: "Concurrent task spawning found — chapeliser can add structured parallelism.".into(),
+            reason: "Concurrent task spawning found — chapeliser can add structured parallelism."
+                .into(),
             already_applied: is_applied(root, "chapeliser"),
         });
     }
@@ -507,7 +522,9 @@ fn check_otpiser(root: &Path, recs: &mut Vec<Recommendation>) {
         recs.push(Recommendation {
             iser: "otpiser".into(),
             confidence: "low",
-            reason: "Elixir project (mix.exs) found — otpiser can audit OTP patterns if they are added.".into(),
+            reason:
+                "Elixir project (mix.exs) found — otpiser can audit OTP patterns if they are added."
+                    .into(),
             already_applied: is_applied(root, "otpiser"),
         });
     }
@@ -566,14 +583,17 @@ fn check_dafniser(root: &Path, recs: &mut Vec<Recommendation>) {
         recs.push(Recommendation {
             iser: "dafniser".into(),
             confidence: "high",
-            reason: "Cryptographic algorithm code found — dafniser adds Dafny correctness proofs.".into(),
+            reason: "Cryptographic algorithm code found — dafniser adds Dafny correctness proofs."
+                .into(),
             already_applied: is_applied(root, "dafniser"),
         });
     } else if has_safety_critical {
         recs.push(Recommendation {
             iser: "dafniser".into(),
             confidence: "medium",
-            reason: "Safety-critical algorithm patterns found — dafniser can add formal verification.".into(),
+            reason:
+                "Safety-critical algorithm patterns found — dafniser can add formal verification."
+                    .into(),
             already_applied: is_applied(root, "dafniser"),
         });
     }
