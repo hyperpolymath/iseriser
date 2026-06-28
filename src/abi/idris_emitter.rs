@@ -198,11 +198,9 @@ fn find_data_keyword(src: &str) -> Option<usize> {
     let mut search_from = 0;
     while let Some(pos) = src[search_from..].find("data") {
         let abs = search_from + pos;
-        let before_ok = abs == 0
-            || matches!(bytes[abs - 1], b'\n' | b' ' | b'\t');
+        let before_ok = abs == 0 || matches!(bytes[abs - 1], b'\n' | b' ' | b'\t');
         let after = abs + 4;
-        let after_ok = after < bytes.len()
-            && matches!(bytes[after], b' ' | b'\t' | b'\n');
+        let after_ok = after < bytes.len() && matches!(bytes[after], b' ' | b'\t' | b'\n');
         if before_ok && after_ok {
             return Some(abs);
         }
@@ -292,10 +290,7 @@ fn skip_gadt_block(src: &str) -> usize {
     let header_end = match where_pos {
         Some(w) => {
             // Consume through the rest of that line.
-            src[w..]
-                .find('\n')
-                .map(|i| w + i + 1)
-                .unwrap_or(src.len())
+            src[w..].find('\n').map(|i| w + i + 1).unwrap_or(src.len())
         }
         None => {
             // No `where` — single-line `data Foo : ...`. Consume through eol.
@@ -372,10 +367,7 @@ fn parse_to_int_equations(src: &str) -> Result<BTreeMap<String, BTreeMap<String,
 /// Extract the head variant name from a pattern like `Empty`, `(Custom _)`,
 /// `Custom`. Returns `None` for `_` or empty / non-identifier patterns.
 fn extract_variant_from_pattern(pattern: &str) -> Option<String> {
-    let p = pattern
-        .trim_start_matches('(')
-        .trim_end_matches(')')
-        .trim();
+    let p = pattern.trim_start_matches('(').trim_end_matches(')').trim();
     let head_end = p.find(|c: char| !is_ident_char(c)).unwrap_or(p.len());
     if head_end == 0 {
         return None;

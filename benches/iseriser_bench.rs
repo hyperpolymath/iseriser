@@ -21,8 +21,9 @@
 // Run with:
 //   cargo bench --bench iseriser_bench
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 use iseriser::manifest::{parse_manifest, validate};
+use std::hint::black_box;
 
 // ---------------------------------------------------------------------------
 // Manifest TOML fixtures
@@ -100,8 +101,8 @@ description = "Gleam interop -iser targeting the BEAM runtime"
 fn bench_parse_minimal(c: &mut Criterion) {
     c.bench_function("parse_manifest/minimal", |b| {
         b.iter(|| {
-            let m = parse_manifest(black_box(MINIMAL_MANIFEST))
-                .expect("minimal manifest must parse");
+            let m =
+                parse_manifest(black_box(MINIMAL_MANIFEST)).expect("minimal manifest must parse");
             black_box(m);
         });
     });
@@ -111,8 +112,7 @@ fn bench_parse_minimal(c: &mut Criterion) {
 fn bench_parse_rich(c: &mut Criterion) {
     c.bench_function("parse_manifest/rich_20_primitives", |b| {
         b.iter(|| {
-            let m = parse_manifest(black_box(RICH_MANIFEST))
-                .expect("rich manifest must parse");
+            let m = parse_manifest(black_box(RICH_MANIFEST)).expect("rich manifest must parse");
             black_box(m);
         });
     });
@@ -122,8 +122,7 @@ fn bench_parse_rich(c: &mut Criterion) {
 fn bench_parse_gleam(c: &mut Criterion) {
     c.bench_function("parse_manifest/gleam_beam_target", |b| {
         b.iter(|| {
-            let m = parse_manifest(black_box(GLEAM_MANIFEST))
-                .expect("gleam manifest must parse");
+            let m = parse_manifest(black_box(GLEAM_MANIFEST)).expect("gleam manifest must parse");
             black_box(m);
         });
     });
@@ -139,7 +138,8 @@ fn bench_validate_valid(c: &mut Criterion) {
     c.bench_function("validate/valid_manifest", |b| {
         b.iter(|| {
             let result = validate(black_box(&manifest));
-            black_box(result.expect("valid manifest must pass validation"));
+            result.expect("valid manifest must pass validation");
+            black_box(());
         });
     });
 }
@@ -150,7 +150,8 @@ fn bench_validate_rich(c: &mut Criterion) {
     c.bench_function("validate/rich_20_primitives", |b| {
         b.iter(|| {
             let result = validate(black_box(&manifest));
-            black_box(result.expect("rich manifest must pass validation"));
+            result.expect("rich manifest must pass validation");
+            black_box(());
         });
     });
 }
@@ -200,8 +201,7 @@ fn bench_scan_repo(c: &mut Criterion) {
 
     c.bench_function("scan_repo/iseriser_root", |b| {
         b.iter(|| {
-            let recs = iseriser::scan::scan_repo(black_box(&repo_root))
-                .expect("scan must succeed");
+            let recs = iseriser::scan::scan_repo(black_box(&repo_root)).expect("scan must succeed");
             black_box(recs);
         });
     });
@@ -218,11 +218,7 @@ criterion_group!(
     bench_parse_gleam,
 );
 
-criterion_group!(
-    validate_benches,
-    bench_validate_valid,
-    bench_validate_rich,
-);
+criterion_group!(validate_benches, bench_validate_valid, bench_validate_rich,);
 
 criterion_group!(
     abi_benches,

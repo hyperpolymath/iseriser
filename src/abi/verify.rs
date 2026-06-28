@@ -279,18 +279,43 @@ mod tests {
             enums: vec![EnumDecl {
                 name: "S".into(),
                 variants: vec![
-                    EnumVariant { name: "Empty".into(), value: 0 },
-                    EnumVariant { name: "Ready".into(), value: 1 },
-                    EnumVariant { name: "Done".into(), value: 2 },
+                    EnumVariant {
+                        name: "Empty".into(),
+                        value: 0,
+                    },
+                    EnumVariant {
+                        name: "Ready".into(),
+                        value: 1,
+                    },
+                    EnumVariant {
+                        name: "Done".into(),
+                        value: 2,
+                    },
                 ],
             }],
             transition_table: Some(TransitionTable {
                 state_enum: "S".into(),
                 rows: vec![
-                    TransitionRow { from: "Empty".into(), to: "Ready".into(), allowed: true },
-                    TransitionRow { from: "Ready".into(), to: "Done".into(), allowed: true },
-                    TransitionRow { from: "Done".into(), to: "Empty".into(), allowed: true },
-                    TransitionRow { from: "Empty".into(), to: "Done".into(), allowed: false },
+                    TransitionRow {
+                        from: "Empty".into(),
+                        to: "Ready".into(),
+                        allowed: true,
+                    },
+                    TransitionRow {
+                        from: "Ready".into(),
+                        to: "Done".into(),
+                        allowed: true,
+                    },
+                    TransitionRow {
+                        from: "Done".into(),
+                        to: "Empty".into(),
+                        allowed: true,
+                    },
+                    TransitionRow {
+                        from: "Empty".into(),
+                        to: "Done".into(),
+                        allowed: false,
+                    },
                 ],
             }),
         }
@@ -331,8 +356,18 @@ mod tests {
             }
         "#;
         let z = parse_zig(src).unwrap();
-        let report = verify(&make_manifest(), &z, Path::new("m.json"), Path::new("z.zig"));
-        assert!(report.findings.iter().any(|f| f.kind == "variant-value-mismatch"));
+        let report = verify(
+            &make_manifest(),
+            &z,
+            Path::new("m.json"),
+            Path::new("z.zig"),
+        );
+        assert!(
+            report
+                .findings
+                .iter()
+                .any(|f| f.kind == "variant-value-mismatch")
+        );
     }
 
     #[test]
@@ -348,9 +383,17 @@ mod tests {
             }
         "#;
         let z = parse_zig(src).unwrap();
-        let report = verify(&make_manifest(), &z, Path::new("m.json"), Path::new("z.zig"));
+        let report = verify(
+            &make_manifest(),
+            &z,
+            Path::new("m.json"),
+            Path::new("z.zig"),
+        );
         assert!(
-            report.findings.iter().any(|f| f.kind == "transition-forbidden-but-accepted"),
+            report
+                .findings
+                .iter()
+                .any(|f| f.kind == "transition-forbidden-but-accepted"),
             "{:#?}",
             report.findings
         );
@@ -369,9 +412,17 @@ mod tests {
             }
         "#;
         let z = parse_zig(src).unwrap();
-        let report = verify(&make_manifest(), &z, Path::new("m.json"), Path::new("z.zig"));
+        let report = verify(
+            &make_manifest(),
+            &z,
+            Path::new("m.json"),
+            Path::new("z.zig"),
+        );
         assert!(
-            report.findings.iter().any(|f| f.kind == "transition-accepted-but-undeclared"),
+            report
+                .findings
+                .iter()
+                .any(|f| f.kind == "transition-accepted-but-undeclared"),
             "{:#?}",
             report.findings
         );
