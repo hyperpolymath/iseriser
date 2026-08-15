@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — A2mliser project state
+[metadata]
+project = "a2mliser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "A2mliser"
+purpose = """Cryptographic attestation engine for markup and configuration files via A2ML envelopes"""
+completion-percentage = 10
+
+[position]
+phase = "scaffold-documented"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Scaffold only — implementation not yet started",
+]
+
+[critical-next-actions]
+actions = [
+  "Begin Phase 1 — implement CLI skeleton and manifest parser",
+  "Define A2ML envelope format for attestation",
+  "Evaluate Ed25519 crate options for Rust implementation",
+]
+
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

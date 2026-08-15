@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MPL-2.0
+# Intendfile — Design intent declarations for a2mliser
+# Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+@abstract:
+What a2mliser INTENDS to become. These are bespoke design goals
+specific to the Cryptographic attestation for markup files domain.
+@end
+
+## Domain-Specific Intent
+
+### supply-chain-attestation\n- description: Enable SLSA-style supply chain attestation for config files\n- target: In-toto compatible attestation bundles\n- status: aspiration\n\n### a2ml-spec-conformance\n- description: Full A2ML specification compliance (IANA submission)\n- target: Reference implementation status\n- status: aspiration
+
+## Cross-Cutting Intent
+
+### iser-ecosystem-compatibility
+- description: Must interoperate with other -iser projects via shared ABI
+- target: Idris2 ABI + Zig FFI standard interface
+- status: in-progress
+
+### proven-integration
+- description: All formal proofs should be verifiable by the proven framework
+- target: Integration with hyperpolymath/proven
+- status: aspiration

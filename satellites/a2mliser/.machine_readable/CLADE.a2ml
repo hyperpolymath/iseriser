@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: MPL-2.0
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "0dc080c3-7623-525d-9d3c-4986b816b6e2"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "a2mliser"
+prefixed-name = "rm-a2mliser"
+
+[clade]
+primary = "rm"
+secondary = ["gv"]
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/a2mliser"
+gitlab = "hyperpolymath/a2mliser"
+bitbucket = "hyperpolymath/a2mliser"
+
+[lineage]
+type = "standalone"
+parent = "RSR template — scaffold for new repos"
+born = "2026-03-16"
+
+# Lifecycle status (added by clade-status-backfill; see gv-clade-index ADR 0006).
+# Identity (uuid) and status are SEPARATE layers: uuid is immortal; phase is a
+# mutable pointer. No phase is terminal (extinct -> active is a legal "Gitassic
+# Park" transition on the same uuid). A rename is NOT a phase change — the old
+# prefixed-name goes to aliases[], uuid and phase are untouched.
+[status]
+# One of: reserved incubating active dormant | merged superseded archived extinct
+phase = "active"
+since = "2026-03-16"
+present = true
+aliases = []
+merged-into = ""
+superseded-by = ""
+successors = []
+ended = ""
+
+[[status.history]]
+phase = "active"
+since = "2026-03-16"
+note = "backfilled default — correct if the true phase differs"
