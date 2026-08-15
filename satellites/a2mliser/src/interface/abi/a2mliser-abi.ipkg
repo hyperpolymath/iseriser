@@ -1,0 +1,4 @@
+-- SPDX-License-Identifier: MPL-2.0
+package a2mliser-abi
+sourcedir = "."
+modules = A2mliser.ABI.Types, A2mliser.ABI.Layout, A2mliser.ABI.Foreign, A2mliser.ABI.Proofs, A2mliser.ABI.Semantics, A2mliser.ABI.Invariants, A2mliser.ABI.FfiSeam, A2mliser.ABI.Capstone

@@ -1,0 +1,92 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= a2mliser Roadmap
+:toc: left
+:icons: font
+
+== Phase 0: Scaffold [COMPLETE]
+
+* [x] RSR template with 17 CI/CD workflows
+* [x] Rust CLI with `init`, `validate`, `generate`, `build`, `run`, `info` subcommands
+* [x] Manifest parser (`a2mliser.toml` — TOML-based workload description)
+* [x] Codegen module stubs
+* [x] ABI module stubs (Rust side)
+* [x] Idris2 ABI type definitions (Types.idr, Layout.idr, Foreign.idr) — template placeholders
+* [x] Zig FFI scaffold (build.zig, main.zig, integration tests)
+* [x] README with architecture overview
+* [x] Machine-readable state files (STATE.a2ml, META.a2ml, ECOSYSTEM.a2ml)
+* [x] Contractile system (K9, Must, Trust, Dust, Lust)
+* [x] Bot directives for gitbot-fleet
+
+== Phase 1: Core Attestation Engine
+
+The minimum viable attestation pipeline: hash a file, sign the hash, embed
+the signature in an A2ML envelope.
+
+* [ ] Implement SHA-256 and BLAKE3 digest computation in Zig FFI
+* [ ] Implement Ed25519 signing and verification in Zig FFI
+* [ ] Define `AttestationEnvelope` structure (hash algorithm, signature bytes,
+      signer identity, timestamp, target file path, target file digest)
+* [ ] Wire Rust CLI `generate` command to call Zig FFI via C headers
+* [ ] Produce `.a2ml` sidecar files containing the attestation envelope
+* [ ] Implement `validate` command: read `.a2ml` envelope, recompute digest,
+      verify signature
+* [ ] First end-to-end test: attest a TOML file, verify the attestation
+* [ ] Replace Idris2 ABI template placeholders with attestation-specific types
+
+== Phase 2: Format Handlers
+
+Structure-aware parsing so that attestation can target individual sections
+of a document rather than treating it as an opaque blob.
+
+* [ ] TOML handler: parse into tables, attest individual `[section]` blocks
+* [ ] YAML handler: parse documents, resolve anchors/aliases before signing
+* [ ] JSON handler: object-level and array-level attestation
+* [ ] XML handler: element-level signing with XPath selectors
+* [ ] INI handler: section-level attestation, comment preservation
+* [ ] Granularity control in `a2mliser.toml`: `document`, `section`, `field`
+* [ ] Envelope embedding modes: sidecar (`.a2ml` file) vs inline (comments)
+* [ ] Schema co-attestation: sign both the data and its expected schema
+
+== Phase 3: Provenance Chains
+
+Chain-of-custody tracking — an attestation can reference a previous
+attestation, forming a directed acyclic graph of trust.
+
+* [ ] `ProvenanceChain` data structure: ordered list of attestation records
+* [ ] Parent reference: each envelope can cite the hash of its predecessor
+* [ ] Timestamp authority integration (RFC 3161 or custom TSA)
+* [ ] Chain validation: verify the full chain from leaf to root
+* [ ] Merge detection: identify when two chains diverge and re-converge
+* [ ] Export: provenance chain as Graphviz DOT for visualisation
+* [ ] Key rotation: support multiple signing keys with validity periods
+
+== Phase 4: Idris2 Formal Proofs
+
+Replace the template ABI with attestation-specific formal verification.
+
+* [ ] `SignatureAlgorithm` type with exhaustive case coverage
+* [ ] Proof: `sign(key, data) |> verify(pubkey, data)` always succeeds for
+      matching key pairs
+* [ ] Proof: provenance chains form a valid DAG (no cycles)
+* [ ] Proof: attestation envelopes are non-repudiable (signature binds signer
+      identity to content)
+* [ ] Proof: hash collision resistance properties (type-level bounds)
+* [ ] Memory layout proofs for all FFI-crossing structs
+* [ ] Platform-specific ABI compliance verification (Linux, macOS, Windows, WASM)
+
+== Phase 5: Ecosystem Integration
+
+Packaging, distribution, and integration with the broader hyperpolymath
+toolchain.
+
+* [ ] BoJ-server cartridge: expose a2mliser as an MCP tool
+* [ ] PanLL panel: visual attestation status dashboard
+* [ ] CI/CD action: GitHub Action that runs `a2mliser validate` on PRs
+* [ ] VeriSimDB storage: persist attestation records in octad database
+* [ ] k9iser bridge: attest files after K9 contract validation passes
+* [ ] typedqliser bridge: attest generated query wrappers
+* [ ] Plugin system: trait-based handler interface for custom formats
+* [ ] crates.io publication
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] Performance benchmarks and optimisation pass

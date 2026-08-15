@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: MPL-2.0
+# eclexiaiser manifest for a2mliser
+
+[project]
+name = "a2mliser"
+
+[[functions]]
+name = "main"
+source = "src/lib.rs"
+energy-budget-mj = 20.0
+
+[carbon]
+provider = "static"
+region = "GB"
+static-intensity = 200.0
+
+[report]
+format = "text"
+include-recommendations = true
