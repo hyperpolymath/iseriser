@@ -3,7 +3,8 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 SPDX-FileCopyrightText: 2025-2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
 
-[![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSE) [![Docs: CC-BY-SA-4.0](https://img.shields.io/badge/docs-CC--BY--SA--4.0-blue)](LICENSES/CC-BY-SA-4.0.txt) ![29
+[![License: MPL-2.0](https://img.shields.io/badge/license-PMPL--1.0--or--later-blue)](LICENSE) ![Palimpsest
+Covenant](https://img.shields.io/badge/Palimpsest-Covenant-purple) ![29
 repos](https://img.shields.io/badge/-iser_family-29_repos-brightgreen)
 ![Idris2 ABI](https://img.shields.io/badge/ABI-Idris2-red) ![Zig
 FFI](https://img.shields.io/badge/FFI-Zig-orange)
@@ -302,7 +303,9 @@ Hypatia neurosymbolic scanning.
 
 # License
 
-Code is licensed under `MPL-2.0`; documentation under `CC-BY-SA-4.0`.
-Full licence texts are in [`LICENSES/`](LICENSES/).
+SPDX-License-Identifier: `MPL-2.0`
 
 Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
+
+Licensed under the [Palimpsest
+License](https://github.com/hyperpolymath/palimpsest-license).
