@@ -1,10 +1,8 @@
-<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
-<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) -->
-# a2mliser — Repository Topology
+== a2mliser — Repository Topology
 
 Map of every directory and its purpose.
 
-```
+....
 a2mliser/
 ├── 0-AI-MANIFEST.a2ml              # AI agent entry point — read first
 ├── README.adoc                     # High-level orientation
@@ -129,20 +127,24 @@ a2mliser/
 │       └── verification/           # Verification scripts
 │
 └── .well-known/                    # .well-known metadata (security.txt, etc.)
-```
+....
 
-## Key Relationships
+=== Key Relationships
 
-- `src/interface/abi/*.idr` **defines** the formal specification (Idris2)
-- `src/interface/ffi/src/main.zig` **implements** the specification (Zig)
-- `src/interface/generated/abi/` **bridges** them via C headers
-- `src/manifest/mod.rs` **reads** user intent from `a2mliser.toml`
-- `src/codegen/mod.rs` **produces** A2ML attestation envelopes
-- `src/main.rs` **orchestrates** the pipeline via CLI subcommands
+* `+src/interface/abi/*.idr+` *defines* the formal specification
+(Idris2)
+* `+src/interface/ffi/src/main.zig+` *implements* the specification
+(Zig)
+* `+src/interface/generated/abi/+` *bridges* them via C headers
+* `+src/manifest/mod.rs+` *reads* user intent from `+a2mliser.toml+`
+* `+src/codegen/mod.rs+` *produces* A2ML attestation envelopes
+* `+src/main.rs+` *orchestrates* the pipeline via CLI subcommands
 
-## Invariants
+=== Invariants
 
-1. Machine-readable files live in `.machine_readable/` ONLY — never in root
-2. Idris2 ABI is the specification; Zig FFI is the implementation
-3. Generated C headers go in `src/interface/generated/abi/`
-4. All workflows are SHA-pinned, all code is MPL-2.0
+[arabic]
+. Machine-readable files live in `+.machine_readable/+` ONLY — never in
+root
+. Idris2 ABI is the specification; Zig FFI is the implementation
+. Generated C headers go in `+src/interface/generated/abi/+`
+. All workflows are SHA-pinned, all code is MPL-2.0
