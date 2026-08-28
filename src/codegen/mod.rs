@@ -93,9 +93,10 @@ pub fn generate_repo_only(manifest: &Manifest, output_dir: &str) -> Result<Scaff
             );
         }
         _ => {
-            if let Some(msg) = result.error_message() {
-                eprintln!("error: {}", msg);
-            }
+            anyhow::bail!(
+                "{}",
+                result.error_message().unwrap_or("unknown error")
+            );
         }
     }
 
@@ -131,9 +132,10 @@ pub fn generate_cartridge(
             );
         }
         _ => {
-            if let Some(msg) = result.error_message() {
-                eprintln!("error: {}", msg);
-            }
+            anyhow::bail!(
+                "{}",
+                result.error_message().unwrap_or("unknown error")
+            );
         }
     }
 

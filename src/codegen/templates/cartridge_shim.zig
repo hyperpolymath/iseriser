@@ -12,7 +12,7 @@
 // Cartridges import this file by relative path (no build-graph change
 // needed). Example:
 //
-//   const shim = @import("../../../ffi/zig/src/cartridge_shim.zig");
+//   const shim = @import("ffi/cartridge_shim.zig");
 //
 //   export fn boj_cartridge_invoke(
 //       tool_name: [*c]const u8,
@@ -114,7 +114,7 @@ var shared_io_state: std.atomic.Value(u8) = .init(0); // 0=uninit 1=initing 2=re
 pub fn io() std.Io {
     if (shared_io_state.load(.acquire) != 2) {
         if (shared_io_state.cmpxchgStrong(0, 1, .acq_rel, .acquire) == null) {
-            shared_threaded = std.Io.Threaded.init(std.heap.smp_allocator, .{});
+            shared_threaded = std.Io.Threaded.init(std.heap.smp_allocator);
             shared_io_state.store(2, .release);
         } else {
             while (shared_io_state.load(.acquire) != 2) std.Thread.yield() catch {};
@@ -145,7 +145,7 @@ pub const Mutex = struct {
 /// Nanoseconds since the POSIX epoch (drop-in for the removed
 /// `std.time.nanoTimestamp`).
 pub fn nanoTimestamp() i128 {
-    const ts = std.Io.Clock.Timestamp.now(io(), .real);
+    const ts = std.Io.Clock.Timestamp.now(io(), .real) catch return 0;
     return @intCast(ts.raw.nanoseconds);
 }
 
