@@ -20,14 +20,58 @@ use std::path::Path;
 use crate::abi::ScaffoldResult;
 use crate::manifest::Manifest;
 
-/// Validate, scaffold, and write a complete -iser repository.
+/// Validate, scaffold, and write a complete -iser repository *and* its
+/// boj-server cartridge.
 ///
 /// This is the main entry point for the generation pipeline:
 ///   1. Deep-validate the language description (parser)
 ///   2. Generate the full file set (scaffold)
 ///   3. Apply language-specific customizations (customizer — called by scaffold)
 ///   4. Write everything to disk (scaffold)
+///   5. Scaffold the `<iser>-mcp` cartridge alongside it (cartridge)
+///
+/// Step 5 is what makes the unified transaction-gated adapter and its SSE
+/// surface arrive *by construction* for every new -iser, which is what
+/// hyperpolymath/standards#90 asks for.  The cartridge is written as a
+/// **sibling** of the repo, at `<output_dir>/<iser>-mcp/`, never inside it:
+/// the adapter belongs in the `hyperpolymath/boj-server-cartridges` registry,
+/// and emitting it into the -iser repo produced a non-building stub that
+/// PR #23 had to revert.
+///
+/// Use [`generate_repo_only`] when the cartridge is not wanted.
 pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<ScaffoldResult> {
+    let result = generate_repo_only(manifest, output_dir)?;
+
+    // Only pair a cartridge with a repo that was actually written. The
+    // manifest is already validated above, so scaffold directly rather than
+    // going through `generate_cartridge` and re-emitting the same warnings.
+    if result.is_success() {
+        let cartridge = cartridge::scaffold_cartridge(manifest, Path::new(output_dir));
+        match &cartridge {
+            cartridge::CartridgeScaffoldResult::Success(c) => println!(
+                "Generated cartridge {} ({} files) at {}",
+                c.name,
+                c.file_count(),
+                c.root.display()
+            ),
+            _ => anyhow::bail!(
+                "cartridge scaffolding failed: {}",
+                cartridge.error_message().unwrap_or("unknown error")
+            ),
+        }
+        println!(
+            "Cartridge home: the hyperpolymath/boj-server-cartridges registry, \
+             at cartridges/domains/<domain>/ — pick the domain directory and set \
+             cartridge.json's \"domain\" field to match."
+        );
+    }
+
+    Ok(result)
+}
+
+/// Validate, scaffold, and write the -iser repository only, without its
+/// boj-server cartridge.
+pub fn generate_repo_only(manifest: &Manifest, output_dir: &str) -> Result<ScaffoldResult> {
     // Step 1: Deep validation
     let report = parser::validate_or_bail(manifest)?;
 
@@ -49,9 +93,10 @@ pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<ScaffoldRes
             );
         }
         _ => {
-            if let Some(msg) = result.error_message() {
-                eprintln!("error: {}", msg);
-            }
+            anyhow::bail!(
+                "{}",
+                result.error_message().unwrap_or("unknown error")
+            );
         }
     }
 
@@ -61,8 +106,9 @@ pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<ScaffoldRes
 /// Validate the manifest then scaffold a boj-server cartridge skeleton.
 ///
 /// Output goes to `<output_dir>/<iser_name>-mcp/`.  Meant to be placed
-/// inside `boj-server/cartridges/`; the emitted Zig build files reference
-/// the shared invoke-shim via `../../../ffi/zig/src/cartridge_shim.zig`.
+/// in the `hyperpolymath/boj-server-cartridges` registry, at
+/// `cartridges/domains/<domain>/`; the cartridge vendors the ADR-0006
+/// invoke-shim at `ffi/cartridge_shim.zig` and so builds wherever it sits.
 ///
 /// See `cartridge` module docs and standards#89 Phase 2b for context.
 pub fn generate_cartridge(
@@ -86,9 +132,10 @@ pub fn generate_cartridge(
             );
         }
         _ => {
-            if let Some(msg) = result.error_message() {
-                eprintln!("error: {}", msg);
-            }
+            anyhow::bail!(
+                "{}",
+                result.error_message().unwrap_or("unknown error")
+            );
         }
     }
 

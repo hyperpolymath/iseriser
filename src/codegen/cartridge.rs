@@ -7,10 +7,21 @@
 //
 // Output topology: <output_dir>/<iser_name>-mcp/
 //
-// The output is meant to be placed inside `boj-server/cartridges/`; the
-// emitted ffi/build.zig references the shared ADR-0006 invoke-shim via
-// `../../../ffi/zig/src/cartridge_shim.zig`, which only resolves when the
-// cartridge sits at `boj-server/cartridges/<name>-mcp/`.
+// The output belongs in the canonical registry,
+// `hyperpolymath/boj-server-cartridges`, at
+// `cartridges/domains/<domain>/<name>-mcp/`.  The emitted `cartridge.json`
+// declares `"category": "domain"` (schema v1's three-way taxonomy: domain,
+// cross-cutting, template) but leaves `"domain"` as a placeholder: which
+// functional domain an -iser belongs to is not derivable from its manifest,
+// so the operator picks the directory and matches the field to it.
+//
+// boj-server's own in-tree `cartridges/` bundle has been retired (see its
+// `BojRest.Application` doc comment): hosts fetch cartridges on demand into a
+// flat cache and point `BOJ_CARTRIDGES_PATH` at it.
+//
+// The cartridge is therefore location-independent: it vendors the ADR-0006
+// invoke-shim at `ffi/cartridge_shim.zig`, as every cartridge in the registry
+// does, rather than reaching up into a host tree.
 //
 // Tracks hyperpolymath/standards#89 Phase 2b.
 
@@ -126,6 +137,7 @@ pub fn scaffold_cartridge(manifest: &Manifest, output_dir: &Path) -> CartridgeSc
     files.push(generate_ffi_readme(&ctx));
     files.push(generate_ffi_build_zig(&ctx));
     files.push(generate_ffi_zig(&ctx));
+    files.push(generate_cartridge_shim());
 
     // Unified gated adapter
     files.push(generate_adapter_readme(&ctx));
@@ -217,21 +229,34 @@ A boj-server cartridge skeleton for __LANG_NAME__, scaffolded by iseriser
 
 [source]
 ----
-boj-server/cartridges/__CARTRIDGE_NAME__/
+__CARTRIDGE_NAME__/
 ├── cartridge.json          — registration manifest (boj.dev schema v1)
 ├── mod.js                  — Deno module entry (JS-worker fallback path)
 ├── README.adoc             — this file
 ├── panels/manifest.json    — observability panel registration
 ├── abi/                    — Idris2 ABI (source of truth)
 ├── ffi/                    — Zig FFI implementing ADR-0006 5-symbol interface
+│   └── cartridge_shim.zig  — vendored ADR-0006 invoke-shim
 └── adapter/                — Unified transaction-gated adapter (loopback)
 ----
 
 == Build
 
-The cartridge presumes it lives inside `boj-server/cartridges/`; the
-`ffi/build.zig` and `adapter/build.zig` reference the shared invoke-shim
-at `boj-server/ffi/zig/src/cartridge_shim.zig` via `../../../`.
+The cartridge builds from wherever it sits: the ADR-0006 invoke-shim is
+vendored at `ffi/cartridge_shim.zig`, so nothing reaches outside the
+cartridge directory.
+
+== Placement
+
+Its home is the canonical registry, `hyperpolymath/boj-server-cartridges`,
+at `cartridges/domains/<domain>/__CARTRIDGE_NAME__/`.
+
+`cartridge.json` ships `"category": "domain"`, which is fixed, and
+`"domain": "scaffold"`, which is *not*: pick the functional domain from the
+registry's existing directories and set the field to match.  iseriser does
+not guess it, because the manifest does not say which domain an -iser
+serves.  A host loads cartridges from a flat on-disk cache — populate one
+with the registry's fetch script and point `BOJ_CARTRIDGES_PATH` at it.
 
 [source,shell]
 ----
@@ -253,7 +278,7 @@ gate is filled in (mirrors the Idris2 contract) and ready for production.
   internal/loopback, never public)
 - ADR-0006 — five-symbol cartridge C ABI
   (`boj_cartridge_init`/`deinit`/`name`/`version`/`invoke`)
-- Pilot: `boj-server/cartridges/k9iser-mcp/`
+- Pilot: `boj-server-cartridges` → `cartridges/domains/config/k9iser-mcp/`
 - Tracking: hyperpolymath/standards#89, #90, #91
 "#,
     );
@@ -273,6 +298,7 @@ fn generate_cartridge_json(ctx: &TemplateCtx) -> GeneratedFile {
   "version": "0.1.0",
   "description": "__LANG_NAME__ -iser cartridge skeleton — regeneration pipeline (scaffold)",
   "domain": "scaffold",
+  "category": "domain",
   "tier": "Ayo",
   "protocols": [
     "MCP",
@@ -597,15 +623,34 @@ zig build test     # run tests
 zig build lib      # produce shared library (zig-out/lib/lib__LIB_NAME__.so)
 ----
 
-The build references the shared invoke-shim at
-`../../../ffi/zig/src/cartridge_shim.zig`; the cartridge MUST live under
-`boj-server/cartridges/__CARTRIDGE_NAME__/` for that relative path to
-resolve.
+The build references the ADR-0006 invoke-shim vendored beside it at
+`cartridge_shim.zig` — byte-identical to the copy every cartridge in
+`hyperpolymath/boj-server-cartridges` carries — so the cartridge builds
+wherever the registry places it.
 "#,
     );
     GeneratedFile {
         path: PathBuf::from("ffi/README.adoc"),
         content,
+    }
+}
+
+/// The ADR-0006 invoke-shim, byte-identical to the copy every cartridge in
+/// `hyperpolymath/boj-server-cartridges` vendors (all 118 copies on that
+/// registry, and boj-server's own `ffi/zig/src/cartridge_shim.zig`, share one
+/// hash). It is embedded rather than fetched so generation stays offline.
+///
+/// Vendoring is what makes a cartridge build wherever the registry places it,
+/// and it is also acknowledged estate debt: one more copy to keep in step if
+/// the shim ever changes. Kept byte-identical on purpose — a divergent copy
+/// would be worse than a duplicated one.
+const CARTRIDGE_SHIM_ZIG: &str = include_str!("templates/cartridge_shim.zig");
+
+/// Emit `ffi/cartridge_shim.zig`, the vendored ADR-0006 invoke-shim.
+fn generate_cartridge_shim() -> GeneratedFile {
+    GeneratedFile {
+        path: PathBuf::from("ffi/cartridge_shim.zig"),
+        content: CARTRIDGE_SHIM_ZIG.to_string(),
     }
 }
 
@@ -622,9 +667,10 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    // Shared ADR-0006 invoke-shim module (relative path up to boj-server trunk).
+    // ADR-0006 invoke-shim, vendored beside this build file. The registry
+    // ships one copy per cartridge so a cartridge builds wherever it sits.
     const shim_mod = b.addModule("cartridge_shim", .{
-        .root_source_file = b.path("../../../ffi/zig/src/cartridge_shim.zig"),
+        .root_source_file = b.path("cartridge_shim.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -823,8 +869,10 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // The shim is vendored in the sibling ffi/ directory, not fetched from a
+    // host tree: the cartridge must build wherever the registry places it.
     const shim_mod = b.addModule("cartridge_shim", .{
-        .root_source_file = b.path("../../../ffi/zig/src/cartridge_shim.zig"),
+        .root_source_file = b.path("../ffi/cartridge_shim.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -1213,11 +1261,11 @@ description = "Chapel distributed computing -iser"
         let tmp = tempfile::tempdir().unwrap();
         let result = scaffold_cartridge(&manifest, tmp.path());
         let repo = result.repo().unwrap();
-        // 13 files: README + cartridge.json + mod.js + panels/manifest.json
+        // 14 files: README + cartridge.json + mod.js + panels/manifest.json
         //   + abi/(README + ipkg + SafeXxx.idr)
-        //   + ffi/(README + build.zig + xxx_ffi.zig)
+        //   + ffi/(README + build.zig + xxx_ffi.zig + cartridge_shim.zig)
         //   + adapter/(README + build.zig + xxx_adapter.zig)
-        assert_eq!(repo.file_count(), 13, "expected 13 files");
+        assert_eq!(repo.file_count(), 14, "expected 14 files");
     }
 
     #[test]
@@ -1238,6 +1286,7 @@ description = "Chapel distributed computing -iser"
         assert!(root.join("ffi/README.adoc").exists());
         assert!(root.join("ffi/build.zig").exists());
         assert!(root.join("ffi/chapeliser_ffi.zig").exists());
+        assert!(root.join("ffi/cartridge_shim.zig").exists());
         assert!(root.join("adapter/README.adoc").exists());
         assert!(root.join("adapter/build.zig").exists());
         assert!(root.join("adapter/chapeliser_adapter.zig").exists());
@@ -1307,5 +1356,126 @@ description = "Chapel distributed computing -iser"
         assert_eq!(idris2_module_name("chapeliser"), "Chapeliser");
         assert_eq!(idris2_module_name("bqniser"), "Bqniser");
         assert_eq!(idris2_module_name("k9iser"), "K9iser");
+    }
+
+    /// The cartridge must build wherever the registry places it. That means
+    /// the ADR-0006 invoke-shim is vendored beside the FFI, byte-identical to
+    /// every copy in `hyperpolymath/boj-server-cartridges`, and nothing
+    /// reaches up into a host tree — the `boj-server/cartridges/` bundle the
+    /// old `../../../ffi/zig/src/` path assumed has been retired.
+    #[test]
+    fn test_cartridge_is_location_independent() {
+        let manifest = test_manifest();
+        let tmp = tempfile::tempdir().unwrap();
+        let result = scaffold_cartridge(&manifest, tmp.path());
+        let repo = result.repo().unwrap();
+
+        let shim =
+            std::fs::read_to_string(tmp.path().join("chapeliser-mcp/ffi/cartridge_shim.zig"))
+                .expect("cartridge does not vendor the invoke-shim");
+        assert_eq!(
+            shim, CARTRIDGE_SHIM_ZIG,
+            "vendored shim has drifted from the registry copy"
+        );
+
+        // `ffi/cartridge_shim.zig` is exempt from the scan below, and only that
+        // one file. Its canon header comment shows the retired path as a usage
+        // example, so byte-identity with the registry copy and a ban on the
+        // string are mutually unsatisfiable. The `assert_eq!` above is this
+        // file's guard, and a stricter one: the scan would allow any edit that
+        // avoids the string, whereas byte-identity allows no edit at all.
+        for file in &repo.files {
+            if file.path == Path::new("ffi/cartridge_shim.zig") {
+                continue;
+            }
+            assert!(
+                !file.content.contains("../../../ffi/zig/src"),
+                "{} still reaches into the retired boj-server cartridges bundle",
+                file.path.display()
+            );
+        }
+    }
+
+    /// boj-server's catalog schema-validates every `cartridge.json` on boot
+    /// and drops the ones that fail, so a cartridge missing a required
+    /// property never loads at all. These are the required properties of
+    /// cartridge schema v1 — `hyperpolymath/standards` @ `f5f0506`, mirrored
+    /// in `boj-server-cartridges/schemas/cartridge-v1.json` — plus the two
+    /// closed enums a wrong value would fall foul of.
+    #[test]
+    fn test_cartridge_json_satisfies_schema_v1_required_properties() {
+        let manifest = test_manifest();
+        let tmp = tempfile::tempdir().unwrap();
+        assert!(scaffold_cartridge(&manifest, tmp.path()).is_success());
+
+        let raw =
+            std::fs::read_to_string(tmp.path().join("chapeliser-mcp/cartridge.json")).unwrap();
+        let json: serde_json::Value =
+            serde_json::from_str(&raw).expect("cartridge.json is not JSON");
+
+        for key in [
+            "$schema",
+            "spdx",
+            "copyright",
+            "name",
+            "version",
+            "description",
+            "domain",
+            "category",
+            "tier",
+            "protocols",
+            "auth",
+            "api",
+            "tools",
+        ] {
+            assert!(
+                json.get(key).is_some(),
+                "cartridge.json omits required property {key:?}; the catalog would reject it"
+            );
+        }
+
+        // `category` is schema v1's three-way taxonomy, not the domain string.
+        assert_eq!(json["category"], "domain");
+        // `tier` is a closed enum; Ayo is the community-contributed tier.
+        assert_eq!(json["tier"], "Ayo");
+    }
+
+    /// End-to-end: a freshly scaffolded cartridge's Zig FFI and unified gated
+    /// adapter must both compile and pass their own tests, from wherever the
+    /// cartridge was written. No-op (passes) where `zig` is not installed, so
+    /// CI without the toolchain stays green.
+    #[test]
+    fn test_scaffolded_cartridge_builds_with_zig() {
+        use std::process::Command;
+
+        let zig_ok = Command::new("zig")
+            .arg("version")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
+        if !zig_ok {
+            eprintln!("skipping: zig not on PATH");
+            return;
+        }
+
+        let manifest = test_manifest();
+        let tmp = tempfile::tempdir().unwrap();
+        assert!(scaffold_cartridge(&manifest, tmp.path()).is_success());
+        let root = tmp.path().join("chapeliser-mcp");
+
+        for component in ["ffi", "adapter"] {
+            let out = Command::new("zig")
+                .args(["build", "test"])
+                .current_dir(root.join(component))
+                .output()
+                .expect("failed to run zig");
+            assert!(
+                out.status.success(),
+                "scaffolded {} failed to build:\n{}\n{}",
+                component,
+                String::from_utf8_lossy(&out.stdout),
+                String::from_utf8_lossy(&out.stderr)
+            );
+        }
     }
 }
