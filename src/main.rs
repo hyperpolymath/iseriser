@@ -42,18 +42,24 @@ enum Commands {
         #[arg(short, long, default_value = "iseriser.toml")]
         manifest: String,
     },
-    /// Generate a complete -iser repository from the manifest.
+    /// Generate a complete -iser repository from the manifest, together with
+    /// its boj-server cartridge (unified transaction-gated adapter + SSE) as
+    /// a sibling `<output>/<iser>-mcp/` tree. standards#90.
     Generate {
         #[arg(short, long, default_value = "iseriser.toml")]
         manifest: String,
         #[arg(short, long, default_value = ".")]
         output: String,
+        /// Emit only the -iser repository, without its boj-server cartridge.
+        #[arg(long, default_value_t = false)]
+        no_cartridge: bool,
     },
     /// Generate a boj-server cartridge skeleton (adapter + FFI + ABI +
     /// cartridge.json + panels + mod.js) for the manifest's -iser.
-    /// Output goes to `<output>/<iser>-mcp/`.  Place inside
-    /// `boj-server/cartridges/` — the emitted Zig build files reference
-    /// the shared invoke-shim via that relative location.
+    /// Output goes to `<output>/<iser>-mcp/`; its home is the
+    /// `hyperpolymath/boj-server-cartridges` registry, at
+    /// `cartridges/domains/<domain>/`. The cartridge vendors the
+    /// ADR-0006 invoke-shim, so it builds wherever it is placed.
     /// standards#89 Phase 2b.
     Cartridge {
         #[arg(short, long, default_value = "iseriser.toml")]
@@ -127,10 +133,18 @@ fn main() -> Result<()> {
                 }
             }
         }
-        Commands::Generate { manifest, output } => {
+        Commands::Generate {
+            manifest,
+            output,
+            no_cartridge,
+        } => {
             let m = manifest::load_manifest(&manifest)?;
             manifest::validate(&m)?;
-            codegen::generate_all(&m, &output)?;
+            if no_cartridge {
+                codegen::generate_repo_only(&m, &output)?;
+            } else {
+                codegen::generate_all(&m, &output)?;
+            }
         }
         Commands::Cartridge { manifest, output } => {
             let m = manifest::load_manifest(&manifest)?;

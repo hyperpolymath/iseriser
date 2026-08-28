@@ -295,8 +295,13 @@ directory.
 |`+cartridge+` |Scaffold a boj-server cartridge skeleton
 (`+<iser>-mcp/+`) for the manifest’s -iser — adapter + FFI + ABI +
 cartridge.json + panels + mod.js. Output goes to
-`+<output>/<iser>-mcp/+`; place inside `+boj-server/cartridges/+` so the
-emitted Zig build files resolve the shared invoke-shim. See
+`+<output>/<iser>-mcp/+`. Its home is the
+`+hyperpolymath/boj-server-cartridges+` registry, at
+`+cartridges/domains/<domain>/+` — pick the domain directory and set
+`+cartridge.json+`'s `+domain+` field to match; iseriser does not guess it,
+because the manifest does not say which domain an -iser serves. The
+cartridge vendors the ADR-0006 invoke-shim at `+ffi/cartridge_shim.zig+`,
+so it builds wherever it is placed. See
 `+examples/cartridge-skeleton/README.adoc+`.
 
 |`+info+` |Print a summary of a manifest.

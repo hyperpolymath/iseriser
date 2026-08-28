@@ -751,25 +751,44 @@ fn test_codegen_output() {{
 // ---------------------------------------------------------------------------
 //
 // The unified transaction-gated adapter belongs to the boj-server cartridge
-// for this -iser (e.g. boj-server/cartridges/<name>-mcp/adapter/), NOT to the
-// -iser repo itself.  Scaffolding the cartridge skeleton is tracked
-// separately under standards#89 Phase 2b — see iseriser ROADMAP.
+// for this -iser (boj-server/cartridges/<name>-mcp/adapter/), NOT to the
+// -iser repo itself.  `codegen::generate_all` emits that cartridge as a
+// sibling tree so every newly generated -iser ships the gated adapter + SSE
+// surface by construction (standards#90); see the `cartridge` module.
 
-/// Generate `.github/workflows/<iser_name>-regen.yml` — the central-trigger
-/// workflow that fires the boj-server cartridge to regenerate `generated/*`
-/// instead of hand-committing artifacts.  Mirrors `boj-build.yml` /
-/// `k9iser-regen.yml` from the pilot (standards#89 sub-issue 1 / rsr-template-repo#58).
-fn generate_regen_workflow(iser_name: &str) -> GeneratedFile {
-    let content = format!(
-        r#"# SPDX-License-Identifier: MPL-2.0
-# {iser_name}-regen.yml — triggers central regeneration via boj-server cartridge.
+/// Template for `.github/workflows/<iser>-regen.yml`.
+///
+/// `__ISER__` is the only substitution token.  A token-and-`replace` template
+/// is used here rather than `format!` because the body is dense in braces —
+/// GitHub expressions, shell parameter expansion and a jq program — and
+/// brace-doubling a payload by hand is exactly how the estate's escaping
+/// defect (standards#331) was introduced in the first place.
+const REGEN_WORKFLOW_TEMPLATE: &str = r#"# SPDX-License-Identifier: MPL-2.0
+# __ISER__-regen.yml — triggers central regeneration through the boj-server
+# __ISER__-mcp cartridge, instead of hand-committing generated/*.
 #
 # Part of the -iser regeneration-cartridge pattern (hyperpolymath/standards#89).
-# Mirrors boj-build.yml / k9iser-regen.yml (rsr-template-repo#58): guarded on
-# the presence of {iser_name}.toml, fire-and-forget until gateway tier-2 ships.
-# Once the http-capability-gateway (ADR-0004) is production-wired, the loopback
-# URL below becomes the external gateway endpoint.
-name: {iser_name} Regen Trigger
+#
+# This deliberately does NOT reproduce the estate `boj-build.yml` shape, which
+# carries four defects (hyperpolymath/standards#331):
+#   1. a hand-escaped curl payload that is not valid JSON;
+#   2. an mDNS host name that no GitHub-hosted runner can resolve, so the step
+#      has never once reached the server;
+#   3. a plaintext scheme, against the estate secure-protocols policy;
+#   4. step-level error suppression, which masked all three.
+# A fifth, found while fixing them: the estate copies POST to the plural
+# cartridge path, which boj-server exposes only as the cartridge LIST endpoint.
+#
+# The defect tokens themselves are kept out of this file on purpose — estate
+# scanners match them in prose as well as in code.
+#
+# The endpoint is NOT hardcoded. boj-server binds 127.0.0.1:7700 by default
+# (elixir/lib/boj_rest/application.ex) and has no routable public name until
+# the http-capability-gateway is production-wired (ADR-0004 tier-2,
+# hyperpolymath/standards#91), so no correct literal host exists to emit.
+# Supply it per-repo as the BOJ_SERVER_URL secret or variable: unset means the
+# step says so and stops; set means a failed dispatch fails the job.
+name: __ISER__ Regen Trigger
 
 on:
   push:
@@ -780,35 +799,83 @@ permissions:
   contents: read
 
 jobs:
-  trigger-{iser_name}:
+  trigger-__ISER__:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-      - name: Detect {iser_name} manifest
+
+      - name: Detect __ISER__ manifest
         id: detect
         run: |
-          if [ -f {iser_name}.toml ]; then
+          if [ -f __ISER__.toml ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Trigger BoJ Server ({iser_name}-mcp cartridge)
+
+      - name: Trigger BoJ Server (__ISER__-mcp cartridge)
         if: steps.detect.outputs.present == 'true'
-        # Fire-and-forget: loopback until gateway tier-2 is wired.
-        # continue-on-error: internal loopback is not yet reachable from GH Actions.
-        # by-design: remove when gateway ships and endpoint becomes external.
+        env:
+          # Secret first — a private endpoint may itself be sensitive; fall
+          # back to the repository/org variable when it is not.
+          BOJ_URL: ${{ secrets.BOJ_SERVER_URL || vars.BOJ_SERVER_URL }}
+          # Expression values reach the shell through the environment, never
+          # by interpolation into the script text: a ref name is caller-chosen.
+          BOJ_REPO: ${{ github.repository }}
+          BOJ_BRANCH: ${{ github.ref_name }}
+          BOJ_SHA: ${{ github.sha }}
         run: |
-          curl -X POST "http://boj-server.local:7700/cartridges/{iser_name}-mcp/invoke" \
+          set -euo pipefail
+
+          if [ -z "$BOJ_URL" ]; then
+            echo "BOJ_SERVER_URL is not configured for this repository."
+            echo "boj-server stays loopback-only until the http-capability-gateway"
+            echo "lands (ADR-0004 tier-2 / standards#91) — nothing to dispatch to."
+            exit 0
+          fi
+
+          case "$BOJ_URL" in
+            https://*) ;;
+            *)
+              echo "::error::BOJ_SERVER_URL must use https:// (estate secure-protocols policy)."
+              exit 1
+              ;;
+          esac
+
+          # Payload built by jq, never by hand-escaping. The estate copies
+          # emitted a stray backslash-brace pair and failed JSON parse in every
+          # repo; jq makes that class of defect unrepresentable. Field names
+          # follow boj-server's router contract, which reads `tool` and
+          # `arguments` (elixir/lib/boj_rest/router.ex).
+          payload="$(jq -nc \
+            --arg repo   "$BOJ_REPO" \
+            --arg branch "$BOJ_BRANCH" \
+            --arg sha    "$BOJ_SHA" \
+            '{tool: "__ISER___generate", arguments: {repo: $repo, branch: $branch, sha: $sha}}')"
+
+          # Singular cartridge path — the plural form is the LIST endpoint and
+          # would 404 even if the host resolved. X-Node-Identity is the caller
+          # tag boj-server logs against the dispatch.
+          curl --fail-with-body --silent --show-error --location --max-time 60 \
+            -X POST "${BOJ_URL%/}/cartridge/__ISER__-mcp/invoke" \
             -H "Content-Type: application/json" \
-            -d "{{\"repo\": \"${{{{ github.repository }}}}\", \"branch\": \"${{{{ github.ref_name }}}}\", \"tool\": \"{iser_name}_generate\"}}"
-        continue-on-error: true  # by-design: loopback not reachable from GH Actions runners
-"#,
-        iser_name = iser_name,
-    );
+            -H "X-Node-Identity: github-actions/$BOJ_REPO" \
+            --data "$payload"
+"#;
+
+/// Generate `.github/workflows/<iser_name>-regen.yml` — the central-trigger
+/// workflow that fires the boj-server `<iser_name>-mcp` cartridge to
+/// regenerate `generated/*` instead of hand-committing artifacts
+/// (standards#89 sub-issue 1 / rsr-template-repo#58).
+///
+/// See `REGEN_WORKFLOW_TEMPLATE` for the standards#331 defects this shape
+/// exists to avoid re-emitting.
+fn generate_regen_workflow(iser_name: &str) -> GeneratedFile {
     GeneratedFile {
         path: PathBuf::from(format!(".github/workflows/{iser_name}-regen.yml")),
-        content,
+        content: REGEN_WORKFLOW_TEMPLATE.replace("__ISER__", iser_name),
     }
 }
 
@@ -1724,5 +1791,135 @@ description = "Chapel distributed computing -iser"
         );
         assert!(repo_root.join("README.adoc").exists());
         assert!(repo_root.join("LICENSE").exists());
+    }
+
+    /// The estate `boj-build.yml` shape shipped four defects into ~30 repos
+    /// (hyperpolymath/standards#331). Fixing the deployed copies is pointless
+    /// while the generator keeps re-emitting them, so this pins all four —
+    /// plus the fifth found while fixing them, the plural cartridge path,
+    /// which boj-server serves only as the LIST endpoint.
+    #[test]
+    fn test_regen_workflow_is_free_of_the_boj_build_defects() {
+        let wf = generate_regen_workflow("chapeliser");
+        let c = &wf.content;
+
+        assert_eq!(
+            wf.path,
+            PathBuf::from(".github/workflows/chapeliser-regen.yml")
+        );
+
+        // 1. Nothing hand-escapes JSON — jq builds the payload.
+        assert!(
+            !c.contains("\\\""),
+            "workflow hand-escapes a JSON payload; jq must build it"
+        );
+        assert!(c.contains("jq -nc"), "payload is not built by jq");
+
+        // 2. No mDNS host: GitHub-hosted runners cannot resolve one.
+        assert!(!c.contains(".local"), "workflow still targets an mDNS host");
+
+        // 3. No plaintext scheme, and the configured URL is checked at run time.
+        assert!(
+            !c.contains("http://"),
+            "workflow still uses a plaintext scheme"
+        );
+        assert!(
+            c.contains("https://*)"),
+            "workflow does not enforce https on the configured URL"
+        );
+
+        // 4. No step-level error suppression masking a failed dispatch.
+        assert!(
+            !c.contains("continue-on-error"),
+            "workflow still suppresses step errors"
+        );
+        assert!(
+            c.contains("--fail-with-body"),
+            "curl does not fail the job on a rejected dispatch"
+        );
+
+        // 5. Singular cartridge path (elixir/lib/boj_rest/router.ex).
+        assert!(
+            c.contains("/cartridge/chapeliser-mcp/invoke"),
+            "workflow does not POST to the singular cartridge invoke path"
+        );
+        assert!(
+            !c.contains("/cartridges/"),
+            "workflow POSTs to the cartridge LIST path"
+        );
+
+        // The endpoint is parameterised, not guessed: boj-server binds
+        // 127.0.0.1 and has no routable name until the http-capability-gateway
+        // is wired (ADR-0004 tier-2 / standards#91).
+        assert!(c.contains("secrets.BOJ_SERVER_URL"));
+        assert!(c.contains("vars.BOJ_SERVER_URL"));
+
+        // Caller-controlled expression values reach the script through the
+        // environment, never by interpolation into the script text.
+        assert!(
+            !c.contains("\"${{ github.ref_name }}\""),
+            "a caller-controlled ref name is interpolated into the shell script"
+        );
+
+        assert!(!c.contains("__ISER__"), "leftover template token");
+    }
+
+    /// The emitted jq program must produce valid JSON in the shape
+    /// boj-server's router accepts (`tool` + `arguments`), and must carry a
+    /// hostile ref name through as data rather than as script. No-op (passes)
+    /// where `jq` is not installed, matching the idris2 test above.
+    #[test]
+    fn test_regen_workflow_payload_is_valid_json() {
+        use std::process::Command;
+
+        let jq_ok = Command::new("jq")
+            .arg("--version")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
+        if !jq_ok {
+            eprintln!("skipping: jq not on PATH");
+            return;
+        }
+
+        let wf = generate_regen_workflow("chapeliser");
+        let program = wf
+            .content
+            .lines()
+            .map(str::trim)
+            .find(|l| l.starts_with("'{tool:"))
+            .expect("no jq program in the emitted workflow")
+            .trim_end_matches(")\"")
+            .trim_matches('\'')
+            .to_string();
+
+        let hostile_ref = "main\"; rm -rf /";
+        let out = Command::new("jq")
+            .args([
+                "-nc",
+                "--arg",
+                "repo",
+                "hyperpolymath/chapeliser",
+                "--arg",
+                "branch",
+                hostile_ref,
+                "--arg",
+                "sha",
+                "0123456789abcdef0123456789abcdef01234567",
+                &program,
+            ])
+            .output()
+            .expect("failed to run jq");
+        assert!(
+            out.status.success(),
+            "jq rejected the emitted program:\n{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+
+        let payload: serde_json::Value =
+            serde_json::from_slice(&out.stdout).expect("emitted payload is not valid JSON");
+        assert_eq!(payload["tool"], "chapeliser_generate");
+        assert_eq!(payload["arguments"]["repo"], "hyperpolymath/chapeliser");
+        assert_eq!(payload["arguments"]["branch"], hostile_ref);
     }
 }
