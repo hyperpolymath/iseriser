@@ -347,3 +347,96 @@ description = "test"
         "should require repo-name ending in 'iser'"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Test 10: `generate_all` pairs every -iser with its boj-server cartridge
+// ---------------------------------------------------------------------------
+//
+// hyperpolymath/standards#90 asks that every new -iser carry the unified
+// transaction-gated adapter and its SSE surface *by construction*. The
+// cartridge is where that lives (iseriser PR #23 established the topology:
+// the adapter belongs in `boj-server/cartridges/<iser>-mcp/`, never inside
+// the -iser repo, where it has no FFI module to import). So the contract
+// this test pins is: one `generate` produces both trees, side by side, with
+// the gate and the SSE surface in the cartridge and neither in the repo.
+
+#[test]
+fn test_generate_all_emits_repo_and_cartridge_side_by_side() {
+    let toml = make_toml(
+        "Chapel",
+        "imperative",
+        "simple",
+        "native",
+        &["task", "locale", "domain"],
+    );
+    let m = parse_manifest(&toml).unwrap();
+    validate(&m).unwrap();
+
+    let tmp = tempdir().unwrap();
+    let out = tmp.path().to_str().unwrap();
+    let result = iseriser::codegen::generate_all(&m, out).expect("generate_all failed");
+    assert!(result.is_success(), "{:?}", result.error_message());
+
+    let repo = tmp.path().join("chapeliser");
+    let cartridge = tmp.path().join("chapeliser-mcp");
+    assert!(repo.is_dir(), "-iser repo was not written");
+    assert!(cartridge.is_dir(), "cartridge was not written alongside it");
+
+    // The cartridge carries the pattern ported from boj-server#73: the
+    // exposure/transaction gate and the SSE surface, in the unified adapter.
+    let adapter =
+        std::fs::read_to_string(cartridge.join("adapter/chapeliser_adapter.zig")).unwrap();
+    assert!(
+        adapter.contains("text/event-stream"),
+        "adapter has no SSE surface"
+    );
+    assert!(
+        adapter.contains("fn exposureSatisfied("),
+        "adapter has no transaction gate"
+    );
+    assert!(
+        adapter.contains("TRANSACTION GATE"),
+        "adapter does not gate before dispatch"
+    );
+
+    // The Idris2 side is the source-of-truth contract the Zig gate mirrors.
+    let idr =
+        std::fs::read_to_string(cartridge.join("abi/ChapeliserMcp/SafeChapeliser.idr")).unwrap();
+    assert!(
+        idr.contains("exposureSatisfied"),
+        "cartridge ABI has no exposure contract"
+    );
+
+    // ...and none of it leaks into the -iser repo (PR #23 topology ruling).
+    assert!(
+        !repo.join("adapter").exists(),
+        "adapter emitted into the repo"
+    );
+
+    // The repo's half of the pattern is the trigger that fires the cartridge.
+    let regen =
+        std::fs::read_to_string(repo.join(".github/workflows/chapeliser-regen.yml")).unwrap();
+    assert!(regen.contains("/cartridge/chapeliser-mcp/invoke"));
+}
+
+// ---------------------------------------------------------------------------
+// Test 11: `--no-cartridge` emits the repo alone
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_generate_repo_only_skips_the_cartridge() {
+    let toml = make_toml("Chapel", "imperative", "simple", "native", &["task"]);
+    let m = parse_manifest(&toml).unwrap();
+    validate(&m).unwrap();
+
+    let tmp = tempdir().unwrap();
+    let out = tmp.path().to_str().unwrap();
+    let result = iseriser::codegen::generate_repo_only(&m, out).expect("generate_repo_only failed");
+    assert!(result.is_success(), "{:?}", result.error_message());
+
+    assert!(tmp.path().join("chapeliser").is_dir());
+    assert!(
+        !tmp.path().join("chapeliser-mcp").exists(),
+        "cartridge emitted despite the repo-only path"
+    );
+}

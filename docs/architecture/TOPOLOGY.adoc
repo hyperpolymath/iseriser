@@ -1,15 +1,14 @@
-<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
-<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
-# Iseriser — Architectural Topology
+== Iseriser — Architectural Topology
 
-## Overview
+=== Overview
 
-Iseriser is the meta-framework that generates new -iser projects. It takes a
-language description as input and produces a complete -iser repository as output.
+Iseriser is the meta-framework that generates new -iser projects. It
+takes a language description as input and produces a complete -iser
+repository as output.
 
-## Data Flow
+=== Data Flow
 
-```
+....
                       iseriser.toml
                     (language description)
                            |
@@ -43,11 +42,11 @@ language description as input and produces a complete -iser repository as output
             | (complete, ready |
             |  to cargo build) |
             +------------------+
-```
+....
 
-## Module Structure
+=== Module Structure
 
-```
+....
 iseriser/
 ├── src/
 │   ├── main.rs                     # CLI: init, validate, generate, build, run, info
@@ -80,35 +79,49 @@ iseriser/
 │   └── architecture/
 │       └── TOPOLOGY.md             # This file
 └── tests/                          # Rust integration tests
-```
+....
 
-## Key Dependencies
+=== Key Dependencies
 
-| Dependency | Purpose |
-|------------|---------|
-| `clap` | CLI argument parsing with derive macros |
-| `serde` + `toml` | Manifest deserialization |
-| `handlebars` | Template engine for code generation |
-| `anyhow` + `thiserror` | Error handling |
-| `walkdir` | Directory traversal for template discovery |
+[cols=",",options="header",]
+|===
+|Dependency |Purpose
+|`+clap+` |CLI argument parsing with derive macros
+|`+serde+` + `+toml+` |Manifest deserialization
+|`+handlebars+` |Template engine for code generation
+|`+anyhow+` + `+thiserror+` |Error handling
+|`+walkdir+` |Directory traversal for template discovery
+|===
 
-## Integration Points
+=== Integration Points
 
-| System | Relationship |
-|--------|-------------|
-| **proven** | Shared Idris2 verified library for ABI proofs |
-| **typell** | Type theory engine used in language model analysis |
-| **rsr-template-repo** | Source templates for generated RSR governance files |
-| **PanLL** | Future: "New -Iser" wizard panel |
-| **BoJ-server** | Future: `iseriser.generate` MCP cartridge |
-| **VeriSimDB** | Future: persist language models and generation history |
-| **Hypatia** | Neurosymbolic scanning of generated repos |
+[width="100%",cols="39%,61%",options="header",]
+|===
+|System |Relationship
+|*proven* |Shared Idris2 verified library for ABI proofs
 
-## Generation Pipeline
+|*typell* |Type theory engine used in language model analysis
 
-1. **Parse** — `iseriser.toml` -> `LanguageDescription` struct
-2. **Model** — `LanguageDescription` -> `LanguageModel` (features, targets, ABI shape)
-3. **Verify** — Idris2 ABI checks language model consistency
-4. **Expand** — Handlebars templates + language model -> file tree
-5. **Write** — file tree -> disk (complete -iser repo)
-6. **Validate** — generated repo passes `cargo check` and template completeness
+|*rsr-template-repo* |Source templates for generated RSR governance
+files
+
+|*PanLL* |Future: "`New -Iser`" wizard panel
+
+|*BoJ-server* |Future: `+iseriser.generate+` MCP cartridge
+
+|*VeriSimDB* |Future: persist language models and generation history
+
+|*Hypatia* |Neurosymbolic scanning of generated repos
+|===
+
+=== Generation Pipeline
+
+[arabic]
+. *Parse* — `+iseriser.toml+` -> `+LanguageDescription+` struct
+. *Model* — `+LanguageDescription+` -> `+LanguageModel+` (features,
+targets, ABI shape)
+. *Verify* — Idris2 ABI checks language model consistency
+. *Expand* — Handlebars templates + language model -> file tree
+. *Write* — file tree -> disk (complete -iser repo)
+. *Validate* — generated repo passes `+cargo check+` and template
+completeness
