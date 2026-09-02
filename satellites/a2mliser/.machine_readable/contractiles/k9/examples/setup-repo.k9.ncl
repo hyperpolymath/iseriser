@@ -132,7 +132,9 @@ K9!
     "add-license" = {
       description = "Add MPL-2.0 license",
       commands = [
-        "curl -sL https://www.mozilla.org/media/MPL/2.0/index.txt -o LICENSE",
+        "curl -sSfL https://www.mozilla.org/media/MPL/2.0/index.txt -o LICENSE.tmp",
+        "grep -q 'Mozilla Public License Version 2.0' LICENSE.tmp",
+        "mv LICENSE.tmp LICENSE",
         "echo '✓ License added'",
       ],
     },
