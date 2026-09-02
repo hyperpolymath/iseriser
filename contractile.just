@@ -62,7 +62,7 @@ trust-verify: trust-license-content trust-no-secrets-committed trust-container-i
 
 # LICENSE contains expected SPDX identifier
 trust-license-content:
-    grep -q 'SPDX\|License\|MIT\|Apache\|PMPL\|MPL' LICENSE
+    grep -qiE 'Mozilla Public License|MIT License|Apache License|General Public License|Creative Commons' LICENSE && ! grep -qi palimpsest LICENSE
 
 # No .env or credential files in repo
 trust-no-secrets-committed:
