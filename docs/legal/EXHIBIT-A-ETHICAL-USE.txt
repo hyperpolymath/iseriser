@@ -2,13 +2,13 @@ SPDX-License-Identifier: MPL-2.0
 
 ================================================================================
 EXHIBIT A — ETHICAL USE GUIDELINES
-Palimpsest-MPL License Version 1.0
+Supplementary to the MPL-2.0 License
 ================================================================================
 
 1. PURPOSE
 
    These guidelines define ethical use expectations for software distributed
-   under the Palimpsest-MPL License. They are not legally binding restrictions
+   under the MPL-2.0 License. They are not legally binding restrictions
    but represent the community's shared values and expectations.
 
 2. PRINCIPLES
@@ -55,12 +55,12 @@ Palimpsest-MPL License Version 1.0
 4. ENFORCEMENT
 
    These guidelines are enforced through community norms, not legal action.
-   Disputes should be raised with the Palimpsest Stewardship Council for
+   Disputes should be raised with the project maintainers for
    non-binding guidance.
 
 5. AMENDMENTS
 
-   These guidelines may be updated by the Palimpsest Stewardship Council.
+   These guidelines may be updated by the project maintainers.
    Updates apply to new distributions, not retroactively.
 
 ================================================================================

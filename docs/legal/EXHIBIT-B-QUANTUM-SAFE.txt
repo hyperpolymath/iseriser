@@ -2,14 +2,13 @@ SPDX-License-Identifier: MPL-2.0
 
 ================================================================================
 EXHIBIT B — QUANTUM-SAFE PROVENANCE SPECIFICATION
-Palimpsest-MPL License Version 1.0
+Supplementary to the MPL-2.0 License
 ================================================================================
 
 1. PURPOSE
 
    This exhibit specifies the cryptographic algorithms and procedures for
-   quantum-safe provenance in software distributed under the Palimpsest-MPL
-   License.
+   quantum-safe provenance in software distributed under the MPL-2.0 License.
 
 2. APPROVED ALGORITHMS
 
@@ -93,7 +92,7 @@ Palimpsest-MPL License Version 1.0
 
 7. COMPLIANCE
 
-   Quantum-safe provenance is OPTIONAL under PMPL-1.0. When present,
+   Quantum-safe provenance is OPTIONAL under MPL-2.0. When present,
    it must follow this specification. Stripping quantum-safe signatures
    from distributions is prohibited per Section 4.1 of the License.
 
