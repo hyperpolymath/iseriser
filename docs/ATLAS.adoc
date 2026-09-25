@@ -117,4 +117,6 @@ To create an aspect for a language that has no -iser yet, use the meta-framework
 
 * `theory/AOLD.adoc` — the design philosophy (languages as aspects).
 * `theory/iSOS.adoc` — the architecture (composing aspects).
-* `../README.adoc` — family overview, architecture diagram, full install/usage.
+* `../FEASIBILITY.adoc` — the feasibility assessment: seam classes,
+  evidence tiers, and per-language verdicts. The status note above is
+  its summary form.

@@ -1,0 +1,409 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Iseriser Feasibility Assessment
+:toc: left
+:toclevels: 3
+:icons: font
+
+[.lead]
+**A recon-level feasibility assessment of the -iser family: what it is
+trying to achieve, whether that is achievable as stated, which target
+languages are feasible/practical/impossible, and the bar that every
+-iser and every related language project should be held to.**
+
+This document is the standing *regularity* instrument for the family:
+any README claim that outruns the classification and evidence tier
+recorded here is debt, by definition.
+
+Assessed 2026-09-25 against: the iseriser repo (HEAD `6397682`), the
+satellites (`a2mliser`, `k9iser`), the published state of the sibling
+-iser repos, chapeliser's `Provable` CI lane, the `abi-verify` /
+`abi-emit-manifest` harness, and the language repos (`eclexia`, `a2ml`,
+`ephapax`, `affinescript`, `my-lang`, `phronesis`, …).
+
+== What the project is trying to achieve (the read)
+
+Three layers are visible in the estate, and they are not the same goal:
+
+. *Surface goal — the product.* A family of Rust CLIs (`<lang>iser`)
+  that inject one specialist language's capability into a host
+  codebase through `manifest → Idris2 ABI → Zig FFI → codegen →
+  build/run`, so the host developer gets the superpower "without ever
+  learning those languages" (`README.adoc`).
+. *Architectural goal — the thesis.* iSOS/AOLD: languages as bolt-on
+  *aspects* over one shared proof-carrying seam, composable on a single
+  host ("any two aspects can sit on the same host without knowing about
+  each other"), with `invariant-path` as the conscience that stops
+  local theorems being restated as universal claims.
+. *Meta goal — the estate.* iseriser as the factory that stamps the
+  pattern out uniformly (29 repos, shared RSR governance, agent-readable
+  metadata, `hypatia`/`gitbot-fleet` as operators), i.e. an
+  *AI-agent-operated* language-tools estate, plus a portfolio bodying
+  forth the polymath programme.
+
+All three are legitimate. They fail differently, so they must be
+assessed separately.
+
+== Overall feasibility verdict
+
+=== Infeasible as literally stated
+
+The headline promise — "superpowers … without you ever learning those
+languages", a "formally verified" ABI for 28 heterogeneous runtimes,
+aspects that "compose … without knowing about each other" — is
+**infeasible as stated, for structural reasons rather than effort
+reasons**. Four hard limits:
+
+. *The seam fallacy.* A C ABI carries **structural** guarantees
+  (encodings, layout agreement, protocol state machines, result-code
+  faithfulness). It does not carry **semantic** guarantees of the host.
+  Data-race freedom (ponyiser), fault tolerance (otpiser),
+  reversibility (oblibeniser), ethical safety (phronesiser) are
+  properties of how a *whole program* is organised; they cannot be
+  injected into foreign code through FFI. FFI gives you a *service
+  written in a good language*, not a transformed host.
+. *Conservation of learning.* A manifest that asks for partition
+  strategy, grain size, gather semantics, or kernel shape is asking for
+  the target language's *performance model* in TOML clothing. The
+  honest form of the promise is "learn ~10% (a declarative surface)
+  instead of 100% (the language)". That is still valuable — but it is a
+  different claim than "never learn".
+. *Runtime multiplicity.* Each specialist runtime (BEAM, Pony's Orc,
+  Chapel's multilocale layer, Julia's GC) assumes it owns the process.
+  Hosting one beside a host program is normal engineering; hosting
+  *several on one host* (the iSOS composition claim) is fragile
+  research territory. Composition needs to be claimed per-pair, and
+  mostly at the *data* level, not the runtime level.
+. *Proof scope.* Proving marshalling/interface correctness across a
+  language boundary requires formalising that language's semantics —
+  CompCert-scale effort *per language*. No 28-language proof
+  programme fits in any single person's horizon. What does fit: proofs
+  over the *seam contract itself* (the `FfiSeam`/`Capstone` pattern —
+  result-code injectivity, transition-table conformance), kept honest
+  by the `abi-verify` drift gate.
+
+=== Feasible as re-scoped
+
+Rescoped to *"verified binding generators + foreign-runtime services +
+pattern scaffolders, each claiming only what crosses its seam"*, the
+programme is **feasible, with deep prior art** — SWIG, bindgen,
+uniffi-bindgen, wasm-bindgen, c2chapel, Futhark's C backend, Dafny
+extraction, NIF/port scaffolds. The estate has *already demonstrated*
+the rescoped form end-to-end:
+
+* `chapeliser`'s `Provable` CI lane is green on main: Idris2 ABI proofs
+  type-check (`idris2 --check`), the Zig FFI builds and passes tests,
+  codegen output matches goldens (no drift), and **the generated Chapel
+  compiles and runs under `chpl` in CI**. That is a real, verified
+  manifest→Chapel pipeline.
+* `iseriser abi-emit-manifest` / `abi-verify` is a genuine
+  dual-representation drift gate (Idris2 source as single authority;
+  Zig mirror diffed, five drift classes including the safety-critical
+  forbidden-but-accepted class). This is immediately reusable
+  engineering, independent of the grander thesis.
+
+So the correct verdict is **not "infeasible" but "mis-stated"**: the
+estate can deliver the rescoped promise, and has partly done so.
+
+=== Will it achieve anything useful?
+
+Three audiences, three answers:
+
+* *For the estate itself* — **already yes.** The K9 contractiles, the
+  drift gate, the cartridge pattern, the `Provable` lane culture: these
+  run today and operate the user's own repos.
+* *For external developers* — **only via flagship depth.** 29 repos at
+  2–5 stars, 0 forks, ~0 external issues is not adoption; it is a
+  personal research estate (which is fine, but must be named). External
+  usefulness requires 2–3 -isers driven to a demonstrated-value tier
+  (below) with honest READMEs, not 29 scaffolds.
+* *As research / portfolio* — **strong if the novel parts are elevated
+  and the overclaims retired.** The defensible contributions are:
+  (1) the seam classification itself (what survives an FFI boundary —
+  §4), (2) drift-gated dual contracts (Idris2-as-authority +
+  `abi-verify`), (3) the "machine-check every prose claim" CI pattern
+  (`Provable`), (4) the AOLD framing as a position/workshop paper.
+  Breadth (29 repos) is *negative* evidence to a formal-methods-literate
+  reviewer if the flagship depth is invisible; one green
+  manifest→Chapel→`chpl` pipeline is worth more than twenty READMEs.
+
+== The seam classification (the regularity principle)
+
+Every -iser must be classified by *what actually crosses its seam*, and
+may only claim that class. This is the single most important rule in
+this document.
+
+[cols="1,3,2",options="header"]
+|===
+| Class | What the host actually gets | May claim
+
+| *Injector* | A structural guarantee that provably crosses the C ABI:
+  encoding validity, protocol/state-machine conformance, layout
+  agreement, attestation over bytes, typed units as data.
+| "Your config/markup is attested", "the wire protocol cannot drift",
+  "units are type-checked".
+
+| *Service* | A compiled island (kernel, distributed program, supervisor,
+  verified function) written in the specialist language, callable from
+  the host. The specialist's guarantees hold *inside* the island; the
+  host gets the *effects* (speed, scale, resilience), not the
+  guarantees.
+| "This workload runs distributed/on-GPU/verified", with the boundary
+  obligations (preconditions, serialisation) stated.
+
+| *Scaffolder* | Generated idiomatic code and build wiring; no cross-seam
+  guarantee at all.
+| "Boilerplate generated, builds green". Nothing stronger.
+|===
+
+Applying it (focused languages in §5; full matrix in
+`feasibility-matrix.toml`):
+
+* *Injectors:* a2mliser (signatures over canonicalised bytes), k9iser
+  (static contract checking), ephapaxiser/affinescriptiser (linear
+  *handles* handed to the host — single-use is enforceable on a Rust
+  handle type), the `abi-verify` harness itself, dafniser's extracted
+  functions (the proof survives extraction; preconditions still bind at
+  the boundary).
+* *Services:* chapeliser, futharkiser, julianiser, halideiser,
+  lustreiser, nimiser, otpiser, ponyiser, atsiser (guarantees apply to
+  the wrapped module), verisimiser (a data service), bqniser.
+* *Scaffolders:* wokelangiser, mylangiser, oblibeniser, betlangiser,
+  phronesiser, anvomidaviser, typedqliser (grading levels without a
+  host-side type checker is a lint/schema tier at best).
+
+The class of an -iser is a *property of the semantics*, not of
+ambition. otpiser can never be an Injector for fault tolerance; that is
+physics, not a roadmap item.
+
+== Per-language feasibility (the ones focused on so far)
+
+=== A2ML / a2mliser — feasible, HIGH
+
+Attestation of markup/config is engineering, not research; the crypto
+is off-the-shelf (SHA-256/BLAKE3, Ed25519, ML-DSA). Prior art is
+sigstore/in-toto/TUF; the honest differentiator is
+**structure-aware, field/section-level attestation** — signing *this
+field* of *this schema version*, not an opaque blob. That is a real,
+defensible niche.
+
+Particular challenges:
+
+. *Canonicalisation.* Format-preserving TOML/YAML round-trips are lossy
+  (comments, ordering). Signing requires a canonical serialisation;
+  JCS exists for JSON, nothing standard for TOML/YAML. This is the
+  hard core of the project — solve it first and the rest follows.
+. *Key distribution,* not signing, is the real-world problem. An
+  attestation tool without a key story is a demo.
+. *Interop:* answer "why not a sigstore bundle?" in the README or be
+  dismissed as NIH.
+. *README debt:* the a2mliser satellite's codegen is a `[stub] …
+  implementation pending` while its README promises DAG provenance
+  chains. Under the evidence bar (§6) that README must be tiered
+  *scaffold* until the provenance chain exists.
+. The `a2ml` repo (DEED typed core, Idris2-verified reference
+  implementation) is the right shape: the -iser should *consume* that
+  verifier, never re-implement it.
+
+=== K9 / k9iser — feasible, HIGH
+
+Self-validating configs is CUE/Nickel/Rego territory with real prior
+art (conftest + OPA); the `must / trust / dust / intend` quadruple is a
+coherent and attractive vocabulary that maps 1:1 onto the estate's
+contractiles. The novel direction is **contract mining** — deriving
+contracts from existing configs — rather than checking (solved).
+
+Particular challenges:
+
+. The `.k9` constraint syntax needs a real grammar and semantics
+  (today it is INI-ish with ad-hoc `: string { == 'x' }` expressions).
+  Strongly consider *building on Nickel* (a configuration language with
+  contracts by design) rather than growing a parser.
+. The safety-tier vocabulary (hunt/kennel/yard/estate) needs to mean
+  something *enforcement-wise* — what differs per tier?
+. Mining must produce schemas and ranges, not frozen literals — the
+  committed samples (`package.name : string { == 'panic-attack' }`)
+  over-fit to one snapshot and would false-positive on every future
+  change. That is the difference between a contract and a photograph.
+
+=== Eclexia / eclexiaiser — feasible, MEDIUM
+
+Energy/carbon awareness is a real, active area (green-software
+patterns, RAPL/Kepler/Scaphandre measurement, carbon-intensity APIs).
+The defensible kernel is **dimensional typing of energy/carbon
+quantities** (J, W, gCO2eq/kWh) enforced in generated host code —
+units-of-measure typing is proven tech (F#, Fortress, Frink) and
+genuinely crosses the seam as *typed data*.
+
+Particular challenges:
+
+. *Measurement noise:* per-function energy attribution is coarse
+  (±tens of percent) without careful RAPL discipline; budgets must be
+  statistical, not point claims.
+. *Enforcement semantics:* a runtime-measured budget can only be a
+  guard/report (cgroup-like), never a compile-time proof. Say so.
+. *Scope mismatch:* the Eclexia language repo carries a full compiler
+  stack (AST, abstract interpreter, Cranelift backend, DAP, debugger…)
+  — a far bigger project than the -iser needs. The -iser needs only
+  the measurement + units layer; the language is a separate (and much
+  longer) bet. Keep their roadmaps decoupled.
+. Position as *"flamegraph, but Joules, with type-checked units"* and
+  it is a buildable, useful tool. `static-intensity = 200.0` should
+  become a real intensity feed before any claim about carbon.
+
+=== Chapel / chapeliser — feasible, HIGH (the flagship)
+
+The item-parallel slice (serialise → distribute over locales → process
+via 6–8 C functions → gather) matches Chapel's C-interop reality
+(narrow `c_ptr`, locale-aware placement), and the byte-buffer design is
+the correct mitigation. The `Provable` lane — proofs check, FFI tests,
+golden codegen, **generated Chapel compiled and run by `chpl` in CI** —
+is the family's crown jewel and the template for everyone else.
+
+Particular challenges:
+
+. *Deployment:* multilocale Chapel over ≥2 nodes is a real HPC
+  proposition (GASNet/OFI); single-node multilocale is the honest demo
+  tier for now.
+. *Serialisation dominance* for small items (grain-size batching must
+  be on by default, not a tuning flag).
+. *Honest learning curve:* the manifest still asks for partition/gather
+  semantics — i.e. Chapel's performance model. Market it as "10% of
+  Chapel for 80% of the distribution win", not "no Chapel".
+. The Idris proofs (`PartitionComplete`/`PartitionDisjoint`/
+  `GatherConservation`) must be tied to the *generated* program (derive
+  the model from codegen the way `abi-emit-manifest` derives from
+  `Safe*.idr`), or be labelled as proofs over the model only.
+
+=== Futhark / futharkiser — feasible, HIGH (easiest true win)
+
+Futhark's C backend is designed for exactly this: manifest → `.fut`
+with SOAC entry points → `futhark c` → a human-readable C API. The
+-iser's value is the manifest surface + build orchestration + a memory-
+safe wrapper over the (manual-free) C API.
+
+Particular challenges:
+
+. *Performance risk:* naively generated Futhark can lose to NumPy; the
+  value claim needs benchmark gates, not correctness tests alone.
+. *No CI lane installs the `futhark` compiler today* — under the
+  evidence bar, futharkiser cannot claim more than chapeliser's Tier 2
+  until a `Provable`-style lane exists.
+. The wrapper must rigorously own the manual deallocation of the
+  generated C API (fuzz it).
+
+=== Idris2-as-ABI (the family's central bet) — feasible if right-scoped
+
+Two different things are called "the Idris2 ABI" in the docs:
+
+. *Idris2 as the authority for the seam contract* — enums, transition
+  relations, result codes, protocol state machines, with `abi-verify`
+  gating the Zig mirror and (Phase 3) Zig generated from the manifest.
+  **Feasible, differentiated, and already partly shipped.** This is the
+  version to invest in.
+. *Idris2 as prover of cross-runtime marshalling for 28 languages* —
+  infeasible (CompCert-scale per language). The in-repo proofs
+  (`FfiSeam` result-code injectivity, `Capstone` conformance of a
+  five-component scaffold model) are real but modest; they must be what
+  the words "formally verified" refer to, everywhere, or the phrase
+  will cost credibility with exactly the audience it is meant to
+  impress.
+
+Phase 4 (self-hosting) is feasible with effort — the classic
+bootstrapping path. Phase 5 (proofs of template correctness) is
+research-grade; right-size it or drop it.
+
+== The evidence bar (tiers every -iser must declare)
+
+Chapeliser's `Provable` lane already encodes this; make it the family
+standard. An -iser's README must state its current tier, and no claim
+above the tier is allowed:
+
+[cols="1,3",options="header"]
+|===
+| Tier | Requirement
+
+| *T0 — Honest* | README claims ≤ what CI machine-checks. Status line
+  says "scaffold" if codegen is a stub. (The ATLAS already does this in
+  prose; make it structural.)
+| *T1 — Sealed* | The FFI contract (the 5–10 C symbols) is published;
+  the Idris2 authority + `abi-verify` drift gate runs green in CI.
+| *T2 — End-to-end* | One worked example in CI with the *target
+  toolchain installed*: manifest in → specialist artifact built by the
+  real compiler → executed → output asserted. (chapeliser: green.
+  futharkiser: missing lane.)
+| *T3 — Value-demonstrated* | A benchmark/case study on a realistic
+  workload vs a host-only baseline, quantifying the aspect's claim
+  (speedup, recovery, energy, attestation coverage). No family member
+  is here yet; this is where "useful" becomes demonstrable.
+|===
+
+== The language bar (for the related language projects)
+
+Half the family wraps estate languages (A2ML, K9, Eclexia, Ephapax,
+AffineScript, My-Lang, Oblíbený, Phronesis, WokeLang, Betlang,
+Anvomidav, VeriSimDB, …). An -iser may not outrun its language:
+
+[cols="1,3",options="header"]
+|===
+| Level | Requirement
+
+| *L0 — Named* | Written spec/README.
+| *L1 — Implemented* | Reference implementation with a passing test
+  suite and a grammar.
+| *L2 — ABI-stable* | Stable C ABI (or library API) + golden tests;
+  semantic versioning; the -iser consumes the language's own verifier
+  where one exists (a2ml/DEED is the model).
+| *L3 — Consumed* | At least one non-estate consumer.
+|===
+
+Rule: an -iser over a language below L2 is labelled *experimental* and
+its README may not make value claims. Corollary: for a young estate
+language, the -iser's real function is **spec-forcing** — it is the
+tool that drags the language to an ABI. That is a virtue; name it,
+don't hide it.
+
+== Recommended shape (big aims, not bug lists)
+
+. *Adopt the seam classification and tier labels as policy.* Every
+  -iser README gets a two-line status block: class (Injector/Service/
+  Scaffolder), tier (T0–T3), language level (L0–L3). The matrix in
+  `feasibility-matrix.toml` is the machine-readable form.
+. *Concentrate depth.* At most 2–3 -isers in active deepening;
+  everything else drops to maintenance. Recommended flagships:
+  **chapeliser** (real language, green end-to-end lane), **futharkiser**
+  (easiest true T2→T3 win), and one estate-language flagship with a
+  real differentiator — **a2mliser** (canonicalisation is a genuine
+  problem worth solving) or **eclexiaiser** (typed energy units).
+. *Retire the overclaims.* "without you ever learning those languages"
+  → "without rewriting your code in those languages".
+  "Formally verified ABI" → precisely "Idris2-authoritative seam
+  contract, drift-gated" (except where a deeper proof exists and is
+  named). "Provably safe ethical constraints" → "enforced policy
+  constraints" (ethics is not a theorem).
+. *Elevate the genuinely novel.* The seam taxonomy, the drift gate, the
+  Provable-lane culture, and the AOLD position are the contributions
+  an outsider will remember. A short paper or talk on "which language
+  guarantees survive FFI seams, and how to gate the ones that do" is
+  achievable and defensible.
+. *Keep the estate honest about being personal.* 29 repos at
+  2–5 stars is a research estate, not a product family. That is a fine
+  thing to be — the moment the READMEs say so, they stop being a
+  liability and start being a credential.
+
+== Verdict, one paragraph
+
+The -iser idea as marketed is infeasible: semantic guarantees do not
+cross C ABIs, manifests conserve rather than abolish the learning
+curve, and a 28-runtime proof programme does not fit in one horizon.
+The -iser idea as *built in its best corners* is not only feasible but
+partly realised — a green CI lane that turns a TOML manifest into a
+compiled, executed, golden-tested distributed Chapel program is a real
+achievement, and the Idris2-authoritative drift gate is reusable
+engineering of genuine value. The path to "conceivably useful" runs
+through re-scoping (claim only what crosses the seam), concentration
+(2–3 flagships to Tier 3), and claim hygiene (the tiers and bars in
+this document). Followed, the estate yields: working tools for its own
+repos today, a credible shot at external usefulness in the flagship
+corners, and a research/portfolio story that is stronger for being
+exactly as large as what it can machine-check.

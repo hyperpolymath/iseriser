@@ -376,8 +376,18 @@ The GitHub Pages hub provides:
 All 29 -iser repos are scaffolded and functional. The architecture is
 defined, CLI commands work, manifest parsers are operational, and test
 suites are in place across the family. Domain-specific code generation
-logic is the current frontier — each -iser is being deepened with real
+logic is the current frontier — each -iser is being deepened with real
 codegen for its target language.
+
+Each -iser also carries a *feasibility classification* — what its seam
+can actually carry (injector / service / scaffolder) and how much of
+its promise is machine-checked today (tiers T0–T3). See
+link:docs/FEASIBILITY.adoc[the feasibility assessment] and its
+machine-readable form, `docs/feasibility-matrix.toml`. Per that
+assessment: the honest family promise is *verified binding generators
+and foreign-runtime services, each claiming only what crosses its
+seam* — not "superpowers without learning languages", which no C ABI
+can deliver.
 
 == Contributing
 
