@@ -1,0 +1,308 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# feasibility-matrix.toml — machine-readable form of docs/FEASIBILITY.adoc
+#
+# THE REGULARITY RULE (docs/FEASIBILITY.adoc §6-7):
+#   An -iser's README may claim only what its seam-class carries, and only
+#   what its evidence-tier machine-checks. Claims above these labels are
+#   README debt.
+#
+# seam_class:
+#   injector  = structural guarantee provably crosses the C ABI
+#   service   = compiled island in the specialist language; effects (not
+#               guarantees) reach the host; boundary obligations stated
+#   scaffolder= generated boilerplate/wiring; no cross-seam guarantee
+#
+# evidence_tier:
+#   t0 = honest (claims ≤ CI checks; "scaffold" if codegen stubbed)
+#   t1 = sealed (FFI contract published; abi-verify drift gate green)
+#   t2 = end-to-end (real target toolchain compiles+runs generated code in CI)
+#   t3 = value-demonstrated (benchmark vs host-only baseline)
+#
+# language_level (estate languages only; external languages are "external"):
+#   l0 = named/spec   l1 = implemented+tested   l2 = ABI-stable+golden
+#   l3 = consumed outside the estate
+#
+# assessed: 2026-09-25. method: "inspected" = code/CI read directly;
+# "survey" = assessed from repo size, ATLAS note, and manifest surface.
+
+version = 1
+assessed = "2026-09-25"
+source_doc = "docs/FEASIBILITY.adoc"
+
+[[iser]]
+name = "chapeliser"
+language = "Chapel"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t2"
+method = "inspected"
+note = "Flagship. Provable lane green on main: idris2 --check, zig build test, golden codegen, generated Chapel compiled AND run via chpl. Multilocale >=2 nodes is the open deployment frontier."
+
+[[iser]]
+name = "futharkiser"
+language = "Futhark"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "inspected"
+note = "Easiest true T2->T3 win: futhark c backend is designed for this. Missing: CI lane installing the futhark compiler; benchmark gates; wrapper must own the manual C-API deallocation."
+
+[[iser]]
+name = "julianiser"
+language = "Julia"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Realistic for hot-loop extraction; '100x' claims need T3 benchmarks. GC + embedding (julia.h) has known sharp edges."
+
+[[iser]]
+name = "idrisiser"
+language = "Idris2"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Verified wrappers via extraction; obligations bind at the boundary. Overlaps with the family's own ABI-authority pattern — should converge with it."
+
+[[iser]]
+name = "otpiser"
+language = "Erlang/OTP"
+language_origin = "external"
+seam_class = "scaffolder"
+evidence_tier = "t1"
+method = "survey"
+note = "Supervision-tree boilerplate generator. Fault tolerance CANNOT cross a C ABI — classify as scaffolder; a BEAM island (NIF/port) is a service, and the README must not claim host fault tolerance."
+
+[[iser]]
+name = "ponyiser"
+language = "Pony"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Reference-capability guarantees hold inside the Pony island only. Host gets a concurrent service, not data-race freedom. README must say so."
+
+[[iser]]
+name = "dafniser"
+language = "Dafny"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Best case for guarantees surviving the seam: proofs survive extraction to C; preconditions remain boundary obligations the -iser must surface."
+
+[[iser]]
+name = "tlaiser"
+language = "TLA+/PlusCal"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Model checking is offline; counterexamples cross as data. Code->spec extraction is heuristic (undecidable in general). Reading traces REQUIRES TLA+ literacy — 'never learn the language' is impossible here."
+
+[[iser]]
+name = "alloyiser"
+language = "Alloy"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Same shape as tlaiser: model-finding service over specs derived from API descriptions."
+
+[[iser]]
+name = "lustreiser"
+language = "Lustre"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Synchronous dataflow islands; verified code generation exists in the Lustre toolchain itself. Real-time guarantees apply to the island."
+
+[[iser]]
+name = "halideiser"
+language = "Halide"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Schedule optimisation is expert knowledge; a manifest that elides schedules gets default (often slow) ones. T3 benchmarks essential."
+
+[[iser]]
+name = "bqniser"
+language = "BQN"
+language_origin = "external"
+seam_class = "scaffolder"
+evidence_tier = "t1"
+method = "survey"
+note = "Pattern detection + rewrite; value is idiom quality, not guarantees."
+
+[[iser]]
+name = "atsiser"
+language = "ATS"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Linear types over C: real, but only for code moved INTO ATS modules. Claim 'memory safety for the wrapped module', not 'for your C codebase'."
+
+[[iser]]
+name = "nimiser"
+language = "Nim"
+language_origin = "external"
+seam_class = "service"
+evidence_tier = "t1"
+method = "survey"
+note = "Nim -> C is first-class; straightforward wrapper generator territory."
+
+[[iser]]
+name = "verisimiser"
+language = "VeriSimDB"
+language_origin = "estate"
+seam_class = "service"
+language_level = "l1"
+evidence_tier = "t1"
+method = "survey"
+note = "Most-built estate -iser. A data service (drift/provenance/temporal) — positioning vs provenance-aware DB research needs a doc of its own."
+
+[[iser]]
+name = "a2mliser"
+language = "A2ML (DEED typed core)"
+language_origin = "estate"
+seam_class = "injector"
+language_level = "l1"
+evidence_tier = "t0"
+method = "inspected"
+note = "Satellite codegen is a stub while README promises DAG provenance chains — README debt. Hard core = canonical serialisation of TOML/YAML for signing; key distribution is the real product problem; must answer 'why not sigstore'. Consume the a2ml repo's Idris2 verifier, never re-implement."
+
+[[iser]]
+name = "k9iser"
+language = "K9 contracts"
+language_origin = "estate"
+seam_class = "injector"
+language_level = "l1"
+evidence_tier = "t0"
+method = "inspected"
+note = "must/trust/dust/intend is coherent and maps to the contractiles. Needs a real grammar (build on Nickel?), tier semantics (hunt/kennel/yard/estate) defined enforcement-wise, and mining that emits schemas/ranges, not frozen literals (committed samples over-fit one snapshot)."
+
+[[iser]]
+name = "eclexiaiser"
+language = "Eclexia"
+language_origin = "estate"
+seam_class = "injector"
+language_level = "l1"
+evidence_tier = "t1"
+method = "inspected"
+note = "Injector for typed energy/carbon units as data; scaffolder for enforcement (runtime budgets can only guard/report). Measurement noise is statistical; keep the language repo's compiler-stack roadmap decoupled from the -iser."
+
+[[iser]]
+name = "ephapaxiser"
+language = "Ephapax"
+language_origin = "estate"
+seam_class = "injector"
+language_level = "l1"
+evidence_tier = "t1"
+method = "survey"
+note = "Single-use/linear semantics CAN be enforced on host-side handle types (Rust #[must_use]/drop discipline) — one of the few genuinely injectable estate guarantees."
+
+[[iser]]
+name = "affinescriptiser"
+language = "AffineScript"
+language_origin = "estate"
+seam_class = "injector"
+language_level = "l1"
+evidence_tier = "t1"
+method = "survey"
+note = "Same handle-based argument as ephapaxiser, WASM-targeted."
+
+[[iser]]
+name = "typedqliser"
+language = "TypedQL"
+language_origin = "estate"
+seam_class = "scaffolder"
+language_level = "l0"
+evidence_tier = "t0"
+method = "survey"
+note = "10 graded type-safety levels without a host-side type checker is a schema/lint tier at best today."
+
+[[iser]]
+name = "betlangiser"
+language = "Betlang"
+language_origin = "estate"
+seam_class = "scaffolder"
+language_level = "l0"
+evidence_tier = "t0"
+method = "survey"
+note = "Probabilistic semantics cannot be bolted onto deterministic host code; needs host cooperation. A modelling/reporting layer, not an aspect."
+
+[[iser]]
+name = "oblibeniser"
+language = "Oblíbený"
+language_origin = "estate"
+seam_class = "scaffolder"
+language_level = "l1"
+evidence_tier = "t0"
+method = "survey"
+note = "Reversibility requires transactional capture at the operation site — host-side restructuring, not seam injection."
+
+[[iser]]
+name = "phronesiser"
+language = "Phronesis"
+language_origin = "estate"
+seam_class = "scaffolder"
+language_level = "l1"
+evidence_tier = "t0"
+method = "survey"
+note = "RENAME THE GUARANTEE: 'enforced policy constraints', not 'provably safe ethical constraints' — ethics is not a theorem, and the overclaim invites the exact criticism that would sink the credible parts."
+
+[[iser]]
+name = "wokelangiser"
+language = "WokeLang"
+language_origin = "estate"
+seam_class = "scaffolder"
+language_level = "l0"
+evidence_tier = "t0"
+method = "survey"
+note = "Consent flows + accessibility are libraries/patterns/audits, not a language seam."
+
+[[iser]]
+name = "mylangiser"
+language = "My-Lang"
+language_origin = "estate"
+seam_class = "scaffolder"
+language_level = "l1"
+evidence_tier = "t0"
+method = "survey"
+note = "The language core is proved sound twice (Coq + Idris2, CI-gated) — strong; the -iser should surface THAT, and converge with the idrisiser/ABI-authority story."
+
+[[iser]]
+name = "anvomidaviser"
+language = "Anvomidav"
+language_origin = "estate"
+seam_class = "scaffolder"
+language_level = "l1"
+evidence_tier = "t0"
+method = "survey"
+note = "Domain DSL (figure skating choreography). Charming, harmless, no external constituency — keep at maintenance tier."
+
+[[iser]]
+name = "squeakwell"
+language = "SqueakWell (cross-modal constraint propagation)"
+language_origin = "estate"
+seam_class = "service"
+language_level = "l1"
+evidence_tier = "t0"
+method = "survey"
+note = "Recovery service over databases; keep decoupled from the seam thesis."
+
+[[iser]]
+name = "iseriser"
+language = "(meta-framework)"
+language_origin = "estate"
+seam_class = "injector"
+language_level = "l2"
+evidence_tier = "t2"
+method = "inspected"
+note = "The factory: scaffolds repos, cartridges, and the abi-emit-manifest/abi-verify drift gate (the family's most reusable artifact). Its Idris2 proofs are real but modest (enum injectivity, scaffold-model conformance) — 'formally verified' in READMEs must refer to exactly these. Phase 4 self-hosting feasible; Phase 5 proof-of-templates is research-grade."
