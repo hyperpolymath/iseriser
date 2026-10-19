@@ -71,6 +71,16 @@ pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<ScaffoldRes
 
 /// Validate, scaffold, and write the -iser repository only, without its
 /// boj-server cartridge.
+///
+/// Writes to `<output_dir>/<iser_name>/`, where `iser_name` is derived from
+/// `manifest.language.name`. Existing generated files are overwritten.
+/// Returns [`ScaffoldResult::Success`] containing the repository's root path
+/// and generated file contents.
+///
+/// # Errors
+///
+/// Returns an error if semantic validation fails or output directories cannot
+/// be created or files written. A write failure may leave partial output.
 pub fn generate_repo_only(manifest: &Manifest, output_dir: &str) -> Result<ScaffoldResult> {
     // Step 1: Deep validation
     let report = parser::validate_or_bail(manifest)?;
@@ -107,7 +117,17 @@ pub fn generate_repo_only(manifest: &Manifest, output_dir: &str) -> Result<Scaff
 /// `cartridges/domains/<domain>/`; the cartridge vendors the ADR-0006
 /// invoke-shim at `ffi/cartridge_shim.zig` and so builds wherever it sits.
 ///
+/// Here, `iser_name` is derived from `manifest.language.name`. Existing
+/// generated files are overwritten. Returns
+/// [`cartridge::CartridgeScaffoldResult::Success`] containing the cartridge's
+/// root path and generated file contents.
+///
 /// See `cartridge` module docs and standards#89 Phase 2b for context.
+///
+/// # Errors
+///
+/// Returns an error if semantic validation fails or output directories cannot
+/// be created or files written. A write failure may leave partial output.
 pub fn generate_cartridge(
     manifest: &Manifest,
     output_dir: &str,
