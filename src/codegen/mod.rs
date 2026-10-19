@@ -93,10 +93,7 @@ pub fn generate_repo_only(manifest: &Manifest, output_dir: &str) -> Result<Scaff
             );
         }
         _ => {
-            anyhow::bail!(
-                "{}",
-                result.error_message().unwrap_or("unknown error")
-            );
+            anyhow::bail!("{}", result.error_message().unwrap_or("unknown error"));
         }
     }
 
@@ -132,10 +129,7 @@ pub fn generate_cartridge(
             );
         }
         _ => {
-            anyhow::bail!(
-                "{}",
-                result.error_message().unwrap_or("unknown error")
-            );
+            anyhow::bail!("{}", result.error_message().unwrap_or("unknown error"));
         }
     }
 
