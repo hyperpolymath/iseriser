@@ -34,7 +34,8 @@ workflows:
         - 'softprops/action-gh-release@v3.0.3'
     '.github/workflows/rhodibot.yml':
         - 'actions/checkout@v7.0.1'
-    '.github/workflows/rust-ci.yml': []
+    '.github/workflows/rust-ci.yml':
+        - 'hyperpolymath/standards@95de3dfc3fcf09a1cf3325ab42723e3d81682b45'
     '.github/workflows/scorecard.yml': []
     '.github/workflows/secret-scanner.yml': []
     '.github/workflows/static-analysis-gate.yml':
@@ -48,6 +49,11 @@ dependencies:
         commit: 'sha1-55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         owner_id: 44036562
         repo_id: 215566462
+    'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1':
+        ref: '3d3c42e5aac5ba805825da76410c181273ba90b1'
+        commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
+        owner_id: 44036562
+        repo_id: 197814629
     'actions/checkout@v7.0.1':
         ref: 'v7.0.1'
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -85,6 +91,11 @@ dependencies:
         repo_id: 496012378
         uses:
             - 'actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f'
+    'dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f':
+        ref: 'v1'
+        commit: 'sha1-e2a55d2ffb04f378e9626c28d38b36d230d1e12f'
+        owner_id: 1940490
+        repo_id: 260749683
     'erlef/setup-beam@v1.24.1':
         ref: 'v1.24.1'
         commit: 'sha1-54075bcc5e249e4758d363f27d099f55d843f124'
@@ -95,6 +106,11 @@ dependencies:
         commit: 'sha1-24c54180a607b1449ed407dd24f251e4e9147c8d'
         owner_id: 9919
         repo_id: 259445878
+    'goto-bus-stop/setup-zig@abea47f85e598557f500fa1fd2ab7464fcb39406':
+        ref: 'abea47f85e598557f500fa1fd2ab7464fcb39406'
+        commit: 'sha1-abea47f85e598557f500fa1fd2ab7464fcb39406'
+        owner_id: 1006268
+        repo_id: 212984112
     'haskell-actions/setup@v2.12.0':
         ref: 'v2.12.0'
         commit: 'sha1-6037f33647c3f17758a2356c80fc4a53d7e0685d'
@@ -105,6 +121,16 @@ dependencies:
         commit: 'sha1-22e7bdb322c430c1d0dac6b3bb307f4bb139d0be'
         owner_id: 6759885
         repo_id: 1352485172
+    'hyperpolymath/standards@95de3dfc3fcf09a1cf3325ab42723e3d81682b45':
+        ref: '95de3dfc3fcf09a1cf3325ab42723e3d81682b45'
+        commit: 'sha1-95de3dfc3fcf09a1cf3325ab42723e3d81682b45'
+        owner_id: 6759885
+        repo_id: 1116521501
+        uses:
+            - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+            - 'dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f'
+            - 'goto-bus-stop/setup-zig@abea47f85e598557f500fa1fd2ab7464fcb39406'
+            - 'swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6'
     'peter-evans/repository-dispatch@v4.0.1':
         ref: 'v4.0.1'
         commit: 'sha1-28959ce8df70de7be546dd1250a005dd32156697'
@@ -115,3 +141,8 @@ dependencies:
         commit: 'sha1-efb35369e0ad2afab669f228072c1b0d510eae64'
         owner_id: 2242
         repo_id: 204253808
+    'swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6':
+        ref: '6323deb102c322ba6fcbdcafc7e3dddab59af2b6'
+        commit: 'sha1-6323deb102c322ba6fcbdcafc7e3dddab59af2b6'
+        owner_id: 580492
+        repo_id: 298565987
