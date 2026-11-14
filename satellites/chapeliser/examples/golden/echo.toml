@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: MPL-2.0
+# Golden sample — a trivial "echo" workload whose only purpose is to let CI
+# machine-verify the FULL Chapeliser pipeline end to end:
+#   codegen (Rust) -> Chapel compile (chpl) -> link FFI stub -> run.
+#
+# It deliberately uses the simplest strategies (per-item / merge) so the
+# generated Chapel exercises the core distribution path WITHOUT pulling in
+# optional modules (BlockDist, DynamicIters, AtomicObjects). Keeping the
+# compile surface minimal makes this a stable verification fixture.
+#
+# Verified by: .github/workflows/provable.yml (chapel-golden job).
+
+[workload]
+name = "echo"
+entry = "examples/golden/echo.rs::echo"
+partition = "per-item"
+gather = "merge"
+
+[data]
+input-type = "Vec<Bytes>"
+output-type = "Vec<Bytes>"
+serialization = "raw"
+max-item-bytes = 4096
+
+[scaling]
+min-nodes = 1
+max-nodes = 4
+grain-size = 1
+expected-items = 8

@@ -1,0 +1,85 @@
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>chapeliser — Chapel acceleration without learning Chapel</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6;padding:2rem}
+.container{max-width:720px;margin:0 auto}
+h1,h2,h3{font-family:"JetBrains Mono",Consolas,"Courier New",monospace;color:#58a6ff}
+h1{font-size:2.2rem;margin-bottom:.3rem}
+.tagline{color:#8b949e;font-size:1.1rem;margin-bottom:1.5rem}
+.badge{display:inline-block;padding:.2rem .5rem;border-radius:3px;font-size:.75rem;font-weight:600;margin-right:.4rem;text-decoration:none}
+.badge-license{background:#1f6feb;color:#fff}
+.badge-crates{background:#fc8d62;color:#fff}
+.badges{margin-bottom:1.8rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:1rem;overflow-x:auto;margin:1rem 0;color:#e6edf3;font-size:.9rem}
+code{font-family:"JetBrains Mono",Consolas,monospace}
+h2{font-size:1.3rem;margin-top:1.8rem;margin-bottom:.6rem;border-bottom:1px solid #21262d;padding-bottom:.3rem}
+ul{margin:.5rem 0 .5rem 1.5rem}
+li{margin:.3rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.links{margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap}
+.links a{border:1px solid #30363d;padding:.4rem 1rem;border-radius:6px;font-size:.9rem}
+.links a:hover{border-color:#58a6ff}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d;color:#484f58;font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>chapeliser</h1>
+<p class="tagline">Scale single-machine apps to distributed clusters without learning Chapel.</p>
+<div class="badges">
+  <a class="badge badge-license" href="https://github.com/hyperpolymath/palimpsest-license">PMPL-2.0</a>
+  <a class="badge badge-crates" href="https://crates.io/crates/chapeliser">crates.io</a>
+</div>
+
+<h2>Install</h2>
+<pre><code>cargo install chapeliser</code></pre>
+
+<h2>What It Does</h2>
+<p>Chapeliser is a general-purpose Chapel acceleration framework. Describe your workload
+in a <code>chapeliser.toml</code> manifest, point it at your code, and it generates the
+distributed scaffolding — Chapel <code>coforall</code> loops, data partitioning, result
+gathering, and the ABI/FFI bridge between your application and the Chapel runtime.</p>
+
+<h2>Features</h2>
+<ul>
+  <li>Manifest-driven — describe what to distribute in TOML, not how</li>
+  <li>Idris2 ABI with formal proofs of data layout and partition safety</li>
+  <li>Zig FFI bridge to Chapel runtime with zero runtime overhead</li>
+  <li>Works with Rust, C, and Zig applications</li>
+  <li>Scales from 1 node (local) to 256+ nodes (cluster)</li>
+  <li>No Chapel expertise required</li>
+</ul>
+
+<h2>Quick Example</h2>
+<pre><code>[workload]
+name = "my-scanner"
+entry = "src/batch.rs::scan_all"
+partition = "per-item"
+gather = "merge"
+
+[scaling]
+min-nodes = 1
+max-nodes = 256
+grain-size = 50</code></pre>
+
+<div class="links">
+  <a href="https://github.com/hyperpolymath/chapeliser">GitHub</a>
+  <a href="https://crates.io/crates/chapeliser">crates.io</a>
+  <a href="https://github.com/hyperpolymath/iseriser">-iser family</a>
+</div>
+
+<footer>
+  Part of the <a href="https://hyperpolymath.github.io/iseriser/">-iser acceleration family</a>.
+  Licensed under <a href="https://github.com/hyperpolymath/palimpsest-license">PMPL-2.0-or-later</a>.
+</footer>
+</div>
+</body>
+</html>

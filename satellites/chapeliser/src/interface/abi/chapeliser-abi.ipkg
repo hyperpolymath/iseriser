@@ -1,0 +1,17 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the chapeliser ABI formal proofs.
+-- Build/check with:  idris2 --build chapeliser-abi.ipkg   (from src/interface/abi/)
+package chapeliser-abi
+
+sourcedir = "."
+
+depends = contrib
+
+modules = Chapeliser.ABI.Types
+        , Chapeliser.ABI.Layout
+        , Chapeliser.ABI.Foreign
+        , Chapeliser.ABI.Proofs
+        , Chapeliser.ABI.Partition
+        , Chapeliser.ABI.Invariants
+        , Chapeliser.ABI.FfiSeam
+        , Chapeliser.ABI.Capstone

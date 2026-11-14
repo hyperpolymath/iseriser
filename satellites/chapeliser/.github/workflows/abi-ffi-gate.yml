@@ -1,0 +1,52 @@
+# This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# This workflow is managed by gh actions-lock.
+# This workflow is managed by gh actions-lock.
+# abi-ffi-gate.yml — enforce that the Zig FFI conforms to the Idris2 ABI.
+#
+# The Idris2 ABI (src/interface/abi) is the source of truth. This gate fails if
+# the Zig FFI (src/interface/ffi) drifts from it: a declared C function with no
+# export, a mismatched result-code map, or an unrendered template token. A
+# second job builds + tests the Zig FFI under the pinned Zig 0.14.0.
+name: ABI-FFI Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    name: ABI ↔ FFI structural conformance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install Julia 1.11.5
+        run: |
+          curl --proto "=https" --proto-redir "=https" --tlsv1.2 -fsSL https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-1.11.5-linux-x86_64.tar.gz -o /tmp/julia.tar.gz
+          # Official julialang-s3.julialang.org/bin/checksums/julia-1.11.5.sha256
+          echo '723e878c642220cc0251a0e13758c059a389cadc7f01376feaf1ea7388fe8f9c  /tmp/julia.tar.gz' | sha256sum --check --strict
+          tar -xf /tmp/julia.tar.gz -C /tmp
+          echo "/tmp/julia-1.11.5/bin" >> "$GITHUB_PATH"
+      - name: Run ABI-FFI gate
+        run: |
+          julia --version   # confirms the pinned 1.11.5 is on PATH, not the runner default
+          julia scripts/abi-ffi-gate.jl
+
+  zig-build:
+    name: Zig FFI builds + tests (Zig 0.14.0)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install Zig 0.14.0
+        run: |
+          curl --proto "=https" --proto-redir "=https" --tlsv1.2 -fsSL https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz -o /tmp/zig.tar.xz
+          # Official ziglang.org/download/index.json: 0.14.0 / x86_64-linux
+          echo '473ec26806133cf4d1918caf1a410f8403a13d979726a9045b421b685031a982  /tmp/zig.tar.xz' | sha256sum --check --strict
+          tar -xf /tmp/zig.tar.xz -C /tmp
+          echo "/tmp/zig-linux-x86_64-0.14.0" >> "$GITHUB_PATH"
+      - name: zig test FFI
+        run: zig test src/interface/ffi/src/main.zig -lc

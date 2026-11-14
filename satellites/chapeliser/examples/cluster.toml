@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: MPL-2.0
+# Example cluster configuration for Chapeliser.
+#
+# Pass this to: chapeliser run --cluster cluster.toml -n 4
+#
+# Chapeliser translates these settings into Chapel/GASNet environment
+# variables for multi-node execution.
+
+# Communication layer: "gasnet" (default), "ofi" (libfabric), "ugni" (Cray)
+comm = "gasnet"
+
+# How to spawn processes on remote nodes: "S" = SSH (default), "L" = local
+spawn = "S"
+
+# List of hostnames/IPs in the cluster
+servers = [
+  "node01.cluster.local",
+  "node02.cluster.local",
+  "node03.cluster.local",
+  "node04.cluster.local",
+]
+
+# Optional: SSH key for passwordless access
+# ssh-key = "/home/user/.ssh/cluster_key"
+
+# Optional: threads per Chapel locale (default: all available cores)
+# threads-per-locale = 16

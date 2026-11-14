@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: MPL-2.0
+# Chapeliser manifest for panic-attacker's mass-panic (assemblyline) mode.
+# Distributes static analysis of hundreds of repositories across a Chapel cluster.
+
+[workload]
+name = "mass-panic"
+entry = "src/assemblyline.rs::scan_repo"
+partition = "per-item"
+gather = "merge"
+
+[data]
+input-type = "Vec<PathBuf>"
+output-type = "Vec<AssailReport>"
+serialization = "bincode"
+max-item-bytes = 10485760  # 10MB max per serialized AssailReport
+
+[scaling]
+min-nodes = 1
+max-nodes = 64
+grain-size = 5              # 5 repos per Chapel task (repos vary in size)
+expected-items = 500        # ~500 repos in hyperpolymath org
+
+[resilience]
+retries = 2
+checkpoint = true
+checkpoint-interval-secs = 120
+redistribute-on-failure = true
+
+# [chapel]
+# compiler-flags = ["--fast", "--cache-remote"]
+# comm-layer = "gasnet-udp"

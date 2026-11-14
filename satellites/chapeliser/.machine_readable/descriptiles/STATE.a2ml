@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Chapeliser project state
+[metadata]
+project = "chapeliser"
+version = "0.1.0"
+last-updated = "2026-06-18"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Chapeliser"
+purpose = """General-purpose Chapel acceleration framework"""
+completion-percentage = 45
+
+[position]
+phase = "testing"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Idris2/Zig/Chapel toolchains unavailable in the local dev sandbox — proofs, FFI, and generated Chapel are now machine-checked in CI (.github/workflows/provable.yml) rather than locally.",
+  "provable.yml has not yet had a green run — until it does, the Idris2 proofs, Zig FFI build, and golden Chapel compile/run are written but not confirmed (ROADMAP Phase 1b).",
+]
+
+[critical-next-actions]
+actions = [
+  "Drive .github/workflows/provable.yml to green (idris2-proofs, zig-ffi, codegen-drift, chapel-golden).",
+  "Add golden samples for the remaining partition/gather strategies and multi-locale runs.",
+  "Add shell completions (bash, zsh, fish).",
+]
+
+[maintenance-status]
+last-run-utc = "2026-06-18T00:00:00Z"
+last-result = "warn"  # unknown | pass | warn | fail — Rust layer green (63 tests); provable.yml pending first run
+
+[language-portfolio-audit-20260907]
+scope = "Evidence audit and scoped repairs; no blanket readiness upgrade"
+report = "https://github.com/hyperpolymath/nextgen-languages/blob/161df54/docs/audits/2026-09-07-language-portfolio.md"
+metadata-path = ".machine_readable/descriptiles/"

@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= Golden sample — end-to-end verification fixture
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:icons: font
+
+This directory is the *provable-real* fixture for Chapeliser: the one workload
+that CI takes all the way from manifest to a running Chapel binary.
+
+== Why it exists
+
+Most of Chapeliser is exercised by Rust unit/integration tests. But the whole
+point of the tool — _generate Chapel, compile it, run it_ — can only be proven
+by actually invoking `chpl`. This fixture closes that loop in CI
+(`.github/workflows/provable.yml`, job `chapel-golden`).
+
+== Contents
+
+[cols="1,3"]
+|===
+| `echo.toml` | A deliberately minimal manifest: `per-item` partition,
+`merge` gather. These are the simplest strategies, so the generated Chapel
+pulls in *no* optional modules (no `BlockDist`, `DynamicIters`, or
+`AtomicObjects`) — keeping the compile surface small and stable.
+
+| `generated/` | The Chapel wrapper, Zig FFI bridge, C header and build script
+produced by `chapeliser generate -m echo.toml`. Committed so the output is
+reviewable and drift-checked. CI regenerates and `diff`s against this tree
+(job `codegen-drift`) — if they differ, the build fails.
+
+| `ffi_stub.c` | A ~60-line C implementation of the 12 `c_*` FFI functions for
+a trivial echo workload (8 items, copy input to output). Stands in for real
+user code so the generated Chapel can be linked and run.
+|===
+
+== Reproduce locally
+
+[source,bash]
+----
+# 1. (Re)generate — must match the committed generated/ tree:
+cargo run -- generate -m examples/golden/echo.toml -o examples/golden/generated
+
+# 2. Compile the generated Chapel against the echo FFI stub (needs chpl + cc):
+chpl --main-module echo_Distributed \
+  examples/golden/generated/chapel/echo_distributed.chpl \
+  examples/golden/ffi_stub.c \
+  -o /tmp/echo_distributed
+
+# 3. Run on a single locale — expect "Gathered 8/8 results (merge)":
+/tmp/echo_distributed -nl1
+----
+
+== What this proves
+
+* The Rust codegen emits Chapel that a real `chpl` accepts (not just
+  "structurally plausible" Chapel).
+* The C-ABI contract between the generated Chapel `extern proc` declarations
+  and the FFI layer links cleanly.
+* The per-item / merge distribution path runs to completion and conserves all
+  items (8 in, 8 gathered).
+
+It does *not* prove multi-locale (`-nl>1`) behaviour or the other four
+partition/gather strategies; those are future fixtures (see `ROADMAP.adoc`).
