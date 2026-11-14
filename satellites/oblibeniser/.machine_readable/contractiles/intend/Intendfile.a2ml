@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MPL-2.0
+# Intendfile — Design intent declarations for oblibeniser
+# Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+@abstract:
+What oblibeniser INTENDS to become. These are bespoke design goals
+specific to the Reversible computation and audit trails domain.
+@end
+
+## Domain-Specific Intent
+
+### event-sourcing-native\n- description: Generated wrappers should produce full event-sourcing audit logs\n- target: CQRS-compatible event streams\n- status: aspiration\n\n### time-travel-debugging\n- description: Support stepping backwards through operation history\n- target: Deterministic replay from any checkpoint\n- status: aspiration
+
+## Cross-Cutting Intent
+
+### iser-ecosystem-compatibility
+- description: Must interoperate with other -iser projects via shared ABI
+- target: Idris2 ABI + Zig FFI standard interface
+- status: in-progress
+
+### proven-integration
+- description: All formal proofs should be verifiable by the proven framework
+- target: Integration with hyperpolymath/proven
+- status: aspiration

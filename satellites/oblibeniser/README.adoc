@@ -1,0 +1,113 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Oblibeniser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+Oblibeniser makes operations **reversible and auditable** via
+https://github.com/hyperpolymath/nextgen-languages[Oblíbený] — a nextgen
+language where every computation has an automatic inverse.
+
+Oblíbený (Czech: "favourite") is a Turing-incomplete language focused on
+reversible computing. Every operation has a provable inverse, enabling undo,
+audit trails, and time-travel debugging. Oblibeniser wraps existing operations
+in these guarantees.
+
+== How It Works
+
+Describe your operations in `oblibeniser.toml`. Oblibeniser:
+
+1. **Parses the manifest** — captures which mutations you want to make reversible
+2. **Generates inverse functions** — every forward operation gets an automatic undo
+3. **Produces an audit trail** — who mutated what, when, with cryptographic proof
+4. **Emits Oblíbený codegen** — reversible wrappers in the target language
+
+.Pipeline
+[source]
+----
+source operation → inverse generation → audit trail → Oblíbený codegen
+----
+
+== Key Value
+
+* **Every mutation has an undo** — database writes, file changes, config updates, API calls
+* **Every state change is auditable** — cryptographic proof of who authorised what, when
+* **Termination guaranteed** — Turing-incompleteness proves no infinite loops
+* **Time-travel debugging** — replay and reverse any sequence of operations
+* **Hostile-environment safe** — designed for zero-trust deployment with post-quantum audit trails
+
+== Use Cases
+
+Database migrations::
+  Generate reversible migrations with proven undo. Roll back a failed deployment
+  to the exact prior state without manual intervention.
+
+Financial transactions::
+  Every debit has a credit inverse. Full audit trail for regulatory compliance.
+  Reconstruct account state at any historical point.
+
+Config management::
+  Track every configuration change with automatic rollback. Know who changed what
+  setting, when, and restore previous state in one command.
+
+Compliance auditing::
+  Immutable, cryptographically signed audit logs. Prove to auditors that every
+  action was authorised and every change is reversible.
+
+Infrastructure-as-code::
+  Reversible infrastructure mutations with automatic teardown inverses.
+  Failed deployments roll back cleanly.
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern:
+
+[source]
+----
+manifest (oblibeniser.toml)
+  → Idris2 ABI proof (ReversibleOperation, InverseProof, AuditEntry)
+  → Zig FFI bridge (C-ABI compatible)
+  → Oblíbený codegen (reversible wrappers in target language)
+----
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family].
+
+=== Reversible Computing Core
+
+Oblibeniser's core abstraction is the `ReversibleOperation`:
+
+* Every `forward` function has a matching `inverse`
+* An `InverseProof` (Idris2 dependent type) proves `inverse(forward(x)) = x`
+* `AuditEntry` records capture the operation, actor, timestamp, and state snapshot
+* `UndoStack` maintains an ordered history enabling time-travel
+
+== Quick Start
+
+[source,bash]
+----
+# Initialise a manifest
+oblibeniser init
+
+# Edit oblibeniser.toml to describe your operations
+
+# Validate
+oblibeniser validate
+
+# Generate reversible wrappers
+oblibeniser generate
+
+# Build
+oblibeniser build
+----
+
+== Status
+
+**Pre-alpha.** Architecture defined, CLI scaffolded, codegen stubs in place.
+ABI types and FFI bridge pending bespoke reversible-computing implementation.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

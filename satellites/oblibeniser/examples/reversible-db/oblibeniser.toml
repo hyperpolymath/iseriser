@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: MPL-2.0
+# Example: Reversible database operations via Oblíbený.
+#
+# This manifest demonstrates all three inverse strategies applied to
+# common database operations. Run with:
+#   oblibeniser generate --manifest examples/reversible-db/oblibeniser.toml
+
+[project]
+name = "reversible-db"
+version = "0.1.0"
+description = "A database layer with fully reversible CRUD operations"
+
+# INSERT: Mirror strategy — inverse is DELETE by key.
+[[operations]]
+name = "db_insert"
+forward-fn = "db::insert"
+params = ["table:String", "key:String", "value:Vec<u8>"]
+inverse-strategy = "mirror"
+
+# DELETE: Mirror strategy — inverse is INSERT with the deleted data.
+[[operations]]
+name = "db_delete"
+forward-fn = "db::delete"
+params = ["table:String", "key:String"]
+inverse-strategy = "mirror"
+
+# UPDATE: Log-replay strategy — records old values and replays them backwards.
+[[operations]]
+name = "db_update"
+forward-fn = "db::update"
+params = ["table:String", "key:String", "field:String", "new_value:String"]
+inverse-strategy = "log-replay"
+
+# BATCH UPDATE: Log-replay — records each individual change in the batch.
+[[operations]]
+name = "db_batch_update"
+forward-fn = "db::batch_update"
+params = ["table:String", "updates:Vec<UpdatePair>"]
+inverse-strategy = "log-replay"
+
+# SCHEMA MIGRATION: Snapshot — captures full DB state before migration.
+[[operations]]
+name = "schema_migrate"
+forward-fn = "schema::migrate"
+params = ["target_version:u32"]
+inverse-strategy = "snapshot"
+
+# TRUNCATE: Snapshot — only safe inverse is full state restore.
+[[operations]]
+name = "db_truncate"
+forward-fn = "db::truncate"
+params = ["table:String"]
+inverse-strategy = "snapshot"
+
+[audit]
+hash-chain = true
+storage = "file"
+max-entries = 50000
+
+[undo]
+max-depth = 200
+auto-checkpoint-interval = 25
