@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Threat Model: VeriSimiser
+:toc:
+:icons: font
+
+== Overview
+
+VeriSimiser augments existing databases with its fixed eight-concern Octad
+(ADR-0004/ADR-0014), drawing capability from VeriSimDB's upstream
+eight-modality Octad. It sits between applications and their databases,
+intercepting reads and writes to maintain provenance chains, temporal
+versions, and drift indices, and — once implemented — Tier 2 overlay
+modalities.
+
+== Trust Boundaries
+
+=== Target Database
+
+The target database is *not* under VeriSimiser's control. VeriSimiser observes
+it but must never corrupt it.
+
+* **Threat**: VeriSimiser bug writes to target database tables.
+* **Mitigation**: Tier 1 sidecar isolation (proven in Idris2 ABI). Tier 1
+  operations use read-only database connections. Zig FFI enforces write
+  isolation at the C-ABI boundary.
+
+=== Sidecar Storage
+
+Provenance chains, temporal snapshots, and drift indices are stored in
+external sidecars (SQLite files, VeriSimDB instances, or flat files).
+
+* **Threat**: Sidecar tampering (modifying or deleting provenance records).
+* **Mitigation**: SHA-256 hash chains are append-only. Each record hashes
+  the previous record, making tampering detectable. Chain verification is
+  available via `verisimiser provenance --verify`.
+
+=== Interception Layer
+
+VeriSimiser intercepts database events via CDC, triggers, or hooks.
+
+* **Threat**: Interception misses events, leading to incomplete provenance.
+* **Mitigation**: Backend-specific strategies chosen for reliability.
+  PostgreSQL logical replication is the gold standard. Application-level
+  hooks are fallback only.
+
+=== VCL-total Queries
+
+Type-safe queries cross both Tier 1 and Tier 2 boundaries.
+
+* **Threat**: Query injection via malformed VCL-total strings.
+* **Mitigation**: VCL-total queries are parsed and type-checked before execution.
+  TypedQLiser provides compile-time validation. No string interpolation into
+  backend queries.
+
+== Drift Detection Integrity
+
+* **Threat**: False negatives in drift detection (inconsistencies not flagged).
+* **Mitigation**: 8-category drift classification ensures comprehensive coverage.
+  Idris2 ABI proofs cover the detector's invariants; the taxonomy is
+  exhaustive over the eight categories.
+
+== Data at Rest
+
+* **Threat**: Sensitive data in sidecar storage (provenance snapshots may contain
+  entity state).
+* **Mitigation**: Sidecar encryption is configurable. Temporal snapshots respect
+  retention policies and are auto-pruned.

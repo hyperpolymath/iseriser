@@ -1,0 +1,184 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# Release workflow — triggered by version tags (v*).
+# Builds artifacts, generates changelog via git-cliff, creates a GitHub Release,
+# and produces SLSA provenance attestations.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            archive_ext: tar.gz
+            bin_ext: ''
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-latest
+            archive_ext: tar.gz
+            bin_ext: ''
+            use_cross: true
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+            archive_ext: tar.gz
+            bin_ext: ''
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
+            archive_ext: zip
+            bin_ext: '.exe'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@4be9e76fd7c4901c61fb841f559994984270fce7 # pinned
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+
+      - name: Install cross (linux-aarch64 only)
+        if: matrix.use_cross
+        run: cargo install cross --locked --version '~0.2'
+
+      - name: Build release binary
+        shell: bash
+        run: |
+          if [ "${{ matrix.use_cross }}" = "true" ]; then
+            cross build --release --target "${{ matrix.target }}"
+          else
+            cargo build --release --target "${{ matrix.target }}"
+          fi
+
+      - name: Package archive
+        shell: bash
+        run: |
+          BIN="target/${{ matrix.target }}/release/verisimiser${{ matrix.bin_ext }}"
+          STAGE="verisimiser-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          mkdir -p "$STAGE"
+          cp "$BIN" "$STAGE/"
+          cp LICENSE "$STAGE/" || true
+          cp README.adoc "$STAGE/" || true
+          if [ "${{ matrix.archive_ext }}" = "zip" ]; then
+            7z a "$STAGE.zip" "$STAGE"
+            echo "ARTIFACT=$STAGE.zip" >> "$GITHUB_ENV"
+          else
+            tar -czf "$STAGE.tar.gz" "$STAGE"
+            echo "ARTIFACT=$STAGE.tar.gz" >> "$GITHUB_ENV"
+          fi
+          ( cd . && sha256sum "$ARTIFACT" 2>/dev/null || shasum -a 256 "$ARTIFACT" ) > "$ARTIFACT.sha256"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-${{ matrix.target }}
+          path: |
+            ${{ env.ARTIFACT }}
+            ${{ env.ARTIFACT }}.sha256
+          retention-days: 7
+
+  changelog:
+    name: Generate Changelog
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changelog: ${{ steps.cliff.outputs.content }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Install git-cliff
+        run: |
+          curl -sSfL https://github.com/orhun/git-cliff/releases/latest/download/git-cliff-$(uname -m)-unknown-linux-gnu.tar.gz \
+            | tar -xz --strip-components=1 -C /usr/local/bin/ git-cliff-*/git-cliff
+
+      - name: Generate changelog for this release
+        id: cliff
+        run: |
+          # Generate changelog for the current tag only
+          CHANGELOG=$(git cliff --latest --strip header)
+          # Write to output using delimiter to handle multiline
+          {
+            echo "content<<CLIFF_EOF"
+            echo "$CHANGELOG"
+            echo "CLIFF_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update full CHANGELOG.md
+        run: |
+          git cliff --output CHANGELOG.md
+
+      - name: Upload updated CHANGELOG.md
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: changelog
+          path: CHANGELOG.md
+          retention-days: 5
+
+  release:
+    name: Create GitHub Release
+    needs: [build, changelog]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: artifacts
+          pattern: release-*
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v2
+        with:
+          body: ${{ needs.changelog.outputs.changelog }}
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+          generate_release_notes: false
+          files: |
+            artifacts/*.tar.gz
+            artifacts/*.zip
+            artifacts/*.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  provenance:
+    name: SLSA Provenance
+    needs: [build]
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      id-token: write
+      contents: write
+    # SLSA generator must run in a separate, isolated workflow
+    # See: https://slsa.dev/spec/v1.0/requirements#build-l3
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: ""
+      # TODO: Replace with actual artifact hashes
+      # Generate with: sha256sum artifact | base64 -w0
+      # base64-subjects: "${{ needs.build.outputs.hashes }}"
