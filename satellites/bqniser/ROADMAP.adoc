@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= bqniser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`bqniser.toml`)
+* [x] Codegen stubs
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI bridge stubs
+* [x] README with architecture
+
+== Phase 1: Pattern Detection Engine
+* [ ] AST parser for Rust source (syn-based)
+* [ ] Loop pattern classifier (for/while/iter → BQN primitive candidates)
+* [ ] Map/filter/fold detection (`.map()`, `.filter()`, `.fold()`)
+* [ ] Accumulate/scan detection (running sums, prefix operations)
+* [ ] Index-heavy code detection (nested indexing → `⊏` select)
+* [ ] Reshape/transpose detection (dimension manipulation → `⥊` / `⍉`)
+* [ ] Pattern confidence scoring (high/medium/low likelihood of speedup)
+* [ ] Unit tests for each pattern class
+
+== Phase 2: BQN Codegen
+* [ ] BQN expression emitter (arithmetic, comparison, boolean primitives)
+* [ ] Train builder (2-train, 3-train composition)
+* [ ] Under (`⌾`) combinator for structural transforms
+* [ ] Modifier application (`¨` each, `⌜` table, `´` fold, `` ` `` scan)
+* [ ] Replicate (`/`) with boolean mask generation
+* [ ] Grade (`⍋` `⍒`) for sort-equivalent patterns
+* [ ] Join (`∾`) for concatenation chains
+* [ ] Reshape (`⥊`) for dimension manipulation
+* [ ] Tacit style optimisation (remove unnecessary variables)
+* [ ] `.bqn` file output with comments mapping back to source lines
+
+== Phase 3: CBQN Integration
+* [ ] Zig FFI bridge to CBQN C API (`BQN_NewEval`, `BQN_Call`, `BQN_ReadF64Arr`)
+* [ ] BQN value lifecycle management (create, access, free)
+* [ ] Array header + shape + data layout (matching Idris2 ABI proofs)
+* [ ] Numeric array round-trip (Rust `Vec<f64>` -> BQN array -> Rust `Vec<f64>`)
+* [ ] String and character array support
+* [ ] Namespace/scope management for multi-expression programs
+* [ ] Error propagation (BQN errors -> Rust `anyhow::Error`)
+* [ ] Benchmark harness: BQN vs original Rust for each rewrite
+
+== Phase 4: Equivalence Proofs (Idris2 ABI)
+* [ ] `ArrayRank` — dependent type encoding BQN array rank
+* [ ] `BQNPrimitive` — enumerate all targeted primitives with semantics
+* [ ] `Train` — type-safe train composition (2-train, 3-train)
+* [ ] `Modifier` — 1-modifier and 2-modifier application proofs
+* [ ] `UnderCombinator` — structural-under correctness (inverse must exist)
+* [ ] Rewrite equivalence theorems (source pattern ↔ BQN expression)
+* [ ] BQN value memory layout proof (header, shape, data alignment)
+* [ ] CBQN FFI function signature proofs (match C API exactly)
+
+== Phase 5: Multi-Source Language Support
+* [ ] Python source analysis (AST via tree-sitter)
+* [ ] Julia source analysis (expression-level pattern matching)
+* [ ] NumPy pattern detection (vectorised ops that BQN can still beat)
+* [ ] Pandas pattern detection (groupby/apply/transform → BQN)
+* [ ] Language-agnostic intermediate representation for patterns
+* [ ] Cross-language benchmark suite
+
+== Phase 6: Ecosystem Integration
+* [ ] PanLL panel for interactive pattern exploration
+* [ ] BoJ-server cartridge for MCP-driven BQN acceleration
+* [ ] VeriSimDB backing store for benchmark results and pattern history
+* [ ] `bqniser.toml` schema published as JSON Schema
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] Error messages and diagnostics polish
+* [ ] Publish to crates.io
+* [ ] Examples gallery: 20+ real-world patterns with before/after benchmarks

@@ -1,0 +1,49 @@
+# bqniser manifest — array-ops example
+# SPDX-License-Identifier: MPL-2.0
+#
+# Demonstrates all five source-pattern types that bqniser can detect
+# and rewrite as BQN array primitives.
+
+[project]
+name = "array-ops-example"
+version = "0.1.0"
+description = "Example: common array operations rewritten as BQN primitives"
+
+# Pattern 1: Sum all prices — loop replaced by BQN fold (+´)
+[[patterns]]
+name = "sum-prices"
+source-pattern = "loop-sum"
+input-type = "f64"
+output-type = "f64"
+
+# Pattern 2: Double each value — map replaced by BQN each (¨)
+[[patterns]]
+name = "double-values"
+source-pattern = "map-transform"
+input-type = "f64"
+output-type = "f64"
+
+# Pattern 3: Keep positive numbers — filter replaced by BQN replicate (/)
+[[patterns]]
+name = "keep-positive"
+source-pattern = "filter-predicate"
+input-type = "f64"
+output-type = "Vec<f64>"
+
+# Pattern 4: Sort ascending — replaced by BQN grade+select (⍋⊏)
+[[patterns]]
+name = "sort-ascending"
+source-pattern = "sort"
+input-type = "f64"
+output-type = "Vec<f64>"
+
+# Pattern 5: Group by category — replaced by BQN group (⊔)
+[[patterns]]
+name = "group-by-category"
+source-pattern = "group-by"
+input-type = "f64"
+output-type = "Vec<Vec<f64>>"
+
+[bqn]
+backend = "cbqn"
+optimize = true

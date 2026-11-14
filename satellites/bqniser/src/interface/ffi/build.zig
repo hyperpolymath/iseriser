@@ -1,0 +1,102 @@
+// BQNiser FFI Build Configuration
+//
+// Builds the Zig FFI bridge to the CBQN runtime as both shared and static
+// libraries.  When CBQN is available as a system library, link it here.
+//
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+
+const std = @import("std");
+
+pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
+
+    // Shared library (.so, .dylib, .dll) — libbqniser
+    const lib = b.addSharedLibrary(.{
+        .name = "bqniser",
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    // Set version
+    lib.version = .{ .major = 0, .minor = 1, .patch = 0 };
+
+    // TODO: Link CBQN when available as system library:
+    // lib.linkSystemLibrary("cbqn");
+
+    // Static library (.a) — libbqniser.a
+    const lib_static = b.addStaticLibrary(.{
+        .name = "bqniser",
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    // Install artifacts
+    b.installArtifact(lib);
+    b.installArtifact(lib_static);
+
+    // Generate header file for C compatibility
+    const header = b.addInstallHeader(
+        b.path("include/bqniser.h"),
+        "bqniser.h",
+    );
+    b.getInstallStep().dependOn(&header.step);
+
+    // Unit tests (test the FFI bridge itself)
+    const lib_tests = b.addTest(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const run_lib_tests = b.addRunArtifact(lib_tests);
+
+    const test_step = b.step("test", "Run FFI bridge unit tests");
+    test_step.dependOn(&run_lib_tests.step);
+
+    // Integration tests (verify Zig FFI matches Idris2 ABI)
+    const integration_tests = b.addTest(.{
+        .root_source_file = b.path("test/integration_test.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    integration_tests.linkLibrary(lib);
+
+    const run_integration_tests = b.addRunArtifact(integration_tests);
+
+    const integration_test_step = b.step("test-integration", "Run ABI compliance integration tests");
+    integration_test_step.dependOn(&run_integration_tests.step);
+
+    // Documentation
+    const docs = b.addTest(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = .Debug,
+    });
+
+    const docs_step = b.step("docs", "Generate FFI bridge documentation");
+    docs_step.dependOn(&b.addInstallDirectory(.{
+        .source_dir = docs.getEmittedDocs(),
+        .install_dir = .prefix,
+        .install_subdir = "docs",
+    }).step);
+
+    // Benchmark (CBQN array round-trip performance)
+    const bench = b.addExecutable(.{
+        .name = "bqniser-bench",
+        .root_source_file = b.path("bench/bench.zig"),
+        .target = target,
+        .optimize = .ReleaseFast,
+    });
+
+    bench.linkLibrary(lib);
+
+    const run_bench = b.addRunArtifact(bench);
+
+    const bench_step = b.step("bench", "Run CBQN round-trip benchmarks");
+    bench_step.dependOn(&run_bench.step);
+}

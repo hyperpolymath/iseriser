@@ -1,0 +1,15 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the bqniser ABI formal proofs.
+-- Build/check with:  idris2 --build bqniser-abi.ipkg   (from src/interface/abi/)
+package bqniser-abi
+
+sourcedir = "."
+
+modules = Bqniser.ABI.Types
+        , Bqniser.ABI.Layout
+        , Bqniser.ABI.Foreign
+        , Bqniser.ABI.Proofs
+        , Bqniser.ABI.Semantics
+        , Bqniser.ABI.Invariants
+        , Bqniser.ABI.FfiSeam
+        , Bqniser.ABI.Capstone

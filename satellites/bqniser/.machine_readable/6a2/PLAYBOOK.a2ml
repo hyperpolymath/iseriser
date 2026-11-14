@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# PLAYBOOK.a2ml — Operational playbook for bqniser
+# Runbooks, incident response, deployment procedures.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
+
+[deployment]
+method = "binary"        # Binary CLI tool distributed via crates.io
+target = "binary"        # cargo install bqniser
+# Also: container image for CI/CD use (Chainguard base)
+
+[dependencies]
+# External runtime dependency: CBQN must be installed
+# - Fedora: dnf install cbqn (if packaged) or build from source
+# - Build: git clone https://github.com/dzaima/CBQN && make
+# - The Zig FFI bridge links against libcbqn at build time
+
+[incident-response]
+# 1. Check .machine_readable/6a2/STATE.a2ml for current status
+# 2. Review recent commits and CI results
+# 3. Run `just validate` to check RSR compliance
+# 4. Run `just security` to audit for vulnerabilities
+# 5. If BQN rewrite produces wrong output: check Idris2 equivalence proof
+
+[release-process]
+# 1. Update version in STATE.a2ml, META.a2ml, Cargo.toml, Zig build
+# 2. Run `just release-preflight` (validate + quality + security + maint-hard-pass)
+# 3. Run `cargo test` and `cd src/interface/ffi && zig build test`
+# 4. Tag and push
+# 5. Run `just container-push` if applicable
+
+[maintenance-operations]
+# Baseline audit:
+#   just maint-audit
+# Hard release gate:
+#   just maint-hard-pass
+# BQN-specific checks:
+#   Verify CBQN version compatibility
+#   Run benchmark suite to detect regressions
