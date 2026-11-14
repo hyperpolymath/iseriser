@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: MPL-2.0
+# Example halideiser manifest — multi-stage image filter pipeline
+#
+# This pipeline applies:
+#   1. Gaussian blur for noise reduction
+#   2. Sharpening via unsharp mask to restore detail
+#   3. Edge detection (Sobel) to highlight contours
+#   4. Thresholding to produce a binary edge map
+#
+# Build:
+#   halideiser generate -m examples/image-filter/halideiser.toml -o generated/image-filter
+#   cd generated/image-filter && cmake -B build && cmake --build build
+#   ./build/photo_filter_runner input.png output.png
+
+[project]
+name = "photo_filter"
+version = "1.0.0"
+description = "4-stage photo filter: denoise -> sharpen -> edge-detect -> threshold"
+
+[[stages]]
+name = "denoise"
+operation = "blur"
+kernel-size = 5
+sigma = 1.4
+
+[[stages]]
+name = "sharpen_detail"
+operation = "sharpen"
+kernel-size = 3
+
+[[stages]]
+name = "find_edges"
+operation = "edge-detect"
+kernel-size = 3
+
+[[stages]]
+name = "binary_edges"
+operation = "threshold"
+value = 50.0
+
+[target]
+arch = "x86"
+vectorize = true
+parallelize = true
+
+[pipeline]
+input-format = "png"
+output-format = "png"
+bit-depth = "uint8"

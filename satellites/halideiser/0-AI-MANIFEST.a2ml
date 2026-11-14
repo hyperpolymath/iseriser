@@ -1,0 +1,116 @@
+# STOP - CRITICAL READING REQUIRED
+
+**THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
+
+## WHAT IS THIS?
+
+This is the AI manifest for **halideiser** — a tool that compiles image and
+video processing pipelines to optimised Halide schedules. It takes pipeline
+descriptions (blur, sharpen, resize, convolve, etc.), generates Halide
+algorithm + schedule code, auto-tunes for target hardware, and produces
+native compiled pipelines achieving 10-100x speedups.
+
+Halide (by Jonathan Ragan-Kelley et al., MIT/Google) separates the algorithm
+(what to compute) from the schedule (how to compute it on hardware).
+Halideiser makes this separation automatic.
+
+## CANONICAL LOCATIONS (UNIVERSAL RULE)
+
+### Machine-Readable Metadata: `.machine_readable/` ONLY
+
+These 6 a2ml files MUST exist in `.machine_readable/descriptiles/` directory ONLY:
+1. **STATE.a2ml** - Project state, progress, blockers
+2. **META.a2ml** - Architecture decisions, governance
+3. **ECOSYSTEM.a2ml** - Position in -iser ecosystem, relationships
+4. **AGENTIC.a2ml** - AI agent interaction patterns
+5. **NEUROSYM.a2ml** - Neurosymbolic integration config (Hypatia)
+6. **PLAYBOOK.a2ml** - Operational runbook
+
+**CRITICAL:** If ANY of these files exist in the root directory, this is an ERROR.
+
+### Anchor File: `.machine_readable/anchors/ANCHOR.a2ml` ONLY
+
+Canonical authority and semantic-boundary declaration.
+
+### Maintenance Policies: `.machine_readable/policies/` ONLY
+
+Minimum required: MAINTENANCE-AXES.a2ml, MAINTENANCE-CHECKLIST.a2ml,
+SOFTWARE-DEVELOPMENT-APPROACH.a2ml.
+
+### Bot Directives: `.machine_readable/bot_directives/` ONLY
+
+### Contractiles: `.machine_readable/contractiles/` ONLY
+
+### AI Configuration: `.machine_readable/ai/` ONLY
+
+## CORE INVARIANTS
+
+1. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
+2. **Single source of truth** - `.machine_readable/` is authoritative
+3. **License consistency** - All code MPL-2.0 unless platform requires MPL-2.0
+4. **Author attribution** - Always "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+5. **Container images** - Chainguard base (`cgr.dev/chainguard/wolfi-base:latest`)
+6. **Container runtime** - Podman, never Docker. Files are `Containerfile`, never `Dockerfile`
+7. **Halide separation** - Algorithm (what) and Schedule (how) are always distinct layers
+8. **ABI-FFI standard** - Idris2 ABI for proofs, Zig FFI for C-ABI bridge
+
+## REPOSITORY STRUCTURE
+
+```
+halideiser/
+├── 0-AI-MANIFEST.a2ml         # THIS FILE (start here)
+├── README.adoc                 # Architecture and usage
+├── ROADMAP.adoc                # Phase 0-6 roadmap
+├── TOPOLOGY.md                 # Module dependency graph
+├── Cargo.toml                  # Rust CLI package
+├── Justfile                    # Task runner
+├── Containerfile               # OCI build (Chainguard base)
+├── LICENSE                     # MPL-2.0
+├── src/
+│   ├── main.rs                 # CLI entry (clap subcommands)
+│   ├── lib.rs                  # Library API
+│   ├── manifest/               # halideiser.toml parser
+│   ├── codegen/                # Halide algorithm + schedule generation
+│   ├── abi/                    # Rust-side ABI types
+│   └── interface/              # Verified Interface Seams
+│       ├── abi/                # Idris2 ABI (pipeline proofs)
+│       │   ├── Types.idr       # PipelineStage, SchedulePrimitive, HardwareTarget, etc.
+│       │   ├── Layout.idr      # Halide buffer_t layout proofs
+│       │   └── Foreign.idr     # FFI: compile, execute, autotune
+│       ├── ffi/                # Zig FFI (C-ABI bridge)
+│       │   ├── build.zig
+│       │   ├── src/main.zig    # Pipeline context implementation
+│       │   └── test/           # Integration tests
+│       └── generated/abi/      # Auto-generated C headers
+├── tests/                      # End-to-end pipeline tests
+├── examples/                   # Example pipeline manifests
+├── docs/                       # Technical documentation
+├── container/                  # Stapeln container ecosystem
+├── verification/               # Formal verification artifacts
+└── .machine_readable/          # ALL machine-readable metadata
+    ├── descriptiles/                    # STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK
+    ├── anchors/                # ANCHOR.a2ml
+    ├── policies/               # Maintenance policies
+    ├── bot_directives/         # Bot instructions
+    ├── contractiles/           # k9, dust, lust, must, trust
+    └── ai/                     # AI configuration
+```
+
+## KEY DOMAIN CONCEPTS
+
+- **Func**: Halide pure function defining what to compute at each pixel
+- **Var**: Dimension variable (x, y, channel, frame)
+- **Schedule**: How to execute (tile, vectorize, parallelize, compute_at, store_at, reorder)
+- **buffer_t**: Halide's strided multi-dimensional buffer (min, extent, stride per dim)
+- **Auto-tuning**: Search over schedule space for optimal performance on specific hardware
+- **AOT compilation**: Ahead-of-time compilation to native code via LLVM
+
+## SESSION STARTUP CHECKLIST
+
+Read THIS file (0-AI-MANIFEST.a2ml) first.
+Understand canonical location: `.machine_readable/`.
+Read `.machine_readable/descriptiles/STATE.a2ml` for current status and next actions.
+
+## ATTESTATION PROOF
+
+**"I have read the AI manifest. All machine-readable content is in `.machine_readable/` ONLY. I will not create duplicate files in the root directory. I understand halideiser compiles image/video pipelines to optimised Halide schedules via the Idris2 ABI / Zig FFI / Rust CLI architecture."**

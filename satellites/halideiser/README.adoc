@@ -1,0 +1,159 @@
+== What Is This?
+
+Halideiser compiles image and video processing pipelines to optimised
+https://halide-lang.org[Halide] schedules. You describe your pipeline
+stages in `+halideiser.toml+` — blur, sharpen, resize, edge detect,
+colour transform, convolution — and Halideiser generates the Halide
+algorithm definitions, auto-tunes the schedule for your target hardware,
+and produces optimised native code.
+
+Halide (by Jonathan Ragan-Kelley et al., MIT/Google) separates the
+_algorithm_ (what to compute) from the _schedule_ (how to compute it on
+hardware). This separation enables 10–100x speedups over hand-tuned C by
+letting the compiler explore tiling, vectorisation, parallelism, and
+memory layout choices automatically. Halideiser makes this power
+accessible without Halide expertise.
+
+== How It Works
+
+[source,text]
+----
+halideiser.toml         (pipeline description)
+       │
+       ▼
+  Pipeline Parser       (validate stages, data flow, dimensions)
+       │
+       ▼
+  Idris2 ABI Proofs     (prove pipeline correctness, buffer safety)
+       │
+       ▼
+  Halide Algorithm       (Func definitions, Var bindings, Expr trees)
+  Codegen                (from pipeline stages)
+       │
+       ▼
+  Schedule Generation    (tile, vectorize, parallelize, compute_at,
+  + Auto-Tuning          store_at, reorder — search over schedule space)
+       │
+       ▼
+  Compiled Pipeline      (native code for target hardware)
+----
+
+[arabic]
+. *Describe* your pipeline in `+halideiser.toml+` — stages, buffer
+dimensions, data types, target hardware
+. *Validate* — the Idris2 ABI layer formally proves buffer bounds,
+dimension compatibility, and stage connectivity
+. *Generate* — Halide algorithm code is emitted with `+Func+`, `+Var+`,
+and scheduling primitives
+. *Tune* — the auto-tuner searches the schedule space (tile sizes, loop
+orders, parallelism) for optimal performance
+. *Compile* — the tuned schedule is compiled to native code via LLVM
+
+== Halide Concepts
+
+Halideiser works with core Halide abstractions:
+
+* *Func* — a pure function defining what to compute at each pixel
+* *Var* — a dimension variable (x, y, channel, frame)
+* *Scheduling primitives* — control _how_ to execute:
+** `+tile(x,+` `+y,+` `+xi,+` `+yi,+` `+tx,+` `+ty)+` — break loops into
+tiles for cache locality
+** `+vectorize(xi,+` `+width)+` — use SIMD instructions (SSE, AVX, NEON)
+** `+parallelize(y)+` — distribute rows across CPU cores
+** `+compute_at(consumer,+` `+var)+` — fuse producer into consumer loop
+** `+store_at(consumer,+` `+var)+` — control where intermediate buffers
+live
+** `+reorder(vars…)+` — change loop nesting order
+** `+unroll(var,+` `+factor)+` — unroll inner loops
+** `+gpu_blocks+` `+/+` `+gpu_threads+` — map to GPU compute grids
+
+== Hardware Targets
+
+[cols=",",options="header",]
+|===
+|Target |Instructions / Backend
+|x86 SSE/AVX |128–512-bit SIMD, auto-vectorisation
+|ARM NEON/SVE |Mobile and embedded SIMD
+|CUDA |NVIDIA GPU kernels
+|OpenCL |Cross-vendor GPU compute
+|WebAssembly |Browser-based image processing
+|Metal |Apple GPU compute
+|Vulkan |Cross-platform GPU compute
+|===
+
+== Key Value
+
+* *10–100x faster* image and video processing without writing Halide by
+hand
+* *Automatic hardware scheduling* — SIMD, GPU, multi-core, all derived
+from one pipeline description
+* *No Halide expertise needed* — describe the pipeline, get the speed
+* *Formally verified* — Idris2 proofs guarantee buffer bounds and
+dimension safety before codegen
+* *Multi-target* — one pipeline compiles to x86, ARM, CUDA, OpenCL,
+WebAssembly
+
+== Use Cases
+
+* *Real-time video filters* — blur, sharpen, colour grade at 60fps+
+* *Batch image processing* — resize, watermark, convert millions of
+images
+* *Medical imaging* — CT/MRI reconstruction, denoising, segmentation
+* *Computational photography* — HDR merge, demosaicing, lens correction
+* *Computer vision preprocessing* — edge detection, histogram
+equalisation, feature extraction
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern (same as
+https://github.com/hyperpolymath/chapeliser[Chapeliser]):
+
+* *Manifest* (`+halideiser.toml+`) — describe WHAT pipeline stages you
+need
+* *Pipeline Parser* (`+src/manifest/+`) — validate stage connectivity
+and buffer dimensions
+* *Idris2 ABI* (`+src/interface/abi/+`) — formal proofs of pipeline
+correctness, buffer layout, and scheduling safety
+* *Halide Codegen* (`+src/codegen/+`) — emit Halide `+Func+` / `+Var+`
+definitions and scheduling calls
+* *Zig FFI* (`+src/interface/ffi/+`) — C-ABI bridge for calling compiled
+pipelines from any language
+* *Rust CLI* (`+src/main.rs+`) — orchestrates parse, validate, generate,
+tune, and build
+
+User writes zero Halide code. Halideiser generates everything.
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of
+acceleration frameworks.
+
+== Status
+
+*Pre-alpha.* Architecture defined, scaffolding in place, codegen
+pending. Codebase in progress — pipeline parser and Halide codegen are
+next.
+
+== Quick Start
+
+[source,bash]
+----
+# Initialise a manifest in the current directory
+halideiser init
+
+# Edit halideiser.toml to describe your pipeline stages
+
+# Validate the manifest
+halideiser validate
+
+# Generate Halide code and schedule
+halideiser generate
+
+# Build the compiled pipeline
+halideiser build --release
+
+# Run the pipeline
+halideiser run --release -- input.png output.png
+----
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

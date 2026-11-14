@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= Image Filter Example
+:author: Jonathan D.A. Jewell
+
+A 4-stage image processing pipeline demonstrating halideiser's core operations:
+
+1. **Gaussian blur** (denoise) — 5x5 kernel, sigma=1.4
+2. **Sharpen** (unsharp mask) — 3x3 kernel
+3. **Edge detect** (Sobel) — gradient magnitude
+4. **Threshold** (binary) — cutoff at 50
+
+== Usage
+
+[source,bash]
+----
+halideiser generate -m examples/image-filter/halideiser.toml -o generated/image-filter
+cd generated/image-filter
+cmake -B build && cmake --build build
+./build/photo_filter_runner input.png output.png
+----
+
+== Target
+
+x86-64 with AVX2 vectorization and OpenMP parallelization.

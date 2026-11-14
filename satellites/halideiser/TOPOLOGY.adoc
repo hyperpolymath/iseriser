@@ -1,0 +1,151 @@
+== TOPOLOGY — halideiser
+
+Module dependency graph for the halideiser codebase.
+
+=== High-Level Flow
+
+....
+halideiser.toml  ──►  Pipeline Parser  ──►  Idris2 ABI Proofs
+                       (src/manifest/)       (src/interface/abi/)
+                             │                      │
+                             ▼                      ▼
+                      Halide Codegen  ◄────  Generated C Headers
+                      (src/codegen/)        (src/interface/generated/)
+                             │
+                             ▼
+                      Schedule Tuner  ──►  Compiled Pipeline
+                      (auto-tuning)        (native code)
+                             │
+                             ▼
+                       Zig FFI Bridge
+                      (src/interface/ffi/)
+....
+
+=== Directory Map
+
+[width="100%",cols="37%,33%,30%",options="header",]
+|===
+|Directory |Language |Purpose
+|`+src/main.rs+` |Rust |CLI entry point (clap subcommands)
+
+|`+src/lib.rs+` |Rust |Library API surface
+
+|`+src/manifest/+` |Rust |Parse and validate `+halideiser.toml+`
+
+|`+src/codegen/+` |Rust |Emit Halide algorithm + schedule code
+
+|`+src/abi/+` |Rust |Runtime ABI types mirroring Idris2 proofs
+
+|`+src/interface/abi/Types.idr+` |Idris2 |Pipeline stage types,
+scheduling primitives, hardware targets
+
+|`+src/interface/abi/Layout.idr+` |Idris2 |Halide `+buffer_t+` memory
+layout proofs
+
+|`+src/interface/abi/Foreign.idr+` |Idris2 |FFI declarations for
+pipeline compilation and execution
+
+|`+src/interface/ffi/src/main.zig+` |Zig |C-ABI FFI implementation
+
+|`+src/interface/ffi/build.zig+` |Zig |Build shared/static library
+
+|`+src/interface/ffi/test/+` |Zig |Integration tests verifying FFI
+matches ABI
+
+|`+src/interface/generated/abi/+` |C |Auto-generated headers from Idris2
+ABI
+
+|`+tests/+` |Rust |End-to-end pipeline tests
+
+|`+examples/+` |TOML/Rust |Example pipeline manifests
+
+|`+verification/+` |— |Formal verification artifacts
+
+|`+container/+` |— |Stapeln container definitions
+
+|`+docs/+` |AsciiDoc |Architecture, theory, attribution
+
+|`+.machine_readable/+` |A2ML/TOML |State, ecosystem, policies, bot
+directives
+|===
+
+=== Rust Module Graph
+
+....
+main.rs
+  ├── manifest::load_manifest()
+  ├── manifest::validate()
+  ├── codegen::generate_all()
+  ├── codegen::build()
+  └── codegen::run()
+
+lib.rs
+  ├── pub mod abi        (Rust-side ABI types)
+  ├── pub mod codegen    (Halide code generation)
+  └── pub mod manifest   (TOML parser + validator)
+....
+
+=== Idris2 ABI Module Graph
+
+....
+Halideiser.ABI.Types
+  ├── PipelineStage      (blur, sharpen, resize, convolve, ...)
+  ├── SchedulePrimitive  (tile, vectorize, parallelize, compute_at, ...)
+  ├── HardwareTarget     (x86_SSE, x86_AVX, ARM_NEON, CUDA, OpenCL, WASM)
+  ├── TileSize           (with proof: divides dimension)
+  ├── BufferDimension    (width, height, channels, frames)
+  └── Result, Handle, Platform (shared ABI base)
+
+Halideiser.ABI.Layout
+  ├── imports Types
+  ├── HalideBufferLayout (stride, extent, min per dimension)
+  ├── BufferBoundsProof  (all accesses within allocated memory)
+  └── LayoutCompatibility (producer output fits consumer input)
+
+Halideiser.ABI.Foreign
+  ├── imports Types, Layout
+  ├── halideiser_compile_pipeline  (pipeline description → compiled code)
+  ├── halideiser_execute_pipeline  (run compiled pipeline on buffer)
+  ├── halideiser_autotune          (search schedule space)
+  └── halideiser_init / halideiser_free (lifecycle)
+....
+
+=== Zig FFI Module Graph
+
+....
+src/main.zig
+  ├── halideiser_init()           → allocate pipeline context
+  ├── halideiser_free()           → release resources
+  ├── halideiser_compile_pipeline() → invoke Halide AOT compiler
+  ├── halideiser_execute_pipeline() → run compiled pipeline on buffers
+  ├── halideiser_autotune()       → auto-tune schedule parameters
+  ├── halideiser_version()        → version string
+  └── halideiser_last_error()     → thread-local error
+
+test/integration_test.zig
+  └── verifies all exported functions match ABI contract
+....
+
+=== Data Flow
+
+....
+User: halideiser.toml
+  │
+  ├─ [workload]
+  │    name, entry, strategy
+  │
+  ├─ [pipeline]
+  │    stages = ["gaussian_blur", "sharpen", "resize"]
+  │
+  ├─ [buffers]
+  │    input  = { width = 1920, height = 1080, channels = 3, type = "uint8" }
+  │    output = { width = 960, height = 540, channels = 3, type = "uint8" }
+  │
+  ├─ [schedule]
+  │    tile_x = 32, tile_y = 8
+  │    vectorize_width = 8
+  │    parallelize = true
+  │
+  └─ [target]
+       hardware = "x86_avx2"
+....

@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# ANCHOR.a2ml - authoritative anchor for halideiser
+
+[metadata]
+version = "1.0.0"
+last-updated = "2026-03-21"
+
+[anchor]
+schema = "hyperpolymath.anchor/1"
+repo = "hyperpolymath/halideiser"
+authority = "upstream-canonical"
+
+purpose = [
+  "Define canonical semantics for Halide pipeline compilation.",
+  "Declare ABI contract for pipeline stage types, scheduling primitives, and buffer layouts.",
+  "Provide golden-path validation for generated Halide code and compiled artifacts.",
+]
+
+[identity]
+project = "halideiser"
+kind = "tool"
+one-sentence = "Compile image/video processing pipelines to optimised Halide schedules"
+domain = "image-processing, video-processing, halide, acceleration"
+
+[semantic-authority]
+policy = "canonical"
+
+owns = [
+  "Pipeline stage type definitions (PipelineStage, SchedulePrimitive, HardwareTarget)",
+  "Halide buffer_t layout proofs and dimension compatibility",
+  "Schedule generation heuristics and auto-tuning strategy",
+  "halideiser.toml manifest schema",
+]
+
+[implementation-policy]
+allowed = ["Rust", "Idris2", "Zig", "C++", "Scheme", "Shell", "Just", "AsciiDoc", "Markdown"]
+forbidden = ["Node.js", "npm", "TypeScript", "Python"]
+
+[golden-path]
+smoke-test-command = [
+  "just test",
+  "just quality",
+]
+
+success-criteria = [
+  "Rust CLI builds and passes tests",
+  "Zig FFI library builds and passes unit + integration tests",
+  "Idris2 ABI type-checks with no holes",
+  "Quality gates pass",
+  "No unresolved critical security findings",
+]
+
+[satellite-policy]
+must-pin-upstream = true
+must-declare-authority = true
+must-have-anchor = true
+must-have-golden-path = true
+
+[semantic-authority-files]
+formal-proofs = "src/interface/abi/"
+ffi-implementation = "src/interface/ffi/"
+manifest-schema = "src/manifest/"
+codegen = "src/codegen/"
