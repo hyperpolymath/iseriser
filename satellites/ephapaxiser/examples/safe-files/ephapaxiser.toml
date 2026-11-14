@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: MPL-2.0
+# Example ephapaxiser manifest — demonstrates resource tracking for file operations.
+#
+# This manifest configures ephapaxiser to analyse file_ops.rs for proper
+# file descriptor handling (open/close pairs).
+
+[project]
+name = "safe-files-example"
+
+# Source files to analyse.
+[[sources]]
+name = "file-handler"
+path = "src/file_ops.rs"
+language = "rust"
+
+# Resource definitions — file descriptors with open/close pair.
+[[resources]]
+name = "FileHandle"
+allocator = "open"
+deallocator = "close"
+kind = "file-descriptor"
+
+# Also track database connections in this example.
+[[resources]]
+name = "DbConnection"
+allocator = "connect"
+deallocator = "disconnect"
+kind = "db-connection"
+
+# Analysis configuration.
+[analysis]
+detect-leaks = true
+detect-double-free = true
+detect-use-after-free = true
+report-format = "text"

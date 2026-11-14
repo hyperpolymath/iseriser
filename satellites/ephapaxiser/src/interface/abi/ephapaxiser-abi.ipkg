@@ -1,0 +1,15 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the ephapaxiser ABI formal proofs.
+-- Build/check with:  idris2 --build ephapaxiser-abi.ipkg   (from src/interface/abi/)
+package ephapaxiser-abi
+
+sourcedir = "."
+
+modules = Ephapaxiser.ABI.Types
+        , Ephapaxiser.ABI.Layout
+        , Ephapaxiser.ABI.Foreign
+        , Ephapaxiser.ABI.Proofs
+        , Ephapaxiser.ABI.Semantics
+        , Ephapaxiser.ABI.Invariants
+        , Ephapaxiser.ABI.FfiSeam
+        , Ephapaxiser.ABI.Capstone

@@ -1,0 +1,73 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= ephapaxiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`ephapaxiser.toml`)
+* [x] Codegen stubs (output directory creation, placeholder messages)
+* [x] Idris2 ABI module stubs (`Types.idr`, `Layout.idr`, `Foreign.idr`)
+* [x] Zig FFI bridge stubs (`main.zig`, `build.zig`, integration tests)
+* [x] README with architecture overview
+
+== Phase 1: Resource Detection
+
+* [ ] Parse source files to identify resource acquisition patterns
+  (open/close, connect/disconnect, alloc/free, acquire/release)
+* [ ] Build resource handle registry from analysis results
+* [ ] Detect paired operations (acquire/release) and orphaned resources
+* [ ] Output resource graph: which handles flow where and when they are consumed
+* [ ] Support Rust, C, and Zig source files as analysis targets
+* [ ] Integration tests with sample codebases containing known resource leaks
+
+== Phase 2: Ephapax Wrapper Generation
+
+* [ ] Generate Ephapax linear type wrappers for each detected resource class
+* [ ] Enforce single-use semantics: each wrapper value must be consumed exactly once
+* [ ] Emit target-language glue code (Rust, C, Zig) that wraps original handles
+* [ ] Template-driven codegen via Handlebars (already a dependency)
+* [ ] First working end-to-end example: file handle wrapper with compile-time leak detection
+
+== Phase 3: Linearity Enforcement
+
+* [ ] Compile-time enforcement that wrapped resources are consumed exactly once
+* [ ] Diagnostic messages: clear errors for use-after-consume, leaked resources,
+  double-free attempts
+* [ ] Support for resource transfer (move semantics through function boundaries)
+* [ ] Support for conditional consumption (if-then-else where both branches consume)
+* [ ] WASM target: proofs erased at compile time, zero runtime overhead
+
+== Phase 4: Idris2 Proofs of Resource Safety
+
+* [ ] `LinearResource` type in `Types.idr`: dependent type encoding single-use semantics
+* [ ] `UsageCount` proof: compile-time counter proving usage == 1
+* [ ] `ResourceLifecycle` state machine: acquired -> in-use -> consumed (no other transitions)
+* [ ] `ConsumeProof` witness: evidence that a resource was properly consumed
+* [ ] Memory layout proofs in `Layout.idr` for resource tracking structs
+* [ ] FFI declarations in `Foreign.idr` for resource analysis operations
+* [ ] **Idris2 wins rule**: if proofs conflict with Ephapax wrappers, adjust the
+  wrappers — never the proofs
+
+== Phase 5: Multi-Language Support (Rust / C / Zig)
+
+* [ ] Rust: generate `Drop`-based wrappers that enforce linear consumption
+* [ ] C: generate header + source pairs with `__attribute__((cleanup))` enforcement
+* [ ] Zig: generate comptime-checked wrappers leveraging Zig's `defer` and error unions
+* [ ] Cross-language interop: resources created in one language, consumed in another
+* [ ] Platform-specific codegen (Linux, macOS, Windows, WASM)
+
+== Phase 6: Ecosystem Integration
+
+* [ ] PanLL panel integration (resource lifecycle visualisation)
+* [ ] BoJ-server cartridge for ephapaxiser operations
+* [ ] VeriSimDB backing store for analysis results and proof artifacts
+* [ ] Error messages and diagnostics polish
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] CI/CD for generated artifacts
+* [ ] Performance benchmarks
+* [ ] Publish to crates.io
+* [ ] Additional examples: database connections, GPU buffers, session tokens, crypto keys
