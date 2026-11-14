@@ -1,0 +1,37 @@
+{
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        { "name": "id", "type": "serial", "nullable": false, "primary_key": true },
+        { "name": "username", "type": "varchar(50)", "nullable": false },
+        { "name": "email", "type": "varchar(255)", "nullable": false },
+        { "name": "bio", "type": "text", "nullable": true },
+        { "name": "created_at", "type": "timestamp", "nullable": false }
+      ]
+    },
+    {
+      "name": "posts",
+      "columns": [
+        { "name": "id", "type": "serial", "nullable": false, "primary_key": true },
+        { "name": "author_id", "type": "integer", "nullable": false },
+        { "name": "title", "type": "varchar(200)", "nullable": false },
+        { "name": "body", "type": "text", "nullable": false },
+        { "name": "published", "type": "boolean", "nullable": false },
+        { "name": "category", "type": "varchar(50)", "nullable": true },
+        { "name": "created_at", "type": "timestamp", "nullable": false }
+      ]
+    },
+    {
+      "name": "comments",
+      "columns": [
+        { "name": "id", "type": "serial", "nullable": false, "primary_key": true },
+        { "name": "post_id", "type": "integer", "nullable": false },
+        { "name": "user_id", "type": "integer", "nullable": false },
+        { "name": "body", "type": "text", "nullable": false },
+        { "name": "parent_id", "type": "integer", "nullable": true },
+        { "name": "created_at", "type": "timestamp", "nullable": false }
+      ]
+    }
+  ]
+}

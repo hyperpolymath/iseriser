@@ -1,0 +1,259 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= TypedQLiser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+== What Is This?
+
+TypedQLiser adds **formal type safety** to any query language — SQL, GraphQL,
+Cypher, SPARQL, KQL, VCL, or anything else — without modifying the database.
+
+It sits in front of your database as a compile-time type checker. Queries go in,
+TypedQLiser proves properties about them (no nulls where you don't expect them,
+no injection, no type mismatches, resources consumed correctly, transaction
+protocols followed), and then passes the original query through unchanged. The
+database never knows it's there.
+
+This is the **highest priority** project in the
+https://github.com/hyperpolymath/iseriser[-iser family].
+
+== The Problem
+
+Every database has a query language. None of them have deep type safety:
+
+* **SQL**: Runtime type errors, null surprises, injection, no resource tracking
+* **GraphQL**: Schema types exist but no dependent types, no linearity, no effects
+* **Cypher**: Pattern matching with no formal verification
+* **SPARQL**: RDF types are stringly-typed at best
+* **VCL**: VeriSimDB's query language has VCL-DT/VCL-total extensions, but they're VCL-specific
+
+TypedQLiser makes the type safety **portable across all query languages**.
+
+== The 10 Type Safety Levels
+
+Derived from https://github.com/hyperpolymath/typell[TypeLL]'s type theory
+and https://github.com/hyperpolymath/vql-ut[VCL-total]'s 10-level hierarchy:
+
+=== Established (Levels 1-6)
+
+[cols="1,2,3"]
+|===
+| Level | Name | What It Proves
+
+| 1 | Parse-time safety | Query is syntactically valid before reaching the database
+| 2 | Schema-binding safety | All referenced tables/fields/types exist in the schema
+| 3 | Type-compatible operations | No comparing strings to integers, no invalid casts
+| 4 | Null-safety | Every nullable path is explicitly handled; no surprise nulls
+| 5 | Injection-proof safety | No user input can alter query structure (proven, not escaped)
+| 6 | Result-type safety | Return type is known at compile time; no `any` or `unknown`
+|===
+
+=== Research (Levels 7-10)
+
+[cols="1,2,3"]
+|===
+| Level | Name | What It Proves
+
+| 7 | Cardinality safety | Query returns exactly N rows, at-most-one, or non-empty (proven)
+| 8 | Effect-tracking safety | Know exactly what side-effects a query produces (reads, writes, deletes)
+| 9 | Temporal safety | Time-dependent queries are valid at the point of execution
+| 10 | Linearity safety | Resources (connections, cursors, transactions) consumed exactly once
+|===
+
+== How It Works
+
+[source]
+----
+Your application
+      │
+      ▼
+  typedqliser.toml  ──► TypedQLiser CLI
+      │                      │
+      │         ┌────────────┼────────────┐
+      │         │            │            │
+      ▼         ▼            ▼            ▼
+  Query      Schema      Idris2        Target
+  Parser     Loader      Type Kernel   Language
+  (per-lang) (introspect)  (proofs)     Plugin
+      │         │            │            │
+      └────┬────┘            │            │
+           ▼                 ▼            │
+      Annotated AST ──► Type Check ◄─────┘
+           │                 │
+           │            ┌────┴────┐
+           │            │         │
+           ▼            ▼         ▼
+      Original      Proof      Error
+      Query         Certificate Report
+      (unchanged)   (.proof)   (if fails)
+----
+
+**Key insight**: the original query passes through to the database *unchanged*.
+TypedQLiser is a compile-time tool, not a query rewriter. The database sees
+exactly what it would have seen without TypedQLiser. This means:
+
+* No performance overhead at runtime
+* No compatibility issues with database versions
+* No risk of query transformation bugs
+* Works with any database that speaks the target query language
+
+== Supported Query Languages
+
+TypedQLiser uses a plugin architecture. Each query language gets a parser plugin:
+
+[cols="1,2,2,1"]
+|===
+| Language | Databases | Max Level Today | Plugin Status
+
+| **SQL** | PostgreSQL, MySQL, SQLite, MSSQL, Oracle | 6 | Priority
+| **GraphQL** | Any GraphQL API | 6 | Priority
+| **Cypher** | Neo4j, Memgraph, AGE | 4 | Planned
+| **SPARQL** | Any RDF triplestore | 4 | Planned
+| **VCL** | VeriSimDB | 10 | Planned (via VCL-total)
+| **KQL** | Azure Data Explorer, Kusto | 4 | Planned
+| **GQL** | ISO GQL databases | 4 | Planned
+| **FQLDT** | Lithoglyph | 10 | Planned (dependent types native)
+| **Custom** | User-defined grammar | varies | Plugin API
+|===
+
+== The Manifest
+
+[source,toml]
+----
+[typedql]
+name = "my-api-queries"
+# Which query language to type-check
+language = "sql"
+# Maximum type safety level to enforce (1-10)
+level = 6
+# How to load the database schema
+schema-source = "introspect"   # introspect | file | inline
+
+[database]
+# Target database for schema introspection
+target-db = "postgresql"
+connection-string = "postgres://localhost/mydb"
+
+[paths]
+# Where to find queries to type-check
+queries = ["src/**/*.sql", "src/**/*.rs"]
+# How queries are embedded: standalone files, string literals, or tagged templates
+embedding = "string-literal"   # standalone | string-literal | tagged-template
+
+[output]
+# What to produce
+proof-certificates = true      # .proof files alongside queries
+error-format = "gcc"           # gcc | json | sarif | human
+ci-mode = false                # true = exit code 1 on type errors
+
+[levels]
+# Fine-grained control over which levels to enforce vs warn
+enforce = [1, 2, 3, 4, 5, 6]
+warn = [7, 8]
+skip = [9, 10]
+----
+
+== Architecture
+
+=== Level model — proof obligations (`src/codegen`, `src/plugins`)
+
+The 10 safety levels are specified as *proof obligations*: for each level the
+checker either accepts the query (safe at that level) or produces a
+counterexample (how it could fail). These obligations are the design target for
+a future Idris2 dependent-type kernel; **today they are enforced operationally
+in Rust** (`src/codegen` + the language plugins), not yet mechanised in Idris2.
+`src/abi/` holds the Rust ABI types.
+
+Proof obligations (one per level):
+* **ParseSafe**: `parse(q) = Right ast` (total parser, no panics)
+* **SchemaBound**: `∀ ref ∈ ast. ref ∈ schema` (all references resolve)
+* **TypeCompat**: `∀ op ∈ ast. types(op.lhs) ≡ types(op.rhs)` (no type mismatches)
+* **NullSafe**: `∀ path ∈ ast. nullable(path) → handled(path)` (null paths covered)
+* **InjectionFree**: `∀ param ∈ ast. param ∈ Parameters` (no string interpolation)
+* **ResultTyped**: `typeof(execute(q, schema)) = T` (return type known)
+* **CardinalitySafe**: `|execute(q)| ∈ {0..1, 1, 1..n, n}` (row count bounded)
+* **EffectTracked**: `effects(q) ⊆ declared_effects` (no undeclared side-effects)
+* **TemporalSafe**: `valid_at(q, now()) = True` (time-dependent predicates hold)
+* **LinearSafe**: `consumed(resources(q)) = exactly_once` (no leaks, no double-use)
+
+=== Zig FFI (`src/interface/ffi/`)
+
+C-ABI bridge exposing TypedQLiser to other languages (build + unit tests
+machine-checked in CI via `provable.yml`). The C header and proof-serialisation
+marshalling are still being filled in.
+
+=== Plugin Architecture (`src/plugins/`)
+
+Each query language is a plugin implementing the `QueryLanguagePlugin` trait:
+
+[source,rust]
+----
+pub trait QueryLanguagePlugin: Send + Sync {
+    /// Parse a query string into a typed AST.
+    fn parse(&self, query: &str) -> Result<QueryAst>;
+
+    /// Load schema from the target database.
+    fn load_schema(&self, config: &DatabaseConfig) -> Result<Schema>;
+
+    /// Extract queries from source files (for embedded queries).
+    fn extract_queries(&self, source: &str, embedding: Embedding) -> Result<Vec<LocatedQuery>>;
+
+    /// Language-specific type rules (e.g., SQL's NULL semantics vs GraphQL's).
+    fn type_rules(&self) -> &TypeRules;
+
+    /// Reconstruct the original query from the AST (for pass-through).
+    fn reconstruct(&self, ast: &QueryAst) -> Result<String>;
+}
+----
+
+== Quick Start
+
+[source,bash]
+----
+# Install
+cargo install typedqliser
+
+# In your project, create typedqliser.toml (see above)
+typedqliser init --language sql --database postgresql
+
+# Type-check all queries in your project
+typedqliser check
+
+# Type-check a single query
+typedqliser check --query "SELECT * FROM users WHERE id = $1"
+
+# Generate proof certificates
+typedqliser check --proofs
+
+# CI mode (exit 1 on errors)
+typedqliser check --ci
+
+# Show what level each query achieves
+typedqliser info
+----
+
+== Relationship to TypeLL, VCL-total, and the -iser Family
+
+* **TypeLL** provides the type theory (10 levels, type kernel, verification protocol)
+* **VCL-total** applies those levels specifically to VeriSimDB's VCL
+* **TypedQLiser** makes them portable to *any* query language
+* TypedQLiser's Idris2 kernel can use TypeLL as a shared dependency
+* VCL-total becomes the VCL plugin within TypedQLiser
+
+== Status
+
+**Pre-alpha.** The Rust type-checker is real and tested (116 tests); the SQL
+plugin enforces levels 1–5 — see the blog-api example, machine-checked in CI via
+`provable.yml` (valid SQL accepted, invalid SQL rejected). The Idris2
+dependent-type kernel is *specified but not yet implemented* — levels are
+currently enforced in Rust. GraphQL and further plugins are next.
+
+This is the **#1 priority** -iser project.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

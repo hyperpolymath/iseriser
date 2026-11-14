@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MPL-2.0
+# Intendfile — Design intent declarations for typedqliser
+# Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+@abstract:
+What typedqliser INTENDS to become. These are bespoke design goals
+specific to the Query language type safety and formal verification domain.
+@end
+
+## Domain-Specific Intent
+
+### gradual-adoption\n- description: Allow incremental type safety (start at level 1, work up)\n- target: Per-query safety level annotations\n- status: aspiration\n\n### vql-ut-integration\n- description: Native integration with VQL-UT as primary query language\n- target: VQL-UT level 10 (fully dependent-typed) support\n- status: aspiration
+
+## Cross-Cutting Intent
+
+### iser-ecosystem-compatibility
+- description: Must interoperate with other -iser projects via shared ABI
+- target: Idris2 ABI + Zig FFI standard interface
+- status: in-progress
+
+### proven-integration
+- description: All formal proofs should be verifiable by the proven framework
+- target: Integration with hyperpolymath/proven
+- status: aspiration

@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= TypedQLiser — Show Me The Receipts
+:toc:
+:icons: font
+
+The README makes claims. This file backs them up.
+
+== Core Claims
+
+=== Claim 1: 10-Level Type Safety for Any Query Language Without Modifying the Database
+
+*From README:* "TypedQLiser adds formal type safety to any query language — SQL, GraphQL, Cypher, SPARQL, KQL, VCL, or anything else — without modifying the database... Queries go in, TypedQLiser proves properties about them... and then passes the original query through unchanged. The database never knows it's there."
+
+*Evidence:* The core type system at `src/abi/` defines 10 levels of type safety as dependent types: Level 1 (Parse-time safety) proves syntactic validity; Level 2 (Schema-binding) proves table/field references exist; Level 3 (Type-compatible operations) proves no type mismatches; Level 4 (Null-safety) proves nullable paths are handled; Level 5 (Injection-proof) proves user input cannot alter query structure; Level 6 (Result-type safety) proves return type is known at compile time; Levels 7-10 (Cardinality, Effect-tracking, Temporal, Linearity) prove resource consumption and execution properties. The plugin architecture at `src/plugins/` allows each query language (SQL, GraphQL, Cypher, etc.) to provide its own parser and type rules. The critical property is that TypedQLiser is a compile-time tool, not a rewriter: the original query passes through unchanged to the database. See `docs/architecture.adoc` for proofs and type kernel design. **Caveat:** This is pre-alpha; only the architecture and Idris2 proof framework are designed. SQL and GraphQL plugins are priority but not yet implemented.
+
+=== Claim 2: Plugin Architecture with Language-Specific Type Rules and Schema Introspection
+
+*From README:* "Each query language gets a parser plugin... Each registry adapter implements a common interface... Language-specific type rules (e.g., SQL's NULL semantics vs GraphQL's)."
+
+*Evidence:* The `QueryLanguagePlugin` trait at `src/plugins/mod.rs` defines the interface every language must implement: `parse(&self, query: &str) -> Result<QueryAst>`, `load_schema(&self, config: &DatabaseConfig) -> Result<Schema>`, `extract_queries(&self, source: &str, embedding: Embedding) -> Result<Vec<LocatedQuery>>`, `type_rules(&self) -> &TypeRules`, `reconstruct(&self, ast: &QueryAst) -> Result<String>`. SQL plugin at `src/plugins/sql.rs` handles PostgreSQL, MySQL, SQLite, MSSQL, Oracle with SQL-specific NULL semantics. GraphQL plugin at `src/plugins/graphql.rs` handles schema introspection and non-null type definitions. The manifest file `typedqliser.toml` specifies which language, which database, which type level to enforce, and where queries live. Schema introspection via `load_schema()` supports database-specific APIs (PostgreSQL introspection, GraphQL introspection queries, etc.). **Caveat:** Plugin development is complex; community plugins may require significant expertise.
+
+== Technology Choices
+
+[cols="1,2"]
+|===
+| Technology | Learn More
+
+| **Rust** | CLI orchestration, plugin system, TOML parsing
+| **Idris2** | Formal proofs for each of the 10 type levels
+| **Zig** | C-ABI FFI bridge between Idris2 kernel and Rust CLI (hyperpolymath standard)
+| **TOML** | User-facing manifest format (typedqliser.toml)
+| **TypeLL** | Shared type theory (10 levels, verification protocol)
+|===
+
+== Dogfooded Across The Account
+
+TypedQLiser is the #1 priority in the -iser ecosystem (TypedQLiser → Chapeliser → VeriSimiser → Squeakwell). Uses:
+- **Idris2 ABI + Zig FFI standard** — Same architecture as https://github.com/hyperpolymath/proven[proven], https://github.com/hyperpolymath/gossamer[gossamer], https://github.com/hyperpolymath/idaptik[idaptik]
+- **TypeLL type theory** — Shared foundation for all query type checking
+- **VCL-total** — Can be deployed as a TypedQLiser plugin for VeriSimDB queries
+
+Related projects:
+- https://github.com/hyperpolymath/typell[TypeLL] — Type theory foundation (10 levels)
+- https://github.com/hyperpolymath/vql-ut[VCL-total] — VCL-specific type safety (VeriSimDB queries)
+- https://github.com/hyperpolymath/iseriser[-iser ecosystem] — Meta-framework for domain-specific query tools
+
+== File Map
+
+[cols="1,3"]
+|===
+| Path | What's There
+
+| `src/main.rs` | CLI entry point: `init`, `check`, `info` commands
+| `src/abi/` | Idris2 type kernel: 10 level definitions as dependent types
+| `src/abi/types.idr` | Core type definitions (ParseSafe, SchemaBound, TypeCompat, NullSafe, InjectionFree, ResultTyped, CardinalitySafe, EffectTracked, TemporalSafe, LinearSafe)
+| `src/abi/proofs.idr` | Proof obligations and verification protocol
+| `ffi/zig/src/` | Zig FFI bridge: proof serialization and AST marshalling (hyperpolymath standard)
+| `src/plugins/` | Query language plugins
+| `src/plugins/mod.rs` | `QueryLanguagePlugin` trait definition
+| `src/plugins/sql.rs` | SQL plugin (PostgreSQL, MySQL, SQLite, MSSQL, Oracle) — Level 6 support
+| `src/plugins/graphql.rs` | GraphQL plugin — Level 6 support
+| `src/plugins/cypher.rs` | Cypher plugin (Neo4j, Memgraph, AGE) — Level 4 support (planned)
+| `src/plugins/sparql.rs` | SPARQL plugin (RDF triplestores) — Level 4 support (planned)
+| `src/plugins/vcl.rs` | VCL plugin (VeriSimDB) — Level 10 support (planned, via VCL-total)
+| `src/manifest.rs` | TOML manifest parser for typedqliser.toml
+| `src/schema.rs` | Schema representation and introspection handling
+| `src/ast.rs` | Abstract syntax tree types (language-agnostic)
+| `src/type_checker.rs` | Type checking orchestration (Idris2 ↔ Zig ↔ Rust)
+| `src/proof_generator.rs` | Generates .proof files (proof certificates)
+| `docs/architecture.adoc` | System architecture and design rationale
+| `docs/10-levels.adoc` | Detailed description of each type safety level
+| `README.adoc` | User guide and quick start
+|===
+
+== Questions?
+
+Open an issue or reach out directly — happy to explain anything in more detail.

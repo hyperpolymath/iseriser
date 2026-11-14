@@ -1,0 +1,17 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the TypedQLiser ABI formal proofs.
+-- Build/check with:  idris2 --build typedqliser-abi.ipkg   (from src/interface/abi/)
+package typedqliser-abi
+
+sourcedir = "."
+
+modules = Typedqliser.ABI.Types
+        , Typedqliser.ABI.Layout
+        , Typedqliser.ABI.Foreign
+        , Typedqliser.ABI.Proofs
+        , Typedqliser.ABI.Semantics
+        , Typedqliser.ABI.SchemaBound
+        , Typedqliser.ABI.TypeCompat
+        , Typedqliser.ABI.Invariants
+        , Typedqliser.ABI.FfiSeam
+        , Typedqliser.ABI.Capstone
