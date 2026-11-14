@@ -1,0 +1,24 @@
+
+# AI Assistant Instructions for atsiser
+
+## Repository Focus
+- `atsiser` wraps C codebases in ATS2 linear types for zero-cost memory safety.
+- Follows the hyperpolymath -iser pattern: manifest → analysis → Idris2 ABI → Zig FFI → codegen.
+- All machine-readable content lives under `.machine_readable/` — state files (a2ml), bot directives, and contractiles.
+- Prefer to keep generated files out of source control, and regenerate them with the documented commands before committing.
+
+## Domain Knowledge
+- ATS2 viewtypes track pointer ownership at the type level (linear types).
+- `dataviewtype` encodes resource state machines (allocated → borrowed → freed).
+- `praxi`/`prfun` are proof-level functions — they generate zero runtime code.
+- Ownership graphs must be acyclic for a valid deallocation order to exist.
+- The Idris2 ABI layer proves meta-properties about the generated ATS2 code.
+
+## Workflow
+1. Inspect `.machine_readable/6a2/STATE.a2ml` for blockers and next actions.
+2. Respect any constraints listed inside `.machine_readable/6a2/AGENTIC.a2ml` when tooling changes are requested.
+3. After finishing edits, update STATE with your outcomes and commit with a concise, imperative message.
+
+## Delivery Promises
+- Mention in summaries whether STATE, `.machine_readable/contractiles/`, or `.machine_readable/bot_directives/` changed.
+- Keep this file in sync with the repository's status; update it if the governance changes.
