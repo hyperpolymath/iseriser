@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# PLAYBOOK.a2ml — Operational playbook for phronesiser
+# Runbooks, incident response, deployment procedures.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
+
+[deployment]
+method = "ci-triggered"
+target = "library"  # phronesiser is a Rust CLI + Zig shared library
+
+[incident-response]
+# 1. Check .machine_readable/6a2/STATE.a2ml for current status
+# 2. Review recent commits and CI results
+# 3. Run `just validate` to check compliance
+# 4. Run `just security` to audit for vulnerabilities
+# 5. If constraint evaluation bugs: check Zig FFI tests first (src/interface/ffi/test/)
+# 6. If ABI mismatch: verify Idris2 types match Zig struct layouts
+
+[release-process]
+# 1. Update version in STATE.a2ml, META.a2ml, Cargo.toml, Justfile
+# 2. Run `just release-preflight` (validate + quality + security + maint-hard-pass)
+# 3. Verify constraint evaluation correctness: `cd src/interface/ffi && zig build test`
+# 4. Optional local permission hardening: `just perms-snapshot && just perms-lock`
+# 5. Tag and push
+# 6. Restore local permissions if needed: `just perms-restore`
+# 7. Run `just container-push` if applicable
+
+[maintenance-operations]
+# Baseline audit:
+#   just maint-audit
+# Hard release gate:
+#   just maint-hard-pass
+# Permission audit:
+#   just perms-audit
+# Constraint engine test:
+#   cd src/interface/ffi && zig build test
+# Rust CLI test:
+#   cargo test

@@ -1,0 +1,40 @@
+= AI Guardrails Example
+// SPDX-License-Identifier: CC-BY-SA-4.0
+
+This example demonstrates a medical triage AI agent with provably safe ethical
+constraints. The `phronesiser.toml` manifest encodes deontic logic rules:
+
+* **Prohibitions**: The bot cannot issue diagnoses or access patient records
+  without consent.
+* **Obligations**: The bot must log every interaction and escalate critical
+  symptoms to a human.
+* **Permissions**: The bot may read public medical guidelines and suggest
+  over-the-counter remedies (when symptoms are not critical).
+
+== Usage
+
+[source,bash]
+----
+# Validate the manifest
+cargo run -- validate -m examples/ai-guardrails/phronesiser.toml
+
+# Generate constraint engine artifacts
+cargo run -- generate -m examples/ai-guardrails/phronesiser.toml -o /tmp/triage-engine
+
+# Show manifest info
+cargo run -- info -m examples/ai-guardrails/phronesiser.toml
+
+# Run self-test
+cargo run -- run -m examples/ai-guardrails/phronesiser.toml
+----
+
+== Constraint Evaluation Rules
+
+The constraint engine evaluates each agent action as follows:
+
+1. Collect all constraints matching the action's `(subject, action)` pair.
+2. Evaluate condition predicates against the action's runtime context.
+3. Apply the highest-priority matching constraint.
+4. In strict mode: prohibitions produce `DENIED` (or `ESCALATED` if
+   `priority >= escalation-threshold`).
+5. Unfulfilled obligations are tracked and reported.
