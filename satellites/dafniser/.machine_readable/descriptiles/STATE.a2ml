@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Dafniser project state
+[metadata]
+project = "dafniser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Dafniser"
+purpose = """Generate correct-by-construction code for critical functions using Dafny verification and Z3 SMT solving"""
+completion-percentage = 45
+
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Dafny/Z3 not installed on dev machine — generated code verified by structure",
+]
+
+[critical-next-actions]
+actions = [
+  "End-to-end test: verified sorting algorithm with Dafny",
+  "Write Idris2 meta-proofs for spec consistency",
+  "Add more verification targets (binary search, balanced tree)",
+]
+
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

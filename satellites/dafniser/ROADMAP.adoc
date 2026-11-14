@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= dafniser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`dafniser.toml`)
+* [x] Codegen module stubs
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI bridge stubs with build.zig
+* [x] README with architecture overview
+* [x] Machine-readable metadata (descriptiles)
+
+== Phase 1: Specification Parser
+* [ ] Define `dafniser.toml` schema for function specs (pre/postconditions, invariants)
+* [ ] Parse `requires` / `ensures` clauses from manifest
+* [ ] Parse `decreases` termination annotations
+* [ ] Parse ghost variable declarations
+* [ ] Parse lemma hints and proof sketches
+* [ ] Validate spec well-formedness (no contradictory pre/post, reachable postconditions)
+* [ ] Error reporting with source spans into the TOML manifest
+
+== Phase 2: Dafny Code Generation
+* [ ] Generate Dafny method signatures with `requires` / `ensures`
+* [ ] Generate loop bodies with `invariant` and `decreases` annotations
+* [ ] Generate ghost variable declarations and assertions
+* [ ] Generate supporting lemmas for complex properties
+* [ ] Generate module refinement layers (abstract -> concrete)
+* [ ] Template library for common patterns (sorting, searching, accumulation)
+* [ ] First end-to-end example: verified sorting algorithm
+
+== Phase 3: Z3 Verification Integration
+* [ ] Invoke Dafny compiler with Z3 backend
+* [ ] Parse Dafny verification output (success / counterexample)
+* [ ] Map verification failures back to TOML spec locations
+* [ ] Structured error messages with counterexample display
+* [ ] Verification caching (skip re-verification of unchanged specs)
+* [ ] Timeout and resource limit configuration
+
+== Phase 4: Multi-Target Compilation
+* [ ] Compile verified Dafny to C# (primary target)
+* [ ] Compile verified Dafny to Java
+* [ ] Compile verified Dafny to Go
+* [ ] Compile verified Dafny to Python
+* [ ] Compile verified Dafny to JavaScript
+* [ ] Build Zig FFI bridge for each target language runtime
+* [ ] Generate C headers from Idris2 ABI definitions
+* [ ] Integration tests per target language
+
+== Phase 5: Idris2 Meta-Proofs
+* [ ] Implement Idris2 ABI types: Precondition, Postcondition, LoopInvariant, GhostVariable, Lemma
+* [ ] Prove spec consistency (no contradictory requires/ensures pairs)
+* [ ] Prove termination measures are well-founded
+* [ ] Prove ghost variables do not escape into runtime code
+* [ ] Prove lemma dependencies form a DAG (no circular proofs)
+* [ ] Prove refinement layers are monotonically more concrete
+* [ ] Generate C headers from verified ABI definitions
+
+== Phase 6: Ecosystem Integration
+* [ ] PanLL panel for spec authoring and verification status display
+* [ ] BoJ-server cartridge for remote Dafny verification
+* [ ] VeriSimDB backing store for verification results and counterexamples
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] Performance benchmarks (codegen time, verification time)
+* [ ] Example library: crypto primitives, sorting, financial algorithms, consensus
+* [ ] Publish to crates.io
+* [ ] Documentation site via GitHub Pages

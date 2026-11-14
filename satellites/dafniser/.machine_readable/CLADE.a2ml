@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: MPL-2.0
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "e032552f-5432-5945-8367-986f8165bbc3"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "dafniser"
+prefixed-name = "rm-dafniser"
+
+[clade]
+primary = "rm"
+secondary = ["gv"]
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/dafniser"
+gitlab = "hyperpolymath/dafniser"
+bitbucket = "hyperpolymath/dafniser"
+
+[lineage]
+type = "standalone"
+parent = "RSR template — scaffold for new repos"
+born = "2026-03-16"
+
+# Lifecycle status (added by clade-status-backfill; see gv-clade-index ADR 0006).
+# Identity (uuid) and status are SEPARATE layers: uuid follows the GitHub path
+# (a move or rename there mints a new one, gv-clade-index ADR 0007; a mirror
+# move or a phase change never does); phase is a mutable pointer. No phase is
+# terminal (extinct -> active is a legal "Gitassic Park" transition on the same
+# uuid). A prefixed-name (clade code) change with the GitHub path unchanged is
+# NOT a phase change — the old prefixed-name goes to aliases[], uuid and phase
+# are untouched.
+[status]
+# One of: reserved incubating active dormant | merged superseded archived extinct
+phase = "active"
+since = "2026-03-16"
+present = true
+aliases = []
+merged-into = ""
+superseded-by = ""
+successors = []
+ended = ""
+
+[[status.history]]
+phase = "active"
+since = "2026-03-16"
+note = "backfilled default — correct if the true phase differs"

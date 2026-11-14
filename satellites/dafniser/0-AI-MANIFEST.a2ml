@@ -1,0 +1,139 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# 0-AI-MANIFEST.a2ml — Universal AI agent entry point for dafniser
+
+# STOP - CRITICAL READING REQUIRED
+
+**THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
+
+## WHAT IS THIS?
+
+This is the AI manifest for **dafniser** — a tool that generates
+correct-by-construction code for critical functions using Dafny.
+
+Dafniser takes function specifications (pre/postconditions, loop invariants,
+ghost variables, lemma hints) from a TOML manifest, generates Dafny source
+with `requires`/`ensures`/`invariant`/`decreases` annotations, verifies
+them via Z3, and compiles to C#, Java, Go, Python, or JavaScript.
+
+Part of the hyperpolymath -iser family (https://github.com/hyperpolymath/iseriser).
+
+## CANONICAL LOCATIONS (UNIVERSAL RULE)
+
+### Machine-Readable Metadata: `.machine_readable/` ONLY
+
+These 6 a2ml files MUST exist in `.machine_readable/descriptiles/` directory ONLY:
+1. **STATE.a2ml** - Project state, progress, blockers
+2. **META.a2ml** - Architecture decisions, governance
+3. **ECOSYSTEM.a2ml** - Position in ecosystem, relationships
+4. **AGENTIC.a2ml** - AI agent interaction patterns
+5. **NEUROSYM.a2ml** - Neurosymbolic integration config
+6. **PLAYBOOK.a2ml** - Operational runbook
+
+**CRITICAL:** If ANY of these files exist in the root directory, this is an ERROR.
+
+### Anchor File: `.machine_readable/anchors/ANCHOR.a2ml` ONLY
+
+Canonical authority and semantic-boundary declaration MUST exist at:
+
+` .machine_readable/anchors/ANCHOR.a2ml `
+
+Do not place `ANCHOR.a2ml` at repository root.
+
+### Maintenance Policies: `.machine_readable/policies/` ONLY
+
+Canonical maintenance/governance files MUST exist under:
+
+` .machine_readable/policies/ `
+
+Minimum required files:
+- `MAINTENANCE-AXES.a2ml`
+- `MAINTENANCE-CHECKLIST.a2ml`
+- `SOFTWARE-DEVELOPMENT-APPROACH.a2ml`
+
+Do not place maintenance policy files in repository root.
+
+### Bot Directives: `.machine_readable/bot_directives/` ONLY
+
+Bot-specific instructions for your automated agents.
+
+### Contractiles: `.machine_readable/contractiles/` ONLY
+
+Policy enforcement contracts (k9, dust, lust, must, trust).
+
+### AI Configuration & Guides: `.machine_readable/ai/` ONLY
+
+- `AI.a2ml` - Language-specific or LLM-specific patterns
+- `PLACEHOLDERS.adoc` - Bootstrap guide
+
+### Community & Forge Metadata: `.github/` ONLY
+
+- `CODEOWNERS` - Review assignments
+- `MAINTAINERS` - Machine-readable contact list
+- `SUPPORT` - Support channels
+- `SECURITY.md` - Technical security policy
+- `CONTRIBUTING.md` - Technical contribution manual
+- `CODE_OF_CONDUCT.md` - Conduct rules
+
+### Agent Instructions
+
+- `0-AI-MANIFEST.a2ml` - THIS FILE (universal entry point)
+
+## REPOSITORY STRUCTURE
+
+```
+dafniser/
+├── 0-AI-MANIFEST.a2ml         # THIS FILE (start here)
+├── README.adoc                 # What dafniser does and why
+├── ROADMAP.adoc                # Phase 0-6 roadmap
+├── CONTRIBUTING.adoc           # Human contribution guide
+├── Justfile                    # Task runner
+├── Containerfile               # OCI build (Chainguard base)
+├── Cargo.toml                  # Rust CLI dependencies
+├── LICENSE                     # MPL-2.0
+├── src/
+│   ├── main.rs                 # CLI entry point (init/validate/generate/build/run/info)
+│   ├── lib.rs                  # Library API
+│   ├── manifest/               # TOML manifest parser and spec extraction
+│   ├── codegen/                # Dafny source generation with verification annotations
+│   └── interface/              # Verified Interface Seams
+│       ├── abi/                # Idris2 ABI (Types, Layout, Foreign)
+│       │   ├── Types.idr       # Precondition, Postcondition, LoopInvariant,
+│       │   │                   # GhostVariable, Lemma, VerificationResult, SpecTree
+│       │   ├── Layout.idr      # Memory layout proofs for ABI types
+│       │   └── Foreign.idr     # FFI declarations (Dafny compile, Z3 verify, target compile)
+│       ├── ffi/                # Zig FFI (The Bridge)
+│       │   ├── build.zig       # Build config (shared + static libs)
+│       │   ├── src/main.zig    # C-ABI implementation of Foreign.idr
+│       │   └── test/           # Integration tests
+│       └── generated/          # C Headers (auto-generated from Idris2 ABI)
+├── docs/
+│   └── architecture/
+│       └── TOPOLOGY.md         # Module topology and data flow diagram
+└── .machine_readable/          # ALL machine-readable metadata (descriptiles/ subdirectory)
+```
+
+## CORE INVARIANTS
+
+1. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
+2. **Single source of truth** - `.machine_readable/` is authoritative
+3. **No stale metadata** - If root state files exist, they are OUT OF DATE
+4. **License consistency** - All code MPL-2.0 unless platform requires MPL-2.0
+5. **Author attribution** - Always "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+6. **Container images** - MUST use Chainguard base (`cgr.dev/chainguard/wolfi-base:latest` or `cgr.dev/chainguard/static:latest`)
+7. **Container runtime** - Podman, never Docker. Files are `Containerfile`, never `Dockerfile`
+8. **Container orchestration** - `selur-compose`, never `docker-compose`
+9. **Dafny pipeline order** - Always: parse spec -> meta-prove (Idris2) -> generate .dfy -> verify (Z3) -> compile target
+10. **No manual Dafny** - Users never write Dafny; dafniser generates everything from TOML specs
+
+## SESSION STARTUP CHECKLIST
+
+1. Read THIS file (0-AI-MANIFEST.a2ml) first
+2. Understand canonical location: `.machine_readable/`
+3. Read `.machine_readable/descriptiles/STATE.a2ml` for current project state
+4. State understanding of canonical locations
+
+## ATTESTATION PROOF
+
+**"I have read the AI manifest for dafniser. All machine-readable content (state files, anchors, policies, bot directives, contractiles, AI guides) is located in `.machine_readable/` ONLY, and community metadata is in `.github/`. I will not create duplicate files in the root directory."**
