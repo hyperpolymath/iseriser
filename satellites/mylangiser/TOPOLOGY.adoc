@@ -1,0 +1,47 @@
+== TOPOLOGY.md — mylangiser
+
+=== Purpose
+
+mylangiser generates progressive-disclosure interfaces for complex APIs
+via My-Lang. It analyses API complexity, scores each endpoint, and
+assigns disclosure levels (beginner / intermediate / expert), then
+generates layered wrapper code with smart defaults for omitted
+parameters. The goal is to make any API learnable by newcomers while
+remaining fully expressive for experts. mylangiser targets library and
+API authors who want to reduce the cognitive load on users without
+sacrificing power.
+
+=== Module Map
+
+....
+mylangiser/
+├── src/
+│   ├── main.rs                    # CLI entry point (clap): init, validate, generate, build, run, info
+│   ├── lib.rs                     # Library API
+│   ├── manifest/mod.rs            # mylangiser.toml parser
+│   ├── codegen/mod.rs             # Layered wrapper code generation (My-Lang disclosure levels)
+│   └── abi/                       # Idris2 ABI bridge stubs
+├── examples/                      # Worked examples
+├── verification/                  # Proof harnesses
+├── container/                     # Stapeln container ecosystem
+└── .machine_readable/             # A2ML metadata
+....
+
+=== Data Flow
+
+....
+mylangiser.toml manifest
+        │
+   ┌────▼────┐
+   │ Manifest │  parse + validate API endpoint definitions and complexity hints
+   │  Parser  │
+   └────┬────┘
+        │  validated API config
+   ┌────▼────┐
+   │ Analyser │  score endpoint complexity, assign beginner/intermediate/expert levels
+   └────┬────┘
+        │  complexity-annotated IR
+   ┌────▼────┐
+   │ Codegen  │  emit generated/mylangiser/ (layered wrappers with smart defaults)
+   └─────────┘
+....
