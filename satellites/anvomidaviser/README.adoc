@@ -1,0 +1,123 @@
+https://github.com/sponsors/hyperpolymath[image:https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?logo=github[Sponsor]]
+
+== What Is This?
+
+Anvomidaviser converts *ISU (International Skating Union) notation* into
+formal figure skating programs via *Anvomidav* — the first programming
+language for figure skating choreography.
+
+The pipeline: ISU notation → formal choreography models → scoring
+validation → program component analysis.
+
+Anvomidaviser bridges existing notation systems (ISU element codes, IJS
+protocols, Code of Points tables) to formally verified Anvomidav
+programs.
+
+== How It Works
+
+Describe your program in `+anvomidaviser.toml+` or import ISU protocols.
+Anvomidaviser:
+
+[arabic]
+. *Parses* ISU element codes — jumps (`+3Lz+`, `+4T+3T+`), spins
+(`+CCoSp4+`), steps (`+StSq3+`), lifts
+. *Validates* against ISU technical rules — Zayak rule, element counts,
+well-balanced requirements
+. *Scores* using the Code of Points — base values, GOE adjustments, PCS,
+deductions
+. *Generates* formal Anvomidav programs with timing, transitions, and
+rink positions
+. *Outputs* score sheets, validation reports, and choreography files
+
+== Use Cases
+
+* *Competition program planning* — build programs, check legality,
+estimate scores before training
+* *Judging consistency checks* — verify scores against ISU rules
+programmatically
+* *Training feedback* — track element difficulty progression across
+seasons
+* *Coaching tools* — visualise program layout, timing, and transitions
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern:
+
+....
+anvomidaviser.toml (manifest)
+        |
+        v
+   ISU Parser (Rust CLI)
+        |
+        v
+   Idris2 ABI (proves scoring rule correctness)
+        |
+        v
+   Zig FFI (C-ABI bridge to scoring engine)
+        |
+        v
+   Anvomidav Codegen (formal program descriptions)
+....
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family].
+
+== CLI Commands
+
+[source,bash]
+----
+# Create a new manifest
+anvomidaviser init
+
+# Validate a manifest against ISU rules
+anvomidaviser validate -m anvomidaviser.toml
+
+# Generate Anvomidav program and score sheets
+anvomidaviser generate -m anvomidaviser.toml -o generated/
+
+# Build generated artifacts
+anvomidaviser build -m anvomidaviser.toml --release
+
+# Run the scoring engine
+anvomidaviser run -m anvomidaviser.toml
+
+# Show manifest information
+anvomidaviser info -m anvomidaviser.toml
+----
+
+== Example Manifest
+
+[source,toml]
+----
+[workload]
+name = "ladies-short-2026"
+discipline = "ladies-single"
+segment = "short-program"
+
+[elements]
+jump_1 = "3Lz+3T"
+spin_1 = "FCSp4"
+step_seq = "StSq4"
+jump_2 = "3F"
+spin_2 = "CCoSp4"
+jump_3 = "2A"
+spin_3 = "LSp4"
+
+[program]
+music = "Clair de Lune"
+duration_seconds = 160
+
+[output]
+format = "anvomidav"
+score_sheet = true
+validation_report = true
+----
+
+== Status
+
+*Pre-alpha / Codebase in progress.* Architecture defined, CLI
+scaffolded, bespoke Idris2 ABI types for ISU scoring, Zig FFI stubs with
+anvomidaviser symbols. Codegen and scoring engine pending.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

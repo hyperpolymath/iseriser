@@ -1,0 +1,128 @@
+= Invisible Character Detection
+:toc:
+:toclevels: 3
+
+== Overview
+
+The invisible character detection gate (empty-linter) enforces file hygiene by detecting C0 control characters, NUL bytes, and leading UTF-8 BOM markers that indicate file corruption or encoding issues.
+
+== Implementation
+
+=== Location
+
+The canonical implementation for anvomidaviser is in `.github/workflows/dogfood-gate.yml` (Job 3: empty-lint).
+
+=== Detection Rules
+
+==== BLOCKING (fails the CI gate)
+
+* *C0 Control Characters*: `\x00-\x08`, `\x0B`, `\x0C`, `\x0E-\x1F`
+** These indicate file corruption (backspace mangled LaTeX, made workflows unloadable)
+** Detection: PCRE byte-wise pattern `\x00|[\x01-\x08\x0B\x0C\x0E-\x1F]`
+** Locale-independent (uses exact hex bytes, not character classes)
+
+* *Leading UTF-8 BOM*: EF BB BF at file position 0
+** Not needed for UTF-8 files (UTF-8 is self-identifying)
+** Causes parser issues in some tools
+** Detection: byte-wise check `head -c 3 file | od -An -tx1 | tr -d ' '` equals `efbbbf`
+
+==== ADVISORY (warning only, does not fail)
+
+* *Invisible Unicode*: NBSP (`\x{a0}`), soft hyphen (`\x{ad}`), zero-width marks, BOM mid-file
+** About 2,100 estate files carry these as legitimate typography in prose
+** Detection included in main PCRE pattern but not enforced
+
+=== Pattern Evolution
+
+[source,bash]
+----
+# Before bd73a39 (broken, never matched anything):
+PATTERNS='\x00|[\x01-\x08\x0B\x0C\x0E-\x1F]|...'
+
+# After bd73a39 (locale-independent, consolidated ranges):
+PATTERNS='(*UTF)[\x00-\x08\x0B\x0C\x0E-\x1F\x{a0}\x{ad}\x{200b}-\x{200f}\x{202a}-\x{202f}\x{2060}\x{2066}-\x{2069}\x{feff}]'
+----
+
+The `(*UTF)` prefix enables UTF-8 mode in PCRE while keeping the byte-level C0 detection locale-independent.
+
+=== Enforcement Strategy
+
+Per commit b3fbe01, enforcement happens *inside* the scan step:
+
+1. Main pattern detects all invisible characters
+2. Blocking subset re-greps only flagged files for C0/NUL
+3. Leading-BOM check uses byte-wise `head | od` on flagged files
+4. If scanner crashes, job fails directly (no silent pass)
+
+This prevents drift between detection and enforcement expressions.
+
+=== Cross-Repo Synchronization
+
+NOTE: `stdlib/ByteDetector.affine` and `config.ncl` do not exist in anvomidaviser. The formal/shared implementation lives in the estate-wide iseriser repository and will be updated to match these rules in a separate cross-repo PR.
+
+== Testing
+
+=== Test Fixtures
+
+Test fixtures are in `tests/fixtures/invisible-chars/`:
+
+* `clean.rs` — No invisible characters (should PASS)
+* `legitimate-whitespace.rs` — Tabs, newlines, spaces (should PASS)
+* `leading-bom.rs` — UTF-8 BOM at position 0 (should BLOCK)
+* `nul-byte.rs` — NUL byte (should BLOCK)
+* `backspace.rs` — Backspace C0 control (should BLOCK)
+* `vertical-tab.rs` — Vertical tab C0 control (should BLOCK)
+* `form-feed.rs` — Form feed C0 control (should BLOCK)
+* `escape.rs` — Escape character C0 control (should BLOCK)
+
+=== Running Tests Locally
+
+[source,bash]
+----
+./tests/test-invisible-char-detection.sh
+----
+
+This script verifies both C0 detection and leading-BOM detection against all fixtures.
+
+=== CI Exclusions
+
+The CI gate excludes test fixtures via:
+
+[source,bash]
+----
+find ... -not -path '*/tests/fixtures/invisible-chars/*' ...
+----
+
+== Design Rationale
+
+=== Why Block Leading BOM?
+
+1. UTF-8 BOM (EF BB BF) is *not* required for UTF-8 files
+2. UTF-8 is self-identifying (no BOM needed unlike UTF-16/32)
+3. Some tools (parsers, compilers) choke on leading BOM
+4. Mid-file BOM stays advisory (may be legitimate in prose/data)
+
+=== Why Byte-Wise Detection?
+
+1. *Locale independence*: PCRE character classes like `[:cntrl:]` vary by locale
+2. *Precision*: Exact hex bytes ensure consistent behavior across systems
+3. *Safety*: No risk of misinterpretation in different environments
+
+=== Why Separate Detection from Enforcement?
+
+1. *Full visibility*: Detect everything first (2,100+ files have legit invisible Unicode)
+2. *Targeted blocking*: Only fail on proven-dangerous corruption
+3. *Fail-safe*: Scanner crash fails the job (no silent pass on empty results)
+
+== Related Commits
+
+* `bd73a39`: Make invisible-character PCRE locale-independent
+* `b3fbe01`: Enforce C0/NUL corruption in-step; warn on invisible Unicode
+* `57ad5da`: Fix invisible-character gate (never matched anything before)
+* Current commit: Add leading-BOM byte-wise check
+
+== References
+
+* Owner ruling 2026-08-28: C0/NUL/leading-BOM blocks; other invisible Unicode advisory
+* Gate-lens census: ~2,100 estate files carry NBSP/zero-width as legit typography
+* LaTeX/workflow corruption incidents: Backspace bytes caused silent mangling

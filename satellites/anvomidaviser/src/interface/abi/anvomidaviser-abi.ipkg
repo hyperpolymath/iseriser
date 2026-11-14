@@ -1,0 +1,4 @@
+-- SPDX-License-Identifier: MPL-2.0
+package anvomidaviser-abi
+sourcedir = "."
+modules = Anvomidaviser.ABI.Types, Anvomidaviser.ABI.Layout, Anvomidaviser.ABI.Foreign, Anvomidaviser.ABI.Proofs, Anvomidaviser.ABI.Semantics, Anvomidaviser.ABI.Invariants, Anvomidaviser.ABI.FfiSeam, Anvomidaviser.ABI.Capstone

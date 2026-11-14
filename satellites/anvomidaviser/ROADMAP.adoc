@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= anvomidaviser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (anvomidaviser.toml)
+* [x] Codegen stubs for Anvomidav output
+* [x] Idris2 ABI module stubs with skating type definitions
+* [x] Zig FFI bridge stubs with anvomidaviser symbol names
+* [x] README with architecture and use cases
+
+== Phase 1: ISU Notation Parser
+* [ ] Parse ISU element codes — jumps (T, S, Lo, F, Lz, A), spins (USp, SSp, CSp, LSp, CCoSp), steps (StSq, ChSq)
+* [ ] Parse combination elements (e.g. `3Lz+3T`, `3F+2T+2Lo`)
+* [ ] Parse element modifiers — under-rotation (`<`, `<<`), edge calls (`e`, `!`), falls
+* [ ] Parse GOE values (-5 to +5) per ISU Communication 2472
+* [ ] Parse PCS categories (SS, TR, PE, CO, IN) with 0.25 increments
+* [ ] Import ISU protocol XML/IJS format files
+* [ ] Base value lookup from Code of Points tables (singles, pairs, ice dance)
+* [ ] Integration tests with real competition protocols
+
+== Phase 2: Anvomidav Codegen
+* [ ] Define Anvomidav program structure — sections, timing, transitions
+* [ ] Generate formal element sequences with ISU notation cross-references
+* [ ] Generate timing constraints (program length requirements per discipline)
+* [ ] Generate transition descriptions between elements
+* [ ] Rink position annotations (entry/exit edges, pattern coverage)
+* [ ] Round-trip: Anvomidav back to ISU element list for verification
+
+== Phase 3: Scoring Engine
+* [ ] Calculate Technical Element Score (TES) — base values + GOE adjustments
+* [ ] Calculate Program Component Score (PCS) — 5 categories x factor
+* [ ] Apply deductions (falls, time violations, costume/prop violations)
+* [ ] Zayak rule enforcement (repeated jump restriction)
+* [ ] Element count validation (short program vs free skate requirements)
+* [ ] Well-balanced program checks (required elements per discipline)
+* [ ] Bonus for elements in second half of program (ISU 10% bonus rule)
+* [ ] Output formatted score sheets matching ISU protocol format
+
+== Phase 4: Idris2 Proofs
+* [ ] Prove GOE range invariant (-5 to +5) at the type level
+* [ ] Prove PCS mark range invariant (0.00 to 10.00 in 0.25 steps)
+* [ ] Prove Zayak rule completeness — all violations are caught
+* [ ] Prove element count bounds per discipline and segment
+* [ ] Prove base value table consistency — no missing entries
+* [ ] Prove scoring formula correctness (TES + PCS - deductions = total)
+* [ ] Cross-platform ABI layout proofs for TechnicalElement and ProgramScore structs
+
+== Phase 5: Ecosystem Integration
+* [ ] BoJ-server cartridge for MCP-based access to scoring engine
+* [ ] PanLL panel for visual program planning and scoring feedback
+* [ ] Coaching tools API — training feedback, element difficulty progression
+* [ ] VeriSimDB backing store for competition results and historical data
+* [ ] Publish CLI to crates.io
+* [ ] Shell completions (bash, zsh, fish)
