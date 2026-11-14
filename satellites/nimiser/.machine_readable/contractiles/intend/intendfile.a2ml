@@ -1,0 +1,15 @@
+// intendfile.a2ml for nimiser
+// SPDX-License-Identifier: MPL-2.0
+// Generated: 2026-04-08T20:03:43+01:00
+
+intendfile {
+    name: "nimiser"
+    version: "1.0.0"
+    description: "intendfile contractile for nimiser"
+    
+    // Basic intendfile configuration
+    enabled: true
+    
+    // Repository-specific intend settings will be added here
+    // This preserves the existing contractile structure and naming convention
+}

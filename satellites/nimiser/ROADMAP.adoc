@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Nimiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`nimiser.toml` -> `Manifest` struct)
+* [x] Codegen stubs (`src/codegen/mod.rs`)
+* [x] Idris2 ABI module stubs (`src/interface/abi/`)
+* [x] Zig FFI bridge stubs (`src/interface/ffi/`)
+* [x] README with architecture and Nim pipeline overview
+
+== Phase 1: Nim Template Generation
+* [ ] Parse `nimiser.toml` interface descriptions into typed IR
+* [ ] Generate Nim templates for type-safe C-compatible wrappers
+* [ ] Generate `{.exportc.}` pragmas from Idris2 ABI definitions
+* [ ] Generate `{.cdecl.}`, `{.packed.}`, `{.align.}` from Layout proofs
+* [ ] Emit Nim source files to `generated/nim/`
+* [ ] First working end-to-end: manifest -> Nim templates -> `nim c` -> `.a` + `.h`
+* [ ] Integration test: link generated `.a` from C and call exported functions
+
+== Phase 2: Nim Macro & Generic Generation
+* [ ] Generate Nim macros for AST-level optimisation (loop unrolling, specialisation)
+* [ ] Generate Nim generics for monomorphised type-safe wrappers
+* [ ] Compile-time evaluation: generate `static` blocks for lookup tables and constants
+* [ ] Generate `=destroy`, `=copy`, `=sink` hooks for resource-owning types
+* [ ] Dead code elimination via conditional compilation (`when defined()`)
+* [ ] Support multi-backend: C, C++, JavaScript output selection in manifest
+
+== Phase 3: Zig FFI & Idris2 ABI Proofs
+* [ ] Write Idris2 ABI proofs for NimTemplate, NimMacro, CompileTimeAST types
+* [ ] Prove memory layout correctness for Nim object types
+* [ ] Prove calling convention compatibility (cdecl, stdcall)
+* [ ] Build Zig FFI bridge linking generated C library to consuming code
+* [ ] Integration tests: Idris2 proofs -> Zig bridge -> generated Nim C library
+
+== Phase 4: Polish & Diagnostics
+* [ ] Error messages with source locations (manifest line numbers)
+* [ ] Nim compilation error capture and re-reporting through Rust CLI
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] Performance benchmarks: generated C vs hand-written C vs raw Nim
+* [ ] CI/CD for generated artifacts (compile-test the output)
+* [ ] Additional examples: buffer library, hash table, event system
+
+== Phase 5: Advanced Nim Features
+* [ ] Nim `concepts` (structural typing) for flexible interface matching
+* [ ] Nim `effect system` annotations for generated code
+* [ ] Cross-compilation matrix: Linux/macOS/Windows x86_64/aarch64
+* [ ] WASM backend via Nim's Emscripten support
+* [ ] Nim `importc` generation for consuming external C libraries
+
+== Phase 6: Ecosystem Integration
+* [ ] PanLL panel for Nim codegen visualisation and AST inspection
+* [ ] BoJ-server cartridge for on-demand library generation
+* [ ] VeriSimDB backing store for generation results and benchmarks
+* [ ] Publish to crates.io
+* [ ] Integration with iseriser meta-framework for auto-scaffolding
