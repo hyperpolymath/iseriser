@@ -1,0 +1,136 @@
+== TOPOLOGY — betlangiser
+
+=== Purpose
+
+Betlangiser adds ternary probabilistic modelling to deterministic code
+via Betlang. It analyses source code, identifies values that should be
+probabilistic, wraps them in distributions, and generates
+uncertainty-propagating code with ternary logic (true/false/unknown).
+
+=== Directory Map
+
+....
+betlangiser/
+├── 0-AI-MANIFEST.a2ml              # AI agent entry point
+├── README.adoc                     # Project overview
+├── ROADMAP.adoc                    # Development phases
+├── TOPOLOGY.md                     # THIS FILE — structural map
+├── Cargo.toml                      # Rust build configuration
+├── LICENSE                         # MPL-2.0
+│
+├── src/                            # Rust source (CLI + orchestration)
+│   ├── main.rs                     # CLI entry point (clap subcommands)
+│   ├── lib.rs                      # Library exports
+│   ├── manifest/                   # betlangiser.toml parser and validator
+│   ├── codegen/                    # Betlang wrapper code generation
+│   ├── core/                       # Core analysis logic
+│   ├── abi/                        # Rust-side ABI bindings
+│   ├── errors/                     # Error types and diagnostics
+│   ├── definitions/                # Type and distribution definitions
+│   ├── aspects/                    # Cross-cutting concerns
+│   ├── bridges/                    # Language adapter bridges
+│   └── contracts/                  # Internal contract validation
+│
+│   └── interface/                  # Verified Interface Seams
+│       ├── abi/                    # Idris2 ABI definitions
+│       │   ├── Types.idr           # Distribution, TernaryBool, ProbabilityValue,
+│       │   │                       #   ConfidenceInterval, SamplingStrategy
+│       │   ├── Layout.idr          # Distribution struct layout, sample buffer layout
+│       │   └── Foreign.idr         # Distribution creation, sampling, combination,
+│       │                           #   ternary logic FFI declarations
+│       ├── ffi/                    # Zig FFI implementation
+│       │   ├── build.zig           # Build shared/static library
+│       │   ├── src/main.zig        # Distribution engine, sampling, ternary logic
+│       │   └── test/               # Integration tests (ABI compliance)
+│       │       └── integration_test.zig
+│       └── generated/              # Auto-generated C headers
+│
+├── .machine_readable/              # Machine-readable metadata (canonical)
+│   ├── 6a2/                        # Core state files
+│   │   ├── STATE.a2ml              # Project progress and blockers
+│   │   ├── META.a2ml               # Architecture decisions
+│   │   ├── ECOSYSTEM.a2ml          # Position in -iser family
+│   │   ├── AGENTIC.a2ml            # AI agent permissions
+│   │   ├── NEUROSYM.a2ml           # Hypatia scanning config
+│   │   └── PLAYBOOK.a2ml           # Operational runbook
+│   ├── CLADE.a2ml                  # Clade taxonomy declaration
+│   ├── ENSAID_CONFIG.a2ml          # PanLL environment config
+│   ├── anchors/                    # Semantic boundary declarations
+│   ├── policies/                   # Maintenance policies
+│   ├── contractiles/               # Policy enforcement (k9, dust, trust)
+│   ├── bot_directives/             # Bot-specific instructions
+│   ├── ai/                         # AI configuration
+│   ├── configs/                    # Tool configs (git-cliff, etc.)
+│   ├── integrations/               # External integrations
+│   ├── compliance/                 # Compliance tracking
+│   └── scripts/                    # Automation scripts
+│
+├── .claude/                        # Claude Code project instructions
+│   └── CLAUDE.md
+├── .github/                        # GitHub metadata and workflows
+│   ├── workflows/                  # 17 CI/CD workflows
+│   ├── CODEOWNERS
+│   ├── SECURITY.md
+│   └── CONTRIBUTING.md
+├── docs/                           # Documentation
+└── container/                      # Stapeln container ecosystem
+....
+
+=== Data Flow
+
+....
+betlangiser.toml (user manifest)
+        |
+        v
+  [Manifest Parser] -- validates distribution params, source paths
+        |
+        v
+  [Source Analyser] -- scans deterministic code for numeric values,
+        |              boolean conditions, decision points
+        v
+  [Distribution Mapper] -- matches values to distributions from manifest
+        |
+        v
+  [Idris2 ABI Prover] -- proves distribution composition correctness,
+        |                 Kolmogorov axioms, support bounds
+        v
+  [Zig FFI Bridge] -- C-ABI sampling engine, combination operators,
+        |              ternary logic evaluation
+        v
+  [Betlang Codegen] -- emits uncertainty-propagating wrappers with
+        |               ternary bet semantics
+        v
+  generated/betlangiser/ (output)
+....
+
+=== Key Types
+
+[width="100%",cols="27%,34%,39%",options="header",]
+|===
+|Type |Module |Purpose
+|`+Distribution+` |Types.idr |Sum type: Normal, Uniform, Beta,
+Bernoulli, Custom
+
+|`+TernaryBool+` |Types.idr |True / False / Unknown with Kleene logic
+
+|`+ProbabilityValue+` |Types.idr |Value in [0,1] with dependent type
+proof
+
+|`+ConfidenceInterval+` |Types.idr |Lower/upper bounds at confidence
+level
+
+|`+SamplingStrategy+` |Types.idr |MonteCarlo / Analytical / Hybrid
+|===
+
+=== Integration Points
+
+[width="100%",cols="39%,61%",options="header",]
+|===
+|System |Relationship
+|*iseriser* |Meta-framework; can scaffold new -iser repos
+|*proven* |Shared Idris2 verified library (distribution proofs)
+|*typell* |Type theory engine (ternary logic foundations)
+|*boj-server* |Cartridge for CLI invocation via MCP
+|*PanLL* |Monte Carlo visualisation and distribution comparison panels
+|*VeriSimDB* |Backing store for simulation results
+|===

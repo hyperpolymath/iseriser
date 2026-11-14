@@ -1,0 +1,13 @@
+-- SPDX-License-Identifier: MPL-2.0
+package betlangiser-abi
+
+sourcedir = "."
+
+modules = Betlangiser.ABI.Types
+        , Betlangiser.ABI.Layout
+        , Betlangiser.ABI.Foreign
+        , Betlangiser.ABI.Proofs
+        , Betlangiser.ABI.Semantics
+        , Betlangiser.ABI.Invariants
+        , Betlangiser.ABI.FfiSeam
+        , Betlangiser.ABI.Capstone

@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= Betlangiser ABI — Idris2 Interface Definitions
+
+This directory contains formally verified ABI definitions for the
+betlangiser probabilistic engine.
+
+== Files
+
+* **Types.idr** — Core types with dependent-type proofs:
+  - `Distribution` — Normal, Uniform, Beta, Bernoulli, Custom (with parameter validity proofs)
+  - `TernaryBool` — True/False/Unknown with Kleene algebra proofs (commutativity, involution)
+  - `ProbabilityValue` — Value in [0,1] with bounds proof
+  - `ConfidenceInterval` — Lower/upper bounds with ordering proof
+  - `SamplingStrategy` — MonteCarlo/Analytical/Hybrid
+  - Kolmogorov axiom witnesses (NonNegative, Normalised)
+
+* **Layout.idr** — Memory layout proofs:
+  - Distribution struct (40 bytes, 8-byte aligned)
+  - Sample buffer (56 bytes, 8-byte aligned)
+  - Confidence interval (24 bytes, 8-byte aligned)
+  - Ternary bool array (16 bytes, 8-byte aligned)
+  - C ABI compliance proofs
+
+* **Foreign.idr** — FFI declarations (implemented in Zig):
+  - Distribution creation (normal, uniform, beta, bernoulli)
+  - Sampling (single and batch)
+  - Distribution combination (add, multiply, mixture)
+  - Ternary logic (compare, AND, OR, NOT)
+  - Confidence interval computation
+  - Distribution properties (mean, variance, tag)
+
+== Verification
+
+All types carry compile-time proofs. Distribution parameters cannot be
+invalid (e.g. negative stddev is a type error). Ternary logic operators
+are proven to satisfy Kleene algebra properties.

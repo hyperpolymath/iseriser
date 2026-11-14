@@ -1,0 +1,39 @@
+# betlangiser manifest — Risk model example
+# SPDX-License-Identifier: MPL-2.0
+#
+# This example demonstrates ternary probabilistic modelling with betlangiser.
+# Three variables model a simplified pricing scenario:
+# - price: normally distributed around 100 with std_dev 5
+# - demand: uniformly distributed between 50 and 150 units
+# - will-buy: a Bernoulli variable representing purchase likelihood (70%)
+#
+# The generated Betlang code wraps these in probability distributions,
+# applies Kleene ternary logic to the Bernoulli variable, and runs
+# a Monte Carlo simulation to estimate confidence intervals.
+
+[project]
+name = "risk-model"
+description = "Probabilistic pricing model with ternary purchase logic"
+
+[[variables]]
+name = "price"
+distribution = "normal"
+mean = 100.0
+std-dev = 5.0
+
+[[variables]]
+name = "demand"
+distribution = "uniform"
+min = 50.0
+max = 150.0
+
+[[variables]]
+name = "will-buy"
+distribution = "bernoulli"
+probability = 0.7
+
+[simulation]
+samples = 10000
+confidence = 0.95
+seed = 42
+output-format = "text"
