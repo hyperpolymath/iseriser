@@ -1,0 +1,13 @@
+-- SPDX-License-Identifier: MPL-2.0
+package eclexiaiser-abi
+
+sourcedir = "."
+
+modules = Eclexiaiser.ABI.Types
+        , Eclexiaiser.ABI.Layout
+        , Eclexiaiser.ABI.Foreign
+        , Eclexiaiser.ABI.Proofs
+        , Eclexiaiser.ABI.Semantics
+        , Eclexiaiser.ABI.Invariants
+        , Eclexiaiser.ABI.FfiSeam
+        , Eclexiaiser.ABI.Capstone
