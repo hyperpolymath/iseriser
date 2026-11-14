@@ -1,0 +1,52 @@
+== TOPOLOGY.md — futharkiser
+
+=== Purpose
+
+futharkiser compiles annotated array operation descriptions to GPU
+kernels via Futhark. Futhark (Troels Henriksen, DIKU Copenhagen) is a
+purely functional array language that compiles to OpenCL or CUDA with
+guaranteed data-race freedom. futharkiser reads kernel descriptions from
+a `+futharkiser.toml+` manifest and generates idiomatic Futhark programs
+using SOACs (second-order array combinators), which are then compiled to
+the selected GPU backend. It targets engineers who want GPU acceleration
+with formal data-race guarantees without writing Futhark or GPU code
+directly.
+
+=== Module Map
+
+....
+futharkiser/
+├── src/
+│   ├── main.rs                    # CLI entry point (clap): init, validate, generate, build, run, info
+│   ├── lib.rs                     # Library API
+│   ├── manifest/mod.rs            # futharkiser.toml parser
+│   ├── codegen/mod.rs             # Futhark source, C-ABI header, and build script generation
+│   └── abi/                       # Idris2 ABI bridge stubs
+├── examples/                      # Worked examples
+├── verification/                  # Proof harnesses
+├── container/                     # Stapeln container ecosystem
+└── .machine_readable/             # A2ML metadata
+....
+
+=== Data Flow
+
+....
+futharkiser.toml manifest
+        │
+   ┌────▼────┐
+   │ Manifest │  parse + validate kernel descriptions and SOAC annotations
+   │  Parser  │
+   └────┬────┘
+        │  validated kernel config
+   ┌────▼────┐
+   │ Analyser │  resolve array shapes, infer parallelism strategy
+   └────┬────┘
+        │  intermediate representation
+   ┌────▼────┐
+   │ Codegen  │  emit generated/futharkiser/ (.fut source, C-ABI header, build script)
+   └────┬────┘
+        │  Futhark programs + C-ABI headers
+   ┌────▼────┐
+   │  Futhark │  compile to OpenCL/CUDA GPU kernels
+   └─────────┘
+....

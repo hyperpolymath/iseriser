@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Futharkiser project state
+[metadata]
+project = "futharkiser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Futharkiser"
+purpose = """Compile annotated array operations to GPU kernels via Futhark"""
+completion-percentage = 45
+
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Futhark compiler not installed on dev machine — .fut output verified by structure",
+]
+
+[critical-next-actions]
+actions = [
+  "Install Futhark compiler and run end-to-end GPU test",
+  "Write Idris2 proofs for parallelism safety properties",
+  "Benchmark against hand-written CUDA for vector addition",
+]
+
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

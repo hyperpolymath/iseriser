@@ -1,0 +1,152 @@
+== Futharkiser — Topology
+
+=== Overview
+
+Futharkiser compiles annotated array operations to GPU kernels via
+Futhark. It follows the hyperpolymath -iser pattern: manifest → source
+analysis → Idris2 ABI (formal proofs) → Futhark codegen → GPU
+compilation → Zig FFI bridge.
+
+=== Data Flow
+
+....
+User Source Code                futharkiser.toml manifest
+      │                                │
+      └──────────┬─────────────────────┘
+                 │
+                 ▼
+       ┌─────────────────┐
+       │  Pattern Detector │  (Rust: src/codegen/mod.rs)
+       │  map/reduce/scan  │  Identifies array-parallel patterns
+       │  scatter/reshape  │
+       └────────┬──────────┘
+                │ ParallelPattern records
+                ▼
+       ┌─────────────────┐
+       │  Idris2 ABI      │  (src/interface/abi/)
+       │  Types.idr        │  SOAC, GPUBackend, ArrayShape,
+       │  Layout.idr       │  MemorySpace, ParallelPattern
+       │  Foreign.idr      │  GPU buffer layout proofs
+       └────────┬──────────┘
+                │ Verified contracts
+                ▼
+       ┌─────────────────┐
+       │  Futhark Codegen  │  (src/codegen/mod.rs)
+       │  .fut generation  │  SOACs with optimal layouts
+       └────────┬──────────┘
+                │ .fut source files
+                ▼
+       ┌─────────────────┐
+       │  Futhark Compiler │  (external: futhark opencl/cuda/multicore/c)
+       │  GPU compilation  │  Produces .c + .h with entry points
+       └────────┬──────────┘
+                │ Compiled C library
+                ▼
+       ┌─────────────────┐
+       │  Zig FFI Bridge   │  (src/interface/ffi/)
+       │  libfutharkiser   │  C-ABI callable from any language
+       │  Buffer mgmt      │  Host ↔ Device memory transfers
+       └────────┬──────────┘
+                │
+                ▼
+       Host Application calls GPU kernels as normal functions
+....
+
+=== Module Map
+
+[width="100%",cols="22%,27%,27%,24%",options="header",]
+|===
+|Module |Language |Location |Purpose
+|CLI |Rust |`+src/main.rs+` |Subcommands: init, validate, generate,
+build, run, info
+
+|Library API |Rust |`+src/lib.rs+` |Programmatic access to manifest +
+codegen
+
+|Manifest |Rust |`+src/manifest/mod.rs+` |Parse and validate
+`+futharkiser.toml+`
+
+|Codegen |Rust |`+src/codegen/mod.rs+` |Generate Futhark `+.fut+` files
+from patterns
+
+|ABI Types |Idris2 |`+src/interface/abi/Types.idr+` |SOAC, GPUBackend,
+ArrayShape, MemorySpace, ParallelPattern, FutharkType, GPUBuffer
+
+|ABI Layout |Idris2 |`+src/interface/abi/Layout.idr+` |GPU buffer
+descriptor layout proofs, struct alignment
+
+|ABI Foreign |Idris2 |`+src/interface/abi/Foreign.idr+` |FFI
+declarations: compile, execute, alloc_buffer, transfer
+
+|FFI Impl |Zig |`+src/interface/ffi/src/main.zig+` |C-ABI
+implementation: GPU context, buffer management
+
+|FFI Build |Zig |`+src/interface/ffi/build.zig+` |Build config for
+libfutharkiser shared/static library
+
+|FFI Tests |Zig |`+src/interface/ffi/test/integration_test.zig+`
+|Integration tests for FFI ↔ ABI contract
+|===
+
+=== Key Type Correspondence
+
+The following types MUST match between the Idris2 ABI and Zig FFI
+layers:
+
+[width="100%",cols="18%,36%,30%,16%",options="header",]
+|===
+|Concept |Idris2 (Types.idr) |Zig (main.zig) |C value
+|Result codes |`+Result+` enum |`+Result+` enum(c_int) |0-7
+
+|GPU backend |`+GPUBackend+` |`+GPUBackend+` enum(u32) |0=OpenCL,
+1=CUDA, 2=Multicore, 3=Sequential
+
+|Memory space |`+MemorySpace+` |`+MemorySpace+` enum(u32) |0=Device,
+1=Host, 2=Shared
+
+|Buffer descriptor |`+gpuBufferDescriptorLayout+`
+|`+GPUBufferDescriptor+` extern struct |32 bytes, 8-byte aligned
+|===
+
+=== GPU Memory Model
+
+....
+┌─────────────────────────────────────────┐
+│ Host (CPU) Memory                       │
+│  MemorySpace.Host                       │
+│  - Source arrays from user application  │
+│  - Results copied back after kernel run │
+└───────────┬─────────────────────────────┘
+            │ futharkiser_transfer()
+            │ (Host → Device / Device → Host)
+            ▼
+┌─────────────────────────────────────────┐
+│ Device (GPU) Global Memory              │
+│  MemorySpace.Device                     │
+│  - Futhark kernel input/output arrays   │
+│  - Managed by Futhark runtime context   │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Shared / Unified Memory (optional)      │
+│  MemorySpace.Shared                     │
+│  - Accessible from both CPU and GPU     │
+│  - Slower than Device for kernel access │
+│  - No explicit transfer needed          │
+└─────────────────────────────────────────┘
+....
+
+=== External Dependencies
+
+[width="100%",cols="38%,31%,31%",options="header",]
+|===
+|Dependency |Version |Purpose
+|Futhark |latest |GPU array language compiler (generates OpenCL/CUDA C
+code)
+
+|Zig |0.13+ |FFI bridge compilation
+
+|Idris2 |0.7+ |ABI formal proofs
+
+|Rust |2024 edition |CLI and orchestration
+|===

@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# NEUROSYM.a2ml — Neurosymbolic integration metadata for futharkiser
+# Configuration for Hypatia scanning and symbolic reasoning.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
+
+[hypatia-config]
+scan-enabled = true
+scan-depth = "standard"  # quick | standard | deep
+report-format = "logtalk"
+
+[symbolic-rules]
+# Custom symbolic rules for futharkiser:
+# - Verify SOAC enum values match between Idris2 Types.idr and Zig main.zig
+# - Verify GPUBufferDescriptor layout (32 bytes, 8-byte aligned) in both layers
+# - Verify MemorySpace enum values (Device=0, Host=1, Shared=2) are consistent
+# - { name = "no-unsafe-ffi", pattern = "believe_me|unsafeCoerce", severity = "critical" }
+# - { name = "soac-consistency", pattern = "SOAC mismatch", severity = "high" }
+
+[neural-config]
+# Neural pattern detection for array-parallel code:
+# confidence-threshold = 0.85
+# model = "hypatia-v2"
+# detect-patterns = ["map", "reduce", "scan", "scatter", "stencil"]

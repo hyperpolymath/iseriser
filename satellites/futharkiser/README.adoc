@@ -1,0 +1,158 @@
+== What Is This?
+
+Futharkiser identifies array-parallel patterns in your code, extracts
+them, generates https://futhark-lang.org[Futhark] programs, and compiles
+those programs to *GPU kernels* (OpenCL, CUDA, or multicore CPU) — all
+without requiring the user to know anything about GPU programming.
+
+https://futhark-lang.org[Futhark] (by Troels Henriksen et al., DIKU
+Copenhagen) is a purely functional array language that compiles to
+highly optimised GPU code. It guarantees no data races and achieves
+near-hand-tuned performance on parallel array operations. Almost nobody
+knows it exists. Futharkiser democratises GPU computing by putting
+Futhark behind a simple manifest.
+
+== How It Works
+
+Annotate array operations in your code with `+#[futharkise]+` (or
+describe them in `+futharkiser.toml+`). Futharkiser then:
+
+[arabic]
+. *Analyses* your source code for parallelisable array patterns
+. *Extracts* operations that map to Futhark’s second-order array
+combinators (SOACs): `+map+`, `+reduce+`, `+scan+`, `+scatter+`,
+`+flatten+`/`+unflatten+`
+. *Proves* parallelism safety via the Idris2 ABI layer (no data races,
+correct memory layouts, valid GPU buffer descriptors)
+. *Generates* Futhark programs with optimal data layouts and memory
+transfers
+. *Compiles* via `+futhark+` `+opencl+`, `+futhark+` `+cuda+`,
+`+futhark+` `+multicore+`, or `+futhark+` `+c+` (sequential, for
+debugging)
+. *Creates* a Zig FFI bridge so the compiled GPU kernels are callable
+from your application with zero ceremony
+
+== Key Value
+
+* *GPU computing for everyone* — no CUDA/OpenCL expertise needed
+* *10-1000x speedups* on array-heavy workloads, with Futhark’s compiler
+performing fusion, tiling, and memory coalescing automatically
+* *Automatic memory management* across the CPU/GPU boundary
+(host/device/shared memory spaces are tracked by the ABI layer)
+* *Safety guarantees* — Futhark is purely functional with no data races;
+Idris2 proofs verify the interface contracts at compile time
+* *Multiple GPU backends* — OpenCL (widest hardware support), CUDA
+(NVIDIA), multicore CPU (no GPU required), sequential C (debugging)
+
+== Use Cases
+
+* *Scientific computing* — matrix operations, PDE solvers, linear
+algebra
+* *Image processing* — convolutions, filters, histograms on pixel arrays
+* *Monte Carlo simulation* — massively parallel random sampling
+* *Neural network primitives* — custom forward/backward passes on
+tensors
+* *Financial modelling* — option pricing, risk calculations over large
+portfolios
+* *Signal processing* — FFT, spectral analysis on array data
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern:
+
+....
+futharkiser.toml           User describes WHAT they want
+        |
+        v
+  Source Analysis           Identifies map/reduce/scan/scatter patterns
+        |
+        v
+  Idris2 ABI Layer          Proves parallelism safety, validates GPU buffer layouts
+  (src/interface/abi/)      Types: SOAC, GPUBackend, ArrayShape, ParallelPattern, MemorySpace
+        |
+        v
+  Futhark Codegen           Generates .fut programs with SOACs
+  (src/codegen/)
+        |
+        v
+  GPU Compilation           futhark opencl | futhark cuda | futhark multicore | futhark c
+        |
+        v
+  Zig FFI Bridge            C-ABI callable GPU kernels
+  (src/interface/ffi/)
+        |
+        v
+  Your Application          Calls GPU kernels as normal functions
+....
+
+=== Futhark SOACs (Second-Order Array Combinators)
+
+Futharkiser maps source patterns to these Futhark primitives:
+
+[width="100%",cols="34%,33%,33%",options="header",]
+|===
+|SOAC |Description |Example pattern
+|`+map+` |Apply function to every element |`+items.iter().map(|x|+`
+`+x+` `+*+` `+2)+`
+
+|`+reduce+` |Fold array with associative operator
+|`+items.iter().sum()+`
+
+|`+scan+` |Inclusive prefix scan |Running totals, prefix sums
+
+|`+scatter+` |Irregular write to array positions |Histogram binning,
+sparse updates
+
+|`+flatten+`/`+unflatten+` |Reshape nested arrays |Matrix operations,
+batch processing
+|===
+
+=== GPU Backends
+
+[width="100%",cols="34%,33%,33%",options="header",]
+|===
+|Backend |Use case |Flag
+|OpenCL |Widest hardware support (AMD, Intel, NVIDIA) |`+--backend+`
+`+opencl+`
+
+|CUDA |NVIDIA GPUs (best NVIDIA performance) |`+--backend+` `+cuda+`
+
+|Multicore CPU |No GPU available; still parallel |`+--backend+`
+`+multicore+`
+
+|Sequential C |Debugging, correctness testing |`+--backend+` `+c+`
+|===
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of
+acceleration frameworks.
+
+== Status
+
+*Codebase in progress.* Architecture defined, CLI scaffolded, RSR
+template complete, Idris2 ABI types stubbed. Futhark codegen and GPU
+compilation pipeline are the next milestones.
+
+== Quick Start
+
+[source,bash]
+----
+# Initialise a manifest in your project
+futharkiser init
+
+# Edit futharkiser.toml to describe your array operations
+# Then generate, build, and run:
+futharkiser generate
+futharkiser build --backend opencl
+futharkiser run
+----
+
+== Building from Source
+
+[source,bash]
+----
+cargo build --release
+----
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0
