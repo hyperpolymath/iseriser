@@ -205,6 +205,10 @@ jobs:
             exit 1
           fi
 
+          # satellites/ holds whole -iser repos imported as they were (PR #144); owner chose to keep them out of this gate.
+          jq --arg ws "$GITHUB_WORKSPACE" '[.[] | select((.file // "") | ltrimstr($ws + "/") | ltrimstr("./") | startswith("satellites/") | not)]' \
+            hypatia-findings.json > hypatia-findings.root.json && mv hypatia-findings.root.json hypatia-findings.json
+
           TOTAL=$(jq '. | length' hypatia-findings.json 2>/dev/null || echo 0)
           CRITICAL=$(jq '[.[] | select(.severity == "critical")] | length' hypatia-findings.json 2>/dev/null || echo 0)
           HIGH=$(jq '[.[] | select(.severity == "high")] | length' hypatia-findings.json 2>/dev/null || echo 0)
