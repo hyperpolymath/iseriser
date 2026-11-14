@@ -1,0 +1,73 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: wokelangiser
+Upstream-Contact: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+Source: https://github.com/hyperpolymath/wokelangiser
+
+# ====================================================================
+# CANONICAL LICENSING RULE (REUSE machine-readable; authoritative)
+#   * Source code, configuration, CI, scripts, machine-readable state
+#     (.a2ml/.ncl), dotfiles, .well-known metadata  ->  MPL-2.0
+#   * Documentation and prose content (*.adoc, *.md, docs/**) -> CC-BY-SA-4.0
+# The repository as a whole is "MPL-2.0 AND CC-BY-SA-4.0". GitHub's
+# community-health licence resolves to MPL-2.0 (from the root LICENSE).
+# Full texts: LICENSES/MPL-2.0.txt and LICENSES/CC-BY-SA-4.0.txt.
+# Each file's SPDX-License-Identifier header is authoritative.
+# Do NOT reintroduce PMPL / Palimpsest anywhere (enforced by the
+# `no-pmpl` contract rule).
+# ====================================================================
+
+# Default: all files are MPL-2.0
+Files: *
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Configuration files that cannot carry headers
+Files: .editorconfig .gitignore .gitattributes .tool-versions .mailmap
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Machine-readable state files
+Files: .machine_readable/*.a2ml
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Bot directives
+Files: .machine_readable/bot_directives/*
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Contractiles
+Files: .machine_readable/contractiles/*
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# GitHub/CI configuration
+Files: .github/* .github/**/*
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Generated files
+Files: generated/*
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Lockfiles and auto-generated
+Files: *.lock Cargo.lock flake.lock
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Devcontainer config (JSON, no comments)
+Files: .devcontainer/*.json
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Git-cliff config
+Files: cliff.toml
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: MPL-2.0
+
+# Documentation and prose content -> CC-BY-SA-4.0
+# (placed last so it wins over the MPL-2.0 default for these paths)
+Files: *.adoc *.md docs/*
+Copyright: 2024-2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+License: CC-BY-SA-4.0

@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: MPL-2.0
+# wokelangiser.toml — Example configuration for a GDPR/CCPA compliant web application
+# See: https://github.com/hyperpolymath/wokelangiser
+#
+# This manifest configures wokelangiser to:
+# 1. Generate consent gates for analytics, marketing, and functional data collection
+# 2. Check WCAG 2.2 AA compliance (contrast ratios, alt text, ARIA labels)
+# 3. Extract translatable strings for 4 locales (en-GB, fr-FR, de-DE, es-ES)
+
+[project]
+name = "compliant-app"
+
+[consent]
+gdpr = true
+ccpa = true
+default-state = "opt-out"       # GDPR Article 7: no pre-ticked boxes
+categories = ["analytics", "marketing", "functional"]
+
+[accessibility]
+wcag-level = "AA"               # Recommended baseline for most applications
+check-contrast = true
+check-alt-text = true
+check-aria = true
+min-contrast-ratio = 4.5        # 4.5:1 for normal text (WCAG 2.2 §1.4.3)
+
+[i18n]
+default-locale = "en-GB"
+supported-locales = ["en-GB", "fr-FR", "de-DE", "es-ES"]
+extract-strings = true
+
+[report]
+format = "text"                  # Options: text | json | a2ml

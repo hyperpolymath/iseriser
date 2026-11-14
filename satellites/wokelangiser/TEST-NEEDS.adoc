@@ -1,0 +1,37 @@
+== TEST-NEEDS.md — wokelangiser
+
+=== CRG Grade: C — ACHIEVED 2026-04-04
+
+=== Current Test State
+
+[width="100%",cols="42%,29%,29%",options="header",]
+|===
+|Category |Count |Notes
+|Integration tests (Rust) |2 |Dual compiled binaries (debug + release)
+
+|Verification tests |Unit-level |`+verification/tests/+` directory
+present
+
+|FFI tests |Present |`+src/interface/ffi/test/+`
+|===
+
+=== What’s Covered
+
+* [x] Dual integration test builds
+* [x] FFI verification layer
+* [x] Cargo test harness
+
+=== Still Missing (for CRG B+)
+
+* [ ] Wokelang syntax parsing tests
+* [ ] Language semantics tests
+* [ ] Fuzzing for language edge cases
+* [ ] Performance benchmarks
+* [ ] Cross-platform compilation tests
+
+=== Run Tests
+
+[source,bash]
+----
+cd /var/mnt/eclipse/repos/wokelangiser && cargo test
+----

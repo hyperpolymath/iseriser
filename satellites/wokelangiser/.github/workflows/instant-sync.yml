@@ -1,0 +1,43 @@
+# This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# Instant Forge Sync - Triggers propagation to all forges on push/release
+name: Instant Sync
+
+on:
+  push:
+    branches: [main, master]
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Presence-gate: `secrets` can't be referenced directly in `if:`, so the
+    # token is mapped to a job-level env var the steps guard on. On forks
+    # (where FARM_DISPATCH_TOKEN is unset) the dispatch is skipped instead of
+    # firing with an empty token.
+    env:
+      FARM_DISPATCH_TOKEN: ${{ secrets.FARM_DISPATCH_TOKEN }}
+    steps:
+      - name: Trigger Propagation
+        if: ${{ env.FARM_DISPATCH_TOKEN != '' }}
+        uses: peter-evans/repository-dispatch@v4.0.1
+        with:
+          token: ${{ env.FARM_DISPATCH_TOKEN }}
+          repository: hyperpolymath/.git-private-farm
+          event-type: propagate
+          client-payload: |-
+            {
+              "repo": "${{ github.event.repository.name }}",
+              "ref": "${{ github.ref }}",
+              "sha": "${{ github.sha }}",
+              "forges": ""
+            }
+
+      - name: Confirm
+        if: ${{ env.FARM_DISPATCH_TOKEN != '' }}
+        run: echo "::notice::Propagation triggered for ${{ github.event.repository.name }}"
