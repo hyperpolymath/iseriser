@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MPL-2.0
+# Intendfile — Design intent declarations for phronesiser
+# Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+@abstract:
+What phronesiser INTENDS to become. These are bespoke design goals
+specific to the Ethical AI constraint verification domain.
+@end
+
+## Domain-Specific Intent
+
+### multi-framework-ethics\n- description: Support multiple ethical frameworks (utilitarian, deontological, virtue)\n- target: Composable constraint layers\n- status: aspiration\n\n### real-time-ethics\n- description: Ethical constraint checking must complete within bounded time\n- target: O(1) constraint evaluation for deployed agents\n- status: aspiration
+
+## Cross-Cutting Intent
+
+### iser-ecosystem-compatibility
+- description: Must interoperate with other -iser projects via shared ABI
+- target: Idris2 ABI + Zig FFI standard interface
+- status: in-progress
+
+### proven-integration
+- description: All formal proofs should be verifiable by the proven framework
+- target: Integration with hyperpolymath/proven
+- status: aspiration

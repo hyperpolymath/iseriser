@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Ponyiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser for `ponyiser.toml`
+* [x] Codegen stubs
+* [x] ABI module stubs (Idris2 + Zig FFI)
+* [x] README with Pony reference capability architecture
+
+== Phase 1: Capability Analysis Engine
+* [ ] Parse concurrent code to identify shared state and message patterns
+* [ ] Implement capability inference: assign iso/val/ref/box/trn/tag to each data reference
+* [ ] Model the Pony capability subtyping lattice (iso <: trn <: ref <: box, iso <: val <: box, tag is bottom)
+* [ ] Detect sendability violations (ref/trn/box cannot cross actor boundaries unless consumed)
+* [ ] Idris2 ABI proofs for RefCapability subtyping and CapabilitySubtyping relation
+* [ ] Emit capability assignment report for user review
+
+== Phase 2: Actor & Behaviour Codegen
+* [ ] Generate Pony actor declarations from manifest component descriptions
+* [ ] Generate behaviour (async handler) signatures with capability-correct parameters
+* [ ] Generate `iso` ownership transfer for message-passing between actors
+* [ ] Generate `val` publish patterns (trn -> val transition for shared immutable data)
+* [ ] Generate causal message types with correct capability annotations
+* [ ] First working end-to-end example: concurrent producer/consumer pipeline
+
+== Phase 3: Zig FFI Bridge
+* [ ] Build Zig FFI bridge for Pony runtime interop
+* [ ] C-ABI-compatible actor handle types
+* [ ] Mailbox layout matching Idris2 Layout.idr proofs
+* [ ] Callback registration for cross-language actor communication
+* [ ] Integration tests verifying capability safety across the FFI boundary
+
+== Phase 4: Verification & Diagnostics
+* [ ] Idris2 proofs for actor mailbox memory layout
+* [ ] Idris2 proofs for causal message ordering guarantees
+* [ ] Compile-time capability violation errors with actionable diagnostics
+* [ ] Capability audit mode: show all inferred capabilities and why
+* [ ] Shell completions (bash, zsh, fish)
+
+== Phase 5: Real-World Patterns
+* [ ] Concurrent HTTP server pattern (iso requests, val config, tag logger)
+* [ ] Pipeline pattern (chain of actors with iso handoff)
+* [ ] Fan-out/fan-in pattern (val broadcast, iso collect)
+* [ ] Supervisor pattern (tag references for health monitoring)
+* [ ] Performance benchmarks vs. lock-based equivalents
+* [ ] Additional examples and documentation
+
+== Phase 6: Ecosystem
+* [ ] PanLL panel integration (capability analysis panel, actor graph visualiser)
+* [ ] BoJ-server cartridge
+* [ ] VeriSimDB backing store for capability analysis results
+* [ ] Publish to crates.io
+* [ ] Integration with iseriser meta-framework

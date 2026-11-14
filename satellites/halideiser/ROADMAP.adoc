@@ -1,0 +1,75 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= halideiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`halideiser.toml`)
+* [x] Codegen stubs
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI bridge stubs
+* [x] README with architecture
+
+== Phase 1: Pipeline Parser
+* [ ] Define `halideiser.toml` schema for pipeline stages (blur, sharpen, resize, convolve, etc.)
+* [ ] Parse buffer dimensions (width, height, channels, frames)
+* [ ] Parse data types (uint8, uint16, float32, float64)
+* [ ] Validate stage connectivity — output dimensions match next stage's input
+* [ ] Parse hardware target declarations (cpu, gpu, wasm)
+* [ ] Parse scheduling hints (tile sizes, parallelism, vectorisation width)
+* [ ] Error diagnostics with source spans pointing into TOML
+
+== Phase 2: Halide Algorithm Codegen
+* [ ] Emit `Func` definitions from pipeline stages
+* [ ] Emit `Var` bindings (x, y, c for spatial + channel dimensions)
+* [ ] Generate `Expr` trees from stage operations (clamp, cast, select, lerp)
+* [ ] Map common operations: Gaussian blur, box filter, Sobel, resize (bilinear/bicubic)
+* [ ] Support multi-stage pipelines with `Func` chaining
+* [ ] Generate `Buffer<>` declarations matching input/output dimensions
+* [ ] Emit `BoundaryConditions` (repeat_edge, constant_exterior, mirror)
+* [ ] C++ output for Halide AOT compilation
+
+== Phase 3: Schedule Generation + Auto-Tuning
+* [ ] Default schedule heuristics per operation type
+* [ ] `tile(x, y, xi, yi, tx, ty)` with configurable tile sizes
+* [ ] `vectorize(xi, width)` for SIMD targets (SSE4=4, AVX2=8, AVX-512=16, NEON=4)
+* [ ] `parallelize(y)` for multi-core CPU targets
+* [ ] `compute_at` / `store_at` fusion for multi-stage pipelines
+* [ ] `reorder` loop variables for cache-optimal traversal
+* [ ] `gpu_blocks` / `gpu_threads` mapping for CUDA/OpenCL targets
+* [ ] Auto-tuning loop: measure, perturb schedule, measure again
+* [ ] Beam search or genetic algorithm over schedule space
+* [ ] Cache tuning results per (pipeline, hardware) pair
+
+== Phase 4: Multi-Target Compilation
+* [ ] x86 SSE4.2 + AVX2 backend via Halide `Target`
+* [ ] x86 AVX-512 backend
+* [ ] ARM NEON backend (mobile, Raspberry Pi)
+* [ ] ARM SVE backend (server ARM)
+* [ ] CUDA backend (NVIDIA GPU)
+* [ ] OpenCL backend (cross-vendor GPU)
+* [ ] WebAssembly backend (browser deployment)
+* [ ] Metal backend (Apple GPU)
+* [ ] Cross-compilation from any host to any target
+* [ ] Fat binary generation (multiple targets in one artifact)
+
+== Phase 5: Idris2 Proofs of Pipeline Equivalence
+* [ ] Prove buffer dimension compatibility between stages
+* [ ] Prove output buffer bounds from input dimensions + operations
+* [ ] Prove schedule preserves algorithm semantics (tiling does not change results)
+* [ ] Prove vectorisation width divides tile dimension
+* [ ] Prove `compute_at` / `store_at` do not introduce data races
+* [ ] Prove boundary conditions handle all edge pixels
+* [ ] Dependent types for buffer_t layout (stride, extent, min)
+
+== Phase 6: Ecosystem Integration
+* [ ] PanLL panel: pipeline visualisation and schedule explorer
+* [ ] BoJ-server cartridge for remote pipeline compilation
+* [ ] VeriSimDB backing store for tuning results
+* [ ] Zig FFI bridge: call compiled pipelines from any language via C ABI
+* [ ] Example gallery: common image/video pipelines with benchmarks
+* [ ] Publish to crates.io
+* [ ] Integration with iseriser meta-framework

@@ -1,0 +1,48 @@
+== TOPOLOGY.md — wokelangiser
+
+=== Purpose
+
+wokelangiser adds consent patterns, accessibility compliance
+(WCAG/ARIA), and internationalisation to existing code via WokeLang.
+Given a `+wokelangiser.toml+` manifest describing target modules and
+compliance requirements, it generates consent gate wrappers,
+accessibility audit reports, and i18n locale files. wokelangiser targets
+any codebase whose authors want to systematically address user rights,
+accessibility standards, and i18n readiness without manually threading
+these concerns through every module.
+
+=== Module Map
+
+....
+wokelangiser/
+├── src/
+│   ├── main.rs                    # CLI entry point (clap): init, validate, generate, build, run, info
+│   ├── lib.rs                     # Library API
+│   ├── manifest/mod.rs            # wokelangiser.toml parser
+│   ├── codegen/mod.rs             # Consent gate, a11y report, and i18n locale generation
+│   └── abi/                       # Idris2 ABI bridge stubs
+├── examples/                      # Worked examples
+├── verification/                  # Proof harnesses
+├── container/                     # Stapeln container ecosystem
+└── .machine_readable/             # A2ML metadata
+....
+
+=== Data Flow
+
+....
+wokelangiser.toml manifest
+        │
+   ┌────▼────┐
+   │ Manifest │  parse + validate target modules, compliance levels, locale config
+   │  Parser  │
+   └────┬────┘
+        │  validated compliance config
+   ┌────▼────┐
+   │ Analyser │  scan source files for consent, a11y, and i18n gaps
+   └────┬────┘
+        │  gap analysis IR
+   ┌────▼────┐
+   │ Codegen  │  emit generated/wokelangiser/ (consent gates, WCAG/ARIA a11y report,
+   │          │  i18n locale files)
+   └─────────┘
+....

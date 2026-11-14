@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Betlangiser project state
+[metadata]
+project = "betlangiser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Betlangiser"
+purpose = """Add ternary probabilistic modelling via Betlang"""
+completion-percentage = 45
+
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Betlang compiler not yet available — codegen produces standalone probabilistic models",
+]
+
+[critical-next-actions]
+actions = [
+  "Implement Bayesian network inference from model graphs",
+  "Write Idris2 proofs for probability conservation invariant",
+  "Add more distribution types (Gaussian, Poisson, Uniform)",
+]
+
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

@@ -1,0 +1,124 @@
+== TOPOLOGY — atsiser
+
+=== Purpose
+
+ATSiser wraps C codebases in ATS2 linear types for zero-cost memory
+safety. It analyses C source, identifies memory-critical patterns,
+generates ATS2 wrappers with `+viewtype+`/`+dataviewtype+` annotations,
+and compiles them back to C with proofs erased — zero runtime overhead.
+
+=== Module Map
+
+....
+atsiser/
+├── src/
+│   ├── main.rs                  # CLI entry point (clap subcommands)
+│   ├── lib.rs                   # Library API (load, validate, generate)
+│   ├── manifest/                # atsiser.toml parser and validator
+│   ├── codegen/                 # ATS2 wrapper code generation
+│   │   ├── viewtype.rs          # viewtype annotations for pointer ownership
+│   │   ├── dataviewtype.rs      # State machine encodings for resource lifecycle
+│   │   ├── arrayview.rs         # Buffer bounds proofs
+│   │   └── proof.rs             # praxi/prfun proof obligation emission
+│   ├── core/                    # C source analysis engine
+│   │   ├── parser.rs            # C header parsing (tree-sitter/libclang)
+│   │   ├── ownership.rs         # Pointer ownership graph construction
+│   │   ├── allocation.rs        # malloc/free pair tracking
+│   │   └── bounds.rs            # Array bounds detection
+│   ├── abi/                     # Rust-side ABI type definitions
+│   ├── definitions/             # Shared type definitions
+│   ├── errors/                  # Error types and diagnostics
+│   ├── contracts/               # Contractile integration
+│   ├── bridges/                 # Cross-iser bridge utilities
+│   ├── aspects/                 # Cross-cutting concerns
+│   └── interface/               # Verified Interface Seams
+│       ├── abi/                 # Idris2 ABI — proves memory safety properties
+│       │   ├── Types.idr        # LinearPtr, Viewtype, OwnershipState, etc.
+│       │   ├── Layout.idr       # C struct memory layout with ownership tracking
+│       │   └── Foreign.idr      # C analysis and ATS2 compilation FFI
+│       ├── ffi/                 # Zig FFI — C-ABI bridge
+│       │   ├── build.zig
+│       │   ├── src/main.zig     # FFI implementation
+│       │   └── test/            # Integration tests
+│       └── generated/           # Auto-generated C headers from Idris2 ABI
+│           └── abi/
+├── tests/                       # Rust integration tests
+├── examples/                    # Example manifests and C projects
+├── container/                   # Stapeln container definitions
+├── verification/                # Formal verification artifacts
+├── features/                    # Feature specifications
+├── docs/
+│   ├── architecture/            # Architecture diagrams, threat model
+│   ├── theory/                  # ATS2 type theory, linear logic background
+│   ├── practice/                # How-to guides, troubleshooting
+│   ├── attribution/             # Credits and citations
+│   └── legal/                   # License exhibits
+└── .machine_readable/           # All machine-readable metadata
+    ├── 6a2/                     # STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK
+    ├── anchors/                 # ANCHOR.a2ml
+    ├── policies/                # Maintenance policies
+    ├── contractiles/            # k9, must, trust, dust, lust
+    ├── bot_directives/          # rhodibot, echidnabot, panicbot, etc.
+    ├── ai/                      # AI assistant configuration
+    ├── integrations/            # proven, verisimdb, vexometer, feedback-o-tron
+    ├── configs/                 # git-cliff, etc.
+    ├── scripts/                 # forge, lifecycle, maintenance, verification
+    └── compliance/              # REUSE dep5, cargo-deny
+....
+
+=== Data Flow
+
+....
+atsiser.toml          C headers + sources
+     │                       │
+     ▼                       ▼
+  Manifest Parser ──► C Source Analyser
+                          │
+                    ┌─────┼─────────────┐
+                    ▼     ▼             ▼
+              Allocation  Ownership   Buffer
+              Tracker     Graph       Bounds
+                    │     │             │
+                    └─────┼─────────────┘
+                          ▼
+                   ATS2 Codegen
+                    │         │
+                    ▼         ▼
+              .sats files   .dats files
+           (viewtype sigs)  (proof terms)
+                    │         │
+                    └────┬────┘
+                         ▼
+                   patsopt (ATS2 compiler)
+                         │
+                         ▼
+                    Generated C
+                  (proofs erased,
+                   zero overhead)
+....
+
+=== Key Types (Idris2 ABI)
+
+[width="100%",cols="40%,60%",options="header",]
+|===
+|Type |Purpose
+|`+LinearPtr+` |Tracked C pointer with ownership proof
+|`+Viewtype+` |ATS2 viewtype classification (owned, borrowed, consumed)
+|`+OwnershipState+` |State machine for pointer lifecycle
+|`+AllocationSite+` |Source location of malloc/calloc/realloc
+|`+BufferBounds+` |Proven array access bounds (offset, length)
+|`+ProofObligation+` |ATS2 proof term to be emitted
+|===
+
+=== Integration Points
+
+[cols=",",options="header",]
+|===
+|System |Role
+|*iseriser* |Meta-framework that generates -iser scaffolding
+|*proven* |Shared Idris2 verified library for formal proofs
+|*typell* |Type theory engine
+|*BoJ-server* |Cartridge for on-demand C wrapping
+|*PanLL* |Visualise ownership graphs and proof coverage
+|*VeriSimDB* |Store analysis results and proof artifacts
+|===

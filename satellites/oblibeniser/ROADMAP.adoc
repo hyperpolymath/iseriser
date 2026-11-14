@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Oblibeniser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (oblibeniser.toml)
+* [x] Codegen stubs
+* [x] ABI module stubs (Types.idr, Layout.idr, Foreign.idr)
+* [x] Zig FFI bridge stubs
+* [x] README with architecture
+
+== Phase 1: Reversible Operation Core
+* [ ] Define ReversibleOperation, InverseProof, AuditEntry, StateSnapshot types in Idris2 ABI
+* [ ] Prove inverse correctness: `inverse(forward(x)) = x` via dependent types
+* [ ] Implement UndoStack with bounded depth and state snapshots
+* [ ] Zig FFI bridge for operation recording and inverse computation
+* [ ] Rust CLI: parse operations from manifest and invoke codegen
+* [ ] First working end-to-end example (file mutation with undo)
+
+== Phase 2: Audit Trail
+* [ ] Cryptographic audit log (hash-chained entries)
+* [ ] AuditEntry layout proof in Idris2 (field alignment, C-ABI compatibility)
+* [ ] Actor identity and authorisation capture
+* [ ] Timestamp and causal ordering
+* [ ] Audit trail query API (who, what, when)
+* [ ] Integration tests with realistic audit scenarios
+
+== Phase 3: Oblíbený Codegen
+* [ ] Target-language-specific reversible wrapper generation
+* [ ] Database migration reversibility (SQL forward/rollback pairs)
+* [ ] Config file mutation with automatic inverse
+* [ ] API call wrappers with compensating transactions
+* [ ] Oblíbený IR (intermediate representation) for cross-target reuse
+
+== Phase 4: Time-Travel Debugging
+* [ ] State snapshot serialisation and restoration
+* [ ] Replay forward from any snapshot
+* [ ] Reverse execution (step backwards through operations)
+* [ ] Interactive debugger TUI for operation history
+* [ ] Diff view between any two historical states
+
+== Phase 5: Polish and Hardening
+* [ ] Error messages and diagnostics
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] CI/CD for generated artifacts
+* [ ] Performance benchmarks (operation recording overhead)
+* [ ] Post-quantum cryptographic audit trails
+* [ ] Hostile-environment hardening (zero-trust assumptions)
+
+== Phase 6: Ecosystem Integration
+* [ ] PanLL panel for reversible operation monitoring
+* [ ] BoJ-server cartridge (oblibeniser MCP)
+* [ ] VeriSimDB backing store for audit trails
+* [ ] Publish to crates.io
+* [ ] Integration with other -iser family tools
+* [ ] Oblíbený language server integration

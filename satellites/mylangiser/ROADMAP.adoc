@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= mylangiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`mylangiser.toml` schema)
+* [x] Codegen stubs for layer generation
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI bridge stubs
+* [x] README with architecture overview
+
+== Phase 1: API Surface Analysis
+* [ ] Parse API descriptions from `mylangiser.toml` (endpoints, types, params)
+* [ ] Classify parameters: required vs optional vs advanced
+* [ ] Detect common patterns (CRUD, pagination, auth, error handling)
+* [ ] Build internal API surface model (function graph, type dependency tree)
+* [ ] Output surface analysis report (`mylangiser info --surface`)
+
+== Phase 2: Complexity Scoring
+* [ ] Assign cognitive-load scores per endpoint (parameter count, type depth, error surface)
+* [ ] Cluster endpoints into disclosure tiers based on score thresholds
+* [ ] Configurable thresholds in `mylangiser.toml` (`[scoring]` section)
+* [ ] Score visualisation in terminal (`mylangiser info --scores`)
+* [ ] Unit tests for scoring algorithm
+
+== Phase 3: My-Lang Layer Generation
+* [ ] Emit `@beginner` wrappers with smart defaults and simplified signatures
+* [ ] Emit `@intermediate` wrappers with full parameters and named arguments
+* [ ] Emit `@expert` wrappers with raw access, batch ops, and escape hatches
+* [ ] Error message transformation per disclosure level
+* [ ] Optional parameter promotion logic
+* [ ] End-to-end test: real API manifest -> three-tier wrapper output
+
+== Phase 4: Smart Default Inference
+* [ ] Infer safe defaults from type constraints (enums, bounded numerics)
+* [ ] Infer defaults from API doc annotations (if present)
+* [ ] User-overridable defaults in `mylangiser.toml` (`[defaults]` section)
+* [ ] Validation: smart defaults must not violate API invariants
+* [ ] Property-based tests for default safety
+
+== Phase 5: Idris2 Proofs of Layer Consistency
+* [ ] Prove `@beginner` is a correct subset of `@intermediate`
+* [ ] Prove `@intermediate` is a correct subset of `@expert`
+* [ ] Prove smart defaults satisfy type constraints
+* [ ] Prove error simplification preserves error identity
+* [ ] Prove disclosure-level upgrade is backward-compatible
+* [ ] Compile-time verification in CI
+
+== Phase 6: Ecosystem Integration
+* [ ] PanLL panel for interactive layer browsing
+* [ ] BoJ-server cartridge for API analysis via MCP
+* [ ] VeriSimDB backing store for analysis results and scoring history
+* [ ] Publish to crates.io
+* [ ] Example: wrap a real-world REST API end-to-end
+* [ ] Example: wrap a C library end-to-end
+* [ ] Integration with iseriser meta-framework

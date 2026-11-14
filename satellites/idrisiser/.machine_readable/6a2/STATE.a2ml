@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Idrisiser project state
+[metadata]
+project = "idrisiser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Idrisiser"
+purpose = """Meta-prover: generates proven-correct wrappers from interface definitions using Idris2 dependent types"""
+completion-percentage = 45
+
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Idris2 compiler needed for totality checking — codegen verified by structure",
+]
+
+[critical-next-actions]
+actions = [
+  "Hook up Idris2 totality checker to validate generated proofs",
+  "End-to-end test: OpenAPI spec to proven native wrapper",
+  "Add shell completions and additional examples",
+]
+
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

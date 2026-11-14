@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= Architecture Decision Record: 0002-licensing-policy
+
+# 2. Canonical Licensing Policy — MPL-2.0 (code) + CC-BY-SA-4.0 (documentation)
+
+Date: 2026-06-20
+
+## Status
+
+Accepted (supersedes the prior Palimpsest/PMPL licensing of this repository).
+
+## Context
+
+wokelangiser was scaffolded from the RSR template, which historically declared a
+"Palimpsest License (PMPL)" as the preferred licence with MPL-2.0 as a fallback. A
+later migration to MPL-2.0 was applied by find/replace and left the repository
+inconsistent: a garbled root `LICENSE` preamble, contract rules that *required* the
+string "PMPL" in `LICENSE`, a k9 scaffolding recipe that re-fetched the PMPL licence
+over the top of `LICENSE`, and scattered PMPL prose. These fragments repeatedly
+"reset" header fixes back toward PMPL.
+
+Separately, documentation/prose content should carry an appropriate content licence
+(CC-BY-SA-4.0) distinct from the source-code licence (MPL-2.0), while keeping a clean,
+machine-readable, GitHub-recognised setup.
+
+## Decision
+
+The canonical licensing rule for this repository is:
+
+- *Source code, configuration, CI, scripts, machine-readable state (`.a2ml`/`.ncl`),
+  dotfiles, and `.well-known` metadata* are licensed under *MPL-2.0*.
+- *Documentation and prose content* (`*.adoc`, `*.md`, and everything under `docs/**`)
+  is licensed under *CC-BY-SA-4.0*.
+- The repository as a whole is therefore *"MPL-2.0 AND CC-BY-SA-4.0"*.
+- Each file carries exactly one `SPDX-License-Identifier` header matching its type.
+  Full licence texts live in `LICENSES/MPL-2.0.txt` and `LICENSES/CC-BY-SA-4.0.txt`
+  (REUSE layout); the file->licence mapping is in
+  `.machine_readable/compliance/reuse/dep5`.
+- GitHub community-health detection resolves to *MPL-2.0* (the root `LICENSE` is the
+  canonical MPL-2.0 text with a short dual-licence notice).
+- The former Palimpsest/PMPL licence is *removed* and MUST NOT be reintroduced.
+
+## Enforcement (anti-slippage)
+
+CI fails (via `contractile.just` `must-check` / `trust-verify`) if the rule slips:
+
+- `must-no-pmpl` — no Palimpsest/PMPL identifier may reappear (outside the
+  policy-definition files themselves).
+- `must-licenses-present` — both `LICENSES/*.txt` must exist.
+- `must-docs-cc-by-sa` — every `*.adoc`/`*.md` must carry the CC-BY-SA-4.0 header.
+- `trust-license-content` — `LICENSE` must declare MPL-2.0 and both texts must exist.
+
+## Consequences
+
+### Positive
+
+- One unambiguous, machine-readable rule, enforced by CI — no drift.
+- Correct separation of code vs content licences.
+- Clean GitHub "MPL-2.0" badge plus a discoverable `LICENSES/` folder.
+
+### Negative
+
+- Large one-time SPDX-header change across ~120 documentation files.
+
+### Neutral
+
+- Third-party dependencies retain their original licences.

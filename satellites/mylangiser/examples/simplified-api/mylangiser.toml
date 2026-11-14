@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: MPL-2.0
+# mylangiser manifest — progressive-disclosure interface for a user management API.
+#
+# This example demonstrates how mylangiser analyses endpoint complexity and
+# generates layered wrappers:
+#   - Beginner:      create_user(username, email) — 2 required params, smart defaults
+#   - Intermediate:  create_user(username, email, role?, mfa?, locale?) — adds common optionals
+#   - Expert:        create_user(username, email, role?, permissions?, mfa?, locale?) — full API
+
+[project]
+name = "simplified-api"
+description = "Progressive-disclosure wrapper for a user management and search API"
+
+[[endpoints]]
+name = "create_user"
+description = "Create a new user account with progressive parameter disclosure"
+params = [
+    "username: string",
+    "email: string",
+    "role?: string",
+    "permissions?: list",
+    "mfa?: bool",
+    "locale?: string",
+]
+required = ["username", "email"]
+
+[[endpoints]]
+name = "search"
+description = "Search with progressive filter disclosure"
+params = [
+    "query: string",
+    "filters?: map",
+    "sort?: string",
+    "page?: int",
+    "limit?: int",
+    "cursor?: string",
+    "facets?: list",
+]
+required = ["query"]
+
+[[endpoints]]
+name = "get_user"
+description = "Simple user lookup — always beginner-level"
+params = [
+    "user_id: string",
+]
+required = ["user_id"]
+
+[levels]
+beginner-threshold = 30
+expert-threshold = 70
+
+[defaults]
+role = "user"
+limit = 20
+page = 1
+locale = "en-GB"

@@ -1,0 +1,38 @@
+== TOPOLOGY.md — bqniser
+
+=== Purpose
+
+Rust CLI tool that scans code for array computation patterns (loops,
+maps, folds, comprehensions) and rewrites them as optimized BQN array
+primitives. Delivers 10-100x speedups on array-heavy workloads without
+requiring users to learn BQN explicitly.
+
+=== Module Map
+
+....
+bqniser/
+├── src/
+│   ├── main.rs                # CLI entry point
+│   ├── scanner.rs             # Pattern detection (loops, folds, etc.)
+│   ├── rewriter.rs            # AST transformation to BQN
+│   └── bqn_codegen.rs         # BQN code generation
+├── tests/
+│   └── ... (integration tests)
+├── Cargo.toml                 # Rust package metadata
+└── examples/
+    └── ... (demo transformations)
+....
+
+=== Data Flow
+
+....
+[Existing Code] ──► [Scanner] ──► [Pattern Match] ──► [Rewriter] ──► [BQN Output]
+                                                           ↓
+                                                    [Performance Analysis]
+....
+
+=== Key Invariants
+
+* Targets array-heavy Python/Rust/JS code
+* Generates standalone BQN that can be integrated back
+* Preserves semantics: rewritten code computes same values

@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Typedqliser project state
+[metadata]
+project = "typedqliser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Typedqliser"
+purpose = """Formal type safety (10 levels) for any query language"""
+completion-percentage = 45
+
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "No blockers — Phase 1 complete, ready for Phase 2",
+]
+
+[critical-next-actions]
+actions = [
+  "Begin Phase 2 — implement core domain logic for typedqliser",
+  "Write property-based tests for manifest parsing",
+  "Define Idris2 ABI proof obligations for Phase 3",
+]
+
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

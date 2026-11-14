@@ -1,0 +1,136 @@
+# STOP - CRITICAL READING REQUIRED
+
+**THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
+
+## WHAT IS THIS?
+
+This is the AI manifest for **futharkiser**. It declares:
+- Canonical file locations (where things MUST be, and nowhere else)
+- Critical invariants (rules that must NEVER be violated)
+- Repository structure and organization
+
+**futharkiser** compiles annotated array operations to GPU kernels via Futhark.
+It identifies array-parallel patterns (map, reduce, scan, scatter) in source code,
+generates Futhark programs using second-order array combinators (SOACs), and compiles
+them to OpenCL/CUDA/multicore GPU code via the Futhark compiler. The Idris2 ABI layer
+formally proves parallelism safety and correct GPU buffer layouts. The Zig FFI layer
+provides the C-ABI bridge between the host application and Futhark-compiled kernels.
+
+## CANONICAL LOCATIONS (UNIVERSAL RULE)
+
+### Machine-Readable Metadata: `.machine_readable/` ONLY
+
+These 6 a2ml files MUST exist in `.machine_readable/6a2/` directory ONLY:
+1. **STATE.a2ml** - Project state, progress, blockers
+2. **META.a2ml** - Architecture decisions, governance
+3. **ECOSYSTEM.a2ml** - Position in ecosystem, relationships
+4. **AGENTIC.a2ml** - AI agent interaction patterns
+5. **NEUROSYM.a2ml** - Neurosymbolic integration config
+6. **PLAYBOOK.a2ml** - Operational runbook
+
+**CRITICAL:** If ANY of these files exist in the root directory, this is an ERROR.
+
+### Anchor File: `.machine_readable/anchors/ANCHOR.a2ml` ONLY
+
+Canonical authority and semantic-boundary declaration MUST exist at:
+
+` .machine_readable/anchors/ANCHOR.a2ml `
+
+Do not place `ANCHOR.a2ml` at repository root.
+
+### Maintenance Policies: `.machine_readable/policies/` ONLY
+
+Canonical maintenance/governance files MUST exist under:
+
+` .machine_readable/policies/ `
+
+Minimum required files:
+- `MAINTENANCE-AXES.a2ml`
+- `MAINTENANCE-CHECKLIST.a2ml`
+- `SOFTWARE-DEVELOPMENT-APPROACH.a2ml`
+
+Do not place maintenance policy files in repository root.
+
+### Bot Directives: `.machine_readable/bot_directives/` ONLY
+
+Bot-specific instructions for automated agents.
+
+### Contractiles: `.machine_readable/contractiles/` ONLY
+
+Policy enforcement contracts (k9, dust, lust, must, trust).
+
+### AI Configuration & Guides: `.machine_readable/ai/` ONLY
+
+- `AI.a2ml` - Language-specific or LLM-specific patterns
+- `PLACEHOLDERS.adoc` - Bootstrap guide
+
+### Community & Forge Metadata: `.github/` ONLY
+
+- `CODEOWNERS` - Review assignments
+- `MAINTAINERS` - Machine-readable contact list
+- `SUPPORT` - Support channels
+- `SECURITY.md` - Technical security policy
+- `CONTRIBUTING.md` - Technical contribution manual
+- `CODE_OF_CONDUCT.md` - Conduct rules
+
+### Agent Instructions
+
+- `0-AI-MANIFEST.a2ml` - THIS FILE (universal entry point)
+
+## CORE INVARIANTS
+
+1. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
+2. **Single source of truth** - `.machine_readable/` is authoritative
+3. **No stale metadata** - If root state files exist, they are OUT OF DATE
+4. **License consistency** - All code MPL-2.0 unless platform requires MPL-2.0
+5. **Author attribution** - Always "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+6. **Container images** - MUST use Chainguard base (`cgr.dev/chainguard/wolfi-base:latest` or `cgr.dev/chainguard/static:latest`)
+7. **Container runtime** - Podman, never Docker. Files are `Containerfile`, never `Dockerfile`
+8. **Container orchestration** - `selur-compose`, never `docker-compose`
+9. **Futhark specifics** - SOACs are map/reduce/scan/scatter; GPU backends are OpenCL/CUDA/multicore/sequential
+10. **ABI/FFI contract** - Idris2 Types.idr defines the domain types (SOAC, GPUBackend, ArrayShape, MemorySpace, ParallelPattern); Zig main.zig must match these exactly
+
+## REPOSITORY STRUCTURE
+
+This repo follows the **Dual-Track** architecture:
+
+```
+futharkiser/
+├── 0-AI-MANIFEST.a2ml         # THIS FILE (start here)
+├── README.adoc                 # High-level orientation (Rich Human)
+├── ROADMAP.adoc                # Phased roadmap (scaffold → GPU compilation → proofs)
+├── CONTRIBUTING.adoc           # Human contribution guide
+├── Cargo.toml                  # Rust CLI build
+├── Containerfile               # OCI build
+├── LICENSE                     # MPL-2.0
+├── src/
+│   ├── main.rs                 # CLI entry point (init, validate, generate, build, run)
+│   ├── lib.rs                  # Library API
+│   ├── manifest/mod.rs         # futharkiser.toml parser
+│   ├── codegen/mod.rs          # Futhark code generation from detected patterns
+│   └── interface/              # Verified Interface Seams
+│       ├── abi/                # Idris2 ABI (formal proofs of parallelism safety)
+│       │   ├── Types.idr       # SOAC, GPUBackend, ArrayShape, MemorySpace, etc.
+│       │   ├── Layout.idr      # GPU buffer descriptor layout proofs
+│       │   └── Foreign.idr     # FFI declarations (compile, execute, alloc_buffer)
+│       ├── ffi/                # Zig FFI (C-ABI bridge to Futhark runtime)
+│       │   ├── build.zig       # Build config for libfutharkiser
+│       │   ├── src/main.zig    # FFI implementation
+│       │   └── test/           # Integration tests
+│       └── generated/          # Auto-generated C headers
+├── container/                  # Stapeln container ecosystem
+├── docs/                       # Technical documentation
+└── .machine_readable/          # ALL machine-readable metadata
+    └── 6a2/                    # STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK
+```
+
+## SESSION STARTUP CHECKLIST
+
+1. Read THIS file (0-AI-MANIFEST.a2ml) first
+2. Understand canonical location: `.machine_readable/`
+3. State understanding of canonical locations
+4. Read `.machine_readable/6a2/STATE.a2ml` for current project state
+
+## ATTESTATION PROOF
+
+**"I have read the AI manifest for futharkiser. All machine-readable content (state files, anchors, policies, bot directives, contractiles, AI guides) is located in `.machine_readable/` ONLY, and community metadata is in `.github/`. I will not create duplicate files in the root directory."**

@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# NEUROSYM.a2ml — Neurosymbolic integration metadata for mylangiser
+# Configuration for Hypatia scanning and symbolic reasoning.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
+
+[hypatia-config]
+scan-enabled = true
+scan-depth = "standard"  # quick | standard | deep
+report-format = "logtalk"
+
+[symbolic-rules]
+# Mylangiser-specific symbolic rules for Hypatia:
+# - Disclosure level ordering: @beginner < @intermediate < @expert (always)
+# - Complexity score bounds: 0 <= score <= 100
+# - Layer monotonicity: beginner_params <= intermediate_params <= expert_params
+# - Smart default safety: inferred defaults must satisfy type constraints
+# - No unsafe FFI patterns (believe_me, unsafeCoerce banned)
+
+[neural-config]
+# Neural pattern detection for API surface analysis:
+# - Detect CRUD patterns in endpoint names
+# - Detect pagination patterns in parameter lists
+# - Detect auth/retry patterns for smart default inference
+# confidence-threshold = 0.85
+# model = "hypatia-v2"

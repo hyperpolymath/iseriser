@@ -1,0 +1,47 @@
+== TOPOLOGY.md — oblibeniser
+
+=== Purpose
+
+oblibeniser makes state-mutating operations reversible and auditable via
+Oblíbený (Czech: "`favourite`"). Every operation targeted by an
+`+oblibeniser.toml+` manifest gets an automatic inverse function,
+enabling undo/redo with configurable stack depth, hash-chained audit
+trails for tamper-evident logging, and time-travel debugging by
+navigating operation history. It targets systems where correctability
+and auditability are first-class requirements.
+
+=== Module Map
+
+....
+oblibeniser/
+├── src/
+│   ├── main.rs                    # CLI entry point (clap): init, validate, generate, build, run, info
+│   ├── lib.rs                     # Library API
+│   ├── manifest/mod.rs            # oblibeniser.toml parser
+│   ├── codegen/mod.rs             # Oblíbený inverse wrapper, audit trail module generation
+│   └── abi/                       # Idris2 ABI bridge stubs
+├── examples/                      # Worked examples
+├── verification/                  # Proof harnesses
+├── container/                     # Stapeln container ecosystem
+└── .machine_readable/             # A2ML metadata
+....
+
+=== Data Flow
+
+....
+oblibeniser.toml manifest
+        │
+   ┌────▼────┐
+   │ Manifest │  parse + validate operation definitions and reversibility config
+   │  Parser  │
+   └────┬────┘
+        │  validated reversibility config
+   ┌────▼────┐
+   │ Analyser │  derive inverse functions, compute hash-chain schema
+   └────┬────┘
+        │  intermediate representation (forward + inverse pairs)
+   ┌────▼────┐
+   │ Codegen  │  emit generated/oblibeniser/ (inverse wrappers, audit trail module,
+   │          │  verification script, undo/redo stack)
+   └─────────┘
+....

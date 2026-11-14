@@ -1,0 +1,145 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Wokelangiser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+Wokelangiser transforms existing code into consent-aware, accessible, and
+internationalised software by injecting WokeLang patterns at the source level.
+
+WokeLang is a hyperpolymath nextgen language designed for inclusive software
+engineering. It provides first-class constructs for consent management,
+accessibility compliance, internationalisation, and cultural sensitivity.
+Wokelangiser brings these constructs to _any_ existing codebase without
+requiring a full rewrite.
+
+== How It Works
+
+[source,text]
+----
+Existing Code
+  |
+  v
+[Consent Point Injection]   <-- @consent decorators (opt-in / opt-out)
+  |
+  v
+[Accessibility Annotation]  <-- @accessible decorators (WCAG level tagging)
+  |
+  v
+[I18n Hook Insertion]       <-- @i18n hooks (locale-aware string extraction)
+  |
+  v
+[Cultural Sensitivity Pass] <-- @sensitive markers (context-specific phrasing)
+  |
+  v
+[WokeLang Codegen]          <-- emit compliant wrapper code
+  |
+  v
+Compliant Output
+----
+
+Configure your intentions in `wokelangiser.toml`. Wokelangiser then:
+
+1. **Analyses** existing user-facing strings, forms, and destructive operations
+2. **Injects consent points** — `@consent(opt_in)` / `@consent(opt_out)` decorators
+   that gate data collection, cookie usage, and destructive actions behind explicit
+   user agreement
+3. **Annotates accessibility** — `@accessible(AA)` / `@accessible(AAA)` decorators
+   that tag UI elements with WCAG 2.2 compliance levels, generating ARIA attributes,
+   colour-contrast metadata, and keyboard-navigation hooks
+4. **Inserts i18n hooks** — `@i18n(locale)` hooks that extract hardcoded strings
+   into locale bundles, add RTL support markers, and wire up pluralisation rules
+5. **Marks cultural sensitivity** — `@sensitive(context)` markers that flag
+   culturally loaded terms, date/time formats, and naming conventions for
+   locale-appropriate alternatives
+6. **Generates compliant output** — WokeLang-annotated wrapper code that passes
+   through the Idris2 ABI for formal verification before emitting target-language
+   bindings via the Zig FFI bridge
+
+== WokeLang Decorator Reference
+
+[cols="1,2,3"]
+|===
+| Decorator | Parameters | Purpose
+
+| `@consent`
+| `opt_in`, `opt_out`, `withdraw`, `audit_trail`
+| Gates operations behind explicit user agreement. Supports GDPR Article 7 consent
+  withdrawal and audit logging.
+
+| `@accessible`
+| `A`, `AA`, `AAA`, `custom(rules...)`
+| Annotates UI elements with WCAG 2.2 conformance levels. Generates ARIA labels,
+  focus indicators, colour contrast checks, and screen reader hints.
+
+| `@i18n`
+| `locale(tag)`, `rtl`, `pluralise`, `format(date\|number\|currency)`
+| Extracts hardcoded strings into ICU MessageFormat bundles. Handles
+  bi-directional text, plural categories, and locale-specific formatting.
+
+| `@sensitive`
+| `cultural(region)`, `terminology(domain)`, `naming(convention)`
+| Flags culturally loaded terms for locale-appropriate alternatives. Respects
+  regional naming conventions, date ordering, and colour symbolism.
+|===
+
+== Use Cases
+
+* **GDPR consent management** — retrofit existing web applications with compliant
+  opt-in/opt-out flows, consent withdrawal mechanisms, and audit trails
+* **WCAG 2.2 compliance automation** — scan UI code and generate accessibility
+  annotations, focus management, and contrast-ratio metadata
+* **Internationalisation retrofit** — extract hardcoded English strings, wire up
+  locale bundles, add RTL support, and handle pluralisation
+* **Inclusive API design** — generate API documentation with culturally neutral
+  examples, inclusive error messages, and accessible response formats
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern:
+
+[source,text]
+----
+wokelangiser.toml (manifest)
+  -> Idris2 ABI proof (consent/accessibility type safety)
+  -> Zig FFI bridge (C-ABI interop)
+  -> Target language codegen (annotated wrapper code)
+----
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family].
+
+=== Key Components
+
+* **Rust CLI** (`src/main.rs`) — parses manifest, orchestrates pipeline
+* **Manifest** (`wokelangiser.toml`) — declares consent rules, WCAG levels,
+  i18n locales, and sensitivity contexts
+* **Idris2 ABI** (`src/interface/abi/`) — formal proofs that consent types are
+  well-formed, WCAG levels are valid, and i18n hooks are complete
+* **Zig FFI** (`src/interface/ffi/`) — C-ABI bridge exposing consent injection,
+  accessibility checking, and i18n formatting to any language
+* **Codegen** (`src/codegen/`) — emits annotated target-language wrappers
+
+== Status
+
+**Pre-alpha.** Architecture defined, CLI scaffolded, Idris2 ABI types for
+consent/accessibility/i18n defined, Zig FFI bridge templated, codegen pending.
+
+== License
+
+This project is *dual-licensed*:
+
+* *Source code, configuration, CI, scripts, and machine-readable state* are under the
+  Mozilla Public License 2.0 (`MPL-2.0`) — link:LICENSE[LICENSE] /
+  link:LICENSES/MPL-2.0.txt[LICENSES/MPL-2.0.txt].
+* *Documentation and prose content* (`+*.adoc+`, `+*.md+`, `docs/**`) are under the
+  Creative Commons Attribution-ShareAlike 4.0 International licence (`CC-BY-SA-4.0`) —
+  link:LICENSES/CC-BY-SA-4.0.txt[LICENSES/CC-BY-SA-4.0.txt].
+
+Each file's `SPDX-License-Identifier` header is authoritative; the file-to-licence
+mapping is recorded (REUSE) in
+link:.machine_readable/compliance/reuse/dep5[`dep5`]. The repository as a whole is
+"`MPL-2.0 AND CC-BY-SA-4.0`"; GitHub reports *MPL-2.0* as the primary licence. See
+link:docs/decisions/0002-licensing-policy.adoc[ADR-0002] for the full policy.

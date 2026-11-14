@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# AI.a2ml — AI assistant instructions for mylangiser
+
+## Repository Focus
+
+- **mylangiser** generates progressive-disclosure interfaces from complex APIs.
+- Three disclosure levels: @beginner (smart defaults, simplified), @intermediate
+  (full params, named args), @expert (raw API, escape hatches).
+- Core pipeline: manifest -> API analysis -> complexity scoring -> Idris2 ABI
+  proofs -> My-Lang codegen -> layered wrapper.
+- All machine-readable content lives under `.machine_readable/` -- state files
+  (a2ml), bot directives, and contractiles.
+
+## Domain Rules
+
+- **Disclosure ordering is invariant**: Beginner < Intermediate < Expert.
+  Never generate a wrapper where beginner exposes more than intermediate.
+- **Complexity scores are bounded 0-100**. Never exceed.
+- **Smart defaults must be type-safe**: if you add a default, verify it
+  satisfies the parameter's type constraints.
+- **Layer monotonicity**: beginner_params <= intermediate_params <= expert_params.
+
+## Workflow
+
+1. Inspect `.machine_readable/6a2/STATE.a2ml` for blockers and next actions.
+2. Respect constraints in `.machine_readable/6a2/AGENTIC.a2ml`.
+3. After finishing edits, update STATE with your outcomes and commit.
+
+## Key Files
+
+- `src/interface/abi/Types.idr` -- DisclosureLevel, ComplexityScore, APIEndpoint,
+  LayeredWrapper, SmartDefault
+- `src/interface/abi/Layout.idr` -- APISurfaceDescriptor, EndpointDescriptor,
+  WrapperDescriptor memory layouts
+- `src/interface/abi/Foreign.idr` -- FFI declarations for analysis, scoring,
+  layer generation
+- `src/interface/ffi/src/main.zig` -- FFI implementation
+- `src/main.rs` -- CLI entry point
+- `src/manifest/` -- mylangiser.toml parser
+- `src/codegen/` -- My-Lang layer generation
+
+## Delivery Promises
+
+- Mention in summaries whether STATE, `.machine_readable/contractiles/`, or
+  `.machine_readable/bot_directives/` changed.
+- Keep this file in sync with the repository's status.

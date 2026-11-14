@@ -1,0 +1,131 @@
+https://github.com/sponsors/hyperpolymath[image:https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?logo=github[Sponsor]]
+
+== What Is This?
+
+Dafniser generates *correct-by-construction code* for critical functions
+using https://dafny.org[Dafny], the verification-aware language created
+by Rustan Leino (originally at Microsoft Research).
+
+Dafny programs carry formal specifications — `+requires+` / `+ensures+`
+clauses, loop invariants, `+decreases+` annotations, ghost variables,
+and lemmas — that an SMT solver (Z3) proves at compile time. Dafny then
+compiles the verified source to C#, Java, Go, Python, or JavaScript.
+
+Nobody outside research groups writes Dafny by hand. Dafniser makes
+verified code generation accessible: write specifications, get provably
+correct implementations.
+
+== How It Works
+
+....
+dafniser.toml (specs)          ← you write this
+    │
+    ▼
+Spec extraction & validation   ← Rust CLI parses pre/postconditions
+    │
+    ▼
+Idris2 ABI meta-proofs         ← proves spec consistency (Types, Layout, Foreign)
+    │
+    ▼
+Dafny code generation           ← requires/ensures, loop invariants, ghost vars, lemmas
+    │
+    ▼
+Z3 verification                 ← SMT solver proves every contract
+    │
+    ▼
+Target compilation              ← Dafny → C# / Java / Go / Python / JavaScript
+    │
+    ▼
+Zig FFI bridge                  ← C-ABI integration with your existing codebase
+....
+
+[arabic]
+. Describe critical functions in `+dafniser.toml+` with preconditions,
+postconditions, and optional invariants.
+. Dafniser generates Dafny source with `+requires+` / `+ensures+`
+contracts, `+decreases+` termination measures, ghost variables, and
+supporting lemmas.
+. Z3 verifies every contract at compile time — if verification fails,
+you get a precise counterexample, not a runtime crash.
+. The verified Dafny compiles to your chosen target language.
+. A Zig FFI bridge wraps the compiled output for C-ABI integration.
+
+== Key Value
+
+* *Proven-correct code* — Z3 proves every pre/postcondition at compile
+time
+* *Auto-generated from specifications* — no manual Dafny authorship
+required
+* *Multiple output languages* — verified code in C#, Java, Go, Python,
+JavaScript
+* *Formal meta-proofs* — Idris2 dependent types verify spec consistency
+before codegen
+* *Refinement support* — layer abstract specs into concrete
+implementations with proof
+
+== Use Cases
+
+Sorting and searching algorithms +
+Verified implementations of quicksort, binary search, merge sort with
+proved bounds and termination.
+
+Cryptographic primitives +
+Constant-time comparisons, key derivation, hashing wrappers with proved
+absence of timing side-channels (within Dafny’s model).
+
+Financial algorithms +
+Interest calculations, rounding, settlement logic with proved
+monotonicity and conservation-of-value properties.
+
+Consensus protocols +
+Leader election, quorum logic, state machine replication steps with
+proved safety invariants.
+
+Safety-critical control logic +
+State machines with proved liveness and deadlock-freedom properties.
+
+== Dafny Specifics
+
+Dafniser generates and manages these Dafny constructs:
+
+* *`+requires+` / `+ensures+`* — preconditions and postconditions on
+every method
+* *`+decreases+`* — termination metrics for recursive functions and
+loops
+* *`+invariant+`* — loop invariants that hold on every iteration
+* *`+ghost+`* — specification-only variables that vanish at compilation
+* *`+lemma+`* — proof obligations discharged by Z3 to establish complex
+properties
+* *`+refines+`* — layered module refinement from abstract to concrete
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern (same as
+https://github.com/hyperpolymath/chapeliser[Chapeliser]):
+
+* *Manifest* (`+dafniser.toml+`) — declare WHAT you need: function
+signatures, preconditions, postconditions, invariants, target language
+* *Idris2 ABI* (`+src/interface/abi/+`) — formal proofs that
+specifications are internally consistent (type-safe, non-contradictory,
+well-scoped)
+* *Zig FFI* (`+src/interface/ffi/+`) — C-ABI bridge to compiled Dafny
+output
+* *Codegen* (`+src/codegen/+`) — generates Dafny source with full
+verification annotations
+* *Rust CLI* — parses manifest, validates specs, invokes Dafny compiler
+and Z3
+
+User writes zero Dafny. Dafniser generates everything.
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of
+acceleration frameworks.
+
+== Status
+
+*Pre-alpha / codebase in progress.* Architecture defined, CLI
+scaffolded, ABI stubs in place. Dafny codegen and Z3 verification
+integration pending.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

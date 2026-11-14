@@ -1,0 +1,36 @@
+== TEST-NEEDS.md — oblibeniser
+
+=== CRG Grade: C — ACHIEVED 2026-04-04
+
+=== Current Test State
+
+[width="100%",cols="42%,29%,29%",options="header",]
+|===
+|Category |Count |Notes
+|Integration tests (Rust) |1 |`+tests/integration_tests.rs+`
+
+|Verification tests |Unit-level |`+verification/tests/+` directory
+present
+
+|FFI tests |Present |`+src/interface/ffi/test/+`
+|===
+
+=== What’s Covered
+
+* [x] Integration test framework in place
+* [x] FFI interface verification tests
+* [x] Cargo-based test execution
+
+=== Still Missing (for CRG B+)
+
+* [ ] Property-based testing (proptest)
+* [ ] Fuzzing targets
+* [ ] Performance benchmarks
+* [ ] Cross-platform CI matrix
+
+=== Run Tests
+
+[source,bash]
+----
+cd /var/mnt/eclipse/repos/oblibeniser && cargo test
+----

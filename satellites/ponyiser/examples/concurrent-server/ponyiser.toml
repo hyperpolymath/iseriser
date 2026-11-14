@@ -1,0 +1,124 @@
+# ponyiser manifest — Concurrent TCP server example
+# SPDX-License-Identifier: MPL-2.0
+#
+# This example demonstrates how ponyiser wraps a concurrent server in
+# Pony reference capabilities to guarantee data-race freedom.
+#
+# Architecture:
+#   Listener (actor) — accepts connections, spawns Handlers
+#   Handler (actor) — manages a single client connection
+#   Logger (actor) — centralised logging (receives val messages)
+#
+# Capability annotations ensure:
+#   - Connections are iso (unique ownership, transferred on accept)
+#   - Buffers are iso (owned by one handler at a time)
+#   - Log messages are val (immutable, safely shared)
+#   - The logger itself is tag (identity-only reference)
+
+[project]
+name = "concurrent-server"
+version = "0.1.0"
+description = "A concurrent TCP server demonstrating Pony capability safety"
+source_lang = "rust"
+
+# --- Actors ---
+
+[[actors]]
+name = "Listener"
+doc = "Accepts incoming TCP connections and dispatches to handlers"
+
+[[actors.fields]]
+name = "port"
+type = "U16"
+capability = "val"
+
+[[actors.fields]]
+name = "active_connections"
+type = "U64"
+capability = "ref"
+
+[[actors.fields]]
+name = "logger"
+type = "Logger"
+capability = "tag"
+
+[[actors]]
+name = "Handler"
+doc = "Manages a single client connection lifecycle"
+
+[[actors.fields]]
+name = "conn"
+type = "TCPConnection"
+capability = "iso"
+
+[[actors.fields]]
+name = "recv_buffer"
+type = "Array[U8]"
+capability = "iso"
+
+[[actors.fields]]
+name = "logger"
+type = "Logger"
+capability = "tag"
+
+[[actors]]
+name = "Logger"
+doc = "Centralised logging actor — receives immutable log messages"
+
+[[actors.fields]]
+name = "out"
+type = "OutStream"
+capability = "ref"
+
+[[actors.fields]]
+name = "level"
+type = "U8"
+capability = "val"
+
+# --- Behaviours ---
+
+[[behaviours]]
+actor = "Listener"
+name = "accept"
+doc = "Accept a new connection — transfers ownership (iso) to a new Handler"
+
+[[behaviours.params]]
+name = "conn"
+type = "TCPConnection"
+capability = "iso"
+
+[[behaviours]]
+actor = "Handler"
+name = "received"
+doc = "Handle incoming data — receives an immutable (val) byte array"
+
+[[behaviours.params]]
+name = "data"
+type = "Array[U8]"
+capability = "val"
+
+[[behaviours]]
+actor = "Handler"
+name = "closed"
+doc = "Handle connection close — no parameters needed"
+
+[[behaviours]]
+actor = "Logger"
+name = "log"
+doc = "Log a message — receives an immutable (val) string"
+
+[[behaviours.params]]
+name = "message"
+type = "String"
+capability = "val"
+
+[[behaviours.params]]
+name = "level"
+type = "U8"
+capability = "val"
+
+# --- Analysis ---
+
+[analysis]
+detect-races = true
+suggest-capabilities = true

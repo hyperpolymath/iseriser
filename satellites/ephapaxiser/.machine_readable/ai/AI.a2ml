@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+
+# AI Assistant Instructions for ephapaxiser
+
+## Repository Focus
+
+- **ephapaxiser** enforces single-use linear type semantics on resources via Ephapax.
+- It analyses code for resource handles, inserts Ephapax linear type wrappers,
+  and enforces exactly-once usage at compile time.
+- This is a Rhodium Standard Repository; obey RSR policies and keep
+  `.machine_readable/` authoritative.
+- All machine-readable content lives under `.machine_readable/` — state files
+  (a2ml), bot directives, and contractiles. Never in root.
+
+## Critical Rule: Idris2 Wins
+
+When Idris2 proofs conflict with Ephapax linear types, Idris2 always wins.
+The formally verified proofs are the source of truth. Adjust Ephapax wrappers
+to conform to Idris2 proofs, never the reverse.
+
+## Architecture
+
+- **Manifest** (`ephapaxiser.toml`) — user describes resources
+- **Resource Analysis** (Rust CLI) — detect acquire/release patterns
+- **Idris2 ABI** (`src/interface/abi/`) — formal proofs of linearity
+  - Types: LinearResource, UsageCount, ResourceLifecycle, ConsumeProof
+- **Zig FFI** (`src/interface/ffi/`) — C-ABI bridge with resource tracking
+- **Codegen** (`src/codegen/`) — emit target-language wrappers (Rust/C/Zig)
+
+## Workflow
+
+1. Read `0-AI-MANIFEST.a2ml` first (universal entry point).
+2. Inspect `.machine_readable/6a2/STATE.a2ml` for blockers and next actions.
+3. Respect constraints in `.machine_readable/6a2/AGENTIC.a2ml`.
+4. After edits, update STATE with outcomes and commit.
+
+## Banned Patterns
+
+Never use: `believe_me`, `assert_total`, `unsafeCoerce`, `Obj.magic`,
+`sorry`, `Admitted`, or any other proof-escape mechanism.
+
+## Delivery Promises
+
+- Mention in summaries whether STATE, contractiles, or bot_directives changed.
+- Keep this file in sync with the repository's status.

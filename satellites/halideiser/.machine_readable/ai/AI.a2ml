@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: MPL-2.0
+# AI Assistant Instructions for halideiser
+
+## Repository Focus
+
+halideiser compiles image and video processing pipelines to optimised Halide
+schedules. It follows the hyperpolymath -iser pattern: manifest-driven code
+generation with Idris2 ABI proofs and Zig FFI bridge.
+
+Key domain concepts:
+- **Func**: Halide pure function (what to compute at each pixel)
+- **Var**: Dimension variable (x, y, channel, frame)
+- **Schedule**: How to execute (tile, vectorize, parallelize, compute_at, store_at, reorder)
+- **buffer_t**: Strided multi-dimensional buffer (min, extent, stride per dimension)
+- **Auto-tuning**: Search over schedule space for optimal performance
+
+## Architecture
+
+- `src/manifest/` — Parse `halideiser.toml` pipeline descriptions
+- `src/codegen/` — Generate Halide algorithm + schedule code
+- `src/interface/abi/` — Idris2 proofs: PipelineStage, SchedulePrimitive, HardwareTarget, BufferDimension, TileSize
+- `src/interface/ffi/` — Zig FFI: pipeline context, compile, execute, autotune
+- `src/main.rs` — Rust CLI: init, validate, generate, build, run, info
+
+## Workflow
+
+1. Inspect `.machine_readable/descriptiles/STATE.a2ml` for blockers and next actions.
+2. Respect constraints in `.machine_readable/descriptiles/AGENTIC.a2ml`.
+3. After finishing edits, update STATE.a2ml with outcomes and commit.
+
+## Key Rules
+
+- All machine-readable content in `.machine_readable/` ONLY — never root.
+- Halide algorithm and schedule are always separate layers.
+- Idris2 ABI types must match Zig FFI enums exactly (tag values).
+- Buffer dimensions must be positive (enforced by dependent types in Idris2).
+- MPL-2.0 license on all original code.

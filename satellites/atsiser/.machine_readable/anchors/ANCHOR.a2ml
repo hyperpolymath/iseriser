@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# ANCHOR.a2ml - authoritative anchor for this repository
+
+[metadata]
+version = "1.0.0"
+last-updated = "2026-03-21"
+
+[anchor]
+schema = "hyperpolymath.anchor/1"
+repo = "hyperpolymath/atsiser"
+authority = "upstream-canonical"
+
+purpose = [
+  "Define canonical semantics and policy boundaries for this repository.",
+  "Declare what downstream/satellite repos can extend but not redefine.",
+  "Provide a stable golden path and invariant contract for release readiness.",
+]
+
+[identity]
+project = "atsiser"
+kind = "tool"
+one-sentence = "Wrap C codebases in ATS2 linear types for zero-cost memory safety"
+domain = "memory-safety, linear-types, C-interop, formal-verification"
+
+[semantic-authority]
+policy = "canonical"
+
+owns = [
+  "C source analysis and allocation pattern detection",
+  "ATS2 viewtype/dataviewtype wrapper generation",
+  "Ownership graph construction and proof obligation emission",
+  "Round-trip ATS2-to-C compilation with zero overhead verification",
+]
+
+[implementation-policy]
+allowed = ["Rust", "Idris2", "Zig", "Scheme", "Shell", "Just", "AsciiDoc", "Markdown"]
+forbidden = ["Node.js", "npm"]
+
+[golden-path]
+smoke-test-command = [
+  "just test",
+  "just quality",
+]
+
+success-criteria = [
+  "Core tests pass",
+  "Quality gates pass",
+  "No unresolved critical security findings",
+]
+
+[satellite-policy]
+must-pin-upstream = true
+must-declare-authority = true
+must-have-anchor = true
+must-have-golden-path = true
+
+[semantic-authority-files]
+language-spec = "SPECIFICATION.md"
+formal-proofs = "docs/proofs/PROOFS.adoc"
+type-theory = "docs/theory/THEORY.adoc"
+algorithms = "docs/theory/ALGORITHMS.adoc"

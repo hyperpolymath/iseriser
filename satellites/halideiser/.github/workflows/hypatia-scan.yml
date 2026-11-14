@@ -1,0 +1,24 @@
+# This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# This workflow is managed by gh actions-lock.
+name: Hypatia Security Scan
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  hypatia:
+    uses: hyperpolymath/standards/.github/workflows/hypatia-scan-reusable.yml@469605210e767ee94d1c7a9c13cb6a1d0a78cad1
+    with:
+      block-on-high: true

@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Wokelangiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`wokelangiser.toml`)
+* [x] Codegen stubs
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI bridge stubs
+* [x] README with architecture overview
+
+== Phase 1: Consent Foundation
+* [ ] Define `ConsentType` enum in Idris2 ABI (OptIn, OptOut, Withdraw, AuditTrail)
+* [ ] Prove consent state machine (grant -> active -> withdraw -> revoked)
+* [ ] Implement consent point detection in source analysis
+* [ ] Build consent injection codegen (decorator insertion)
+* [ ] Zig FFI: `wokelangiser_inject_consent`, `wokelangiser_check_consent`
+* [ ] GDPR Article 7 consent withdrawal flow
+* [ ] First working example: Flask app with cookie consent retrofit
+
+== Phase 2: Accessibility Layer
+* [ ] Define `WCAGLevel` in Idris2 ABI (A, AA, AAA) with conformance proofs
+* [ ] Define `AccessibilityAnnotation` record (aria_label, role, focus_order, contrast_ratio)
+* [ ] Implement UI element scanning for accessibility gaps
+* [ ] Generate ARIA attributes, focus indicators, keyboard navigation hooks
+* [ ] Zig FFI: `wokelangiser_check_accessibility`, `wokelangiser_annotate_element`
+* [ ] Colour contrast ratio calculation (WCAG 2.2 algorithm)
+* [ ] Screen reader hint generation
+* [ ] Example: React component tree with WCAG AA annotations
+
+== Phase 3: Internationalisation
+* [ ] Define `I18nHook` in Idris2 ABI (Locale, PluralCategory, FormatSpec)
+* [ ] Hardcoded string extraction and locale bundle generation
+* [ ] ICU MessageFormat support
+* [ ] RTL text direction detection and annotation
+* [ ] Pluralisation rule engine (CLDR categories)
+* [ ] Date, number, and currency formatting hooks
+* [ ] Zig FFI: `wokelangiser_extract_strings`, `wokelangiser_format_locale`
+* [ ] Example: Express.js API with 5-locale i18n retrofit
+
+== Phase 4: Cultural Sensitivity
+* [ ] Define `CulturalContext` in Idris2 ABI (Region, TerminologyDomain, NamingConvention)
+* [ ] Terminology database for culturally loaded terms
+* [ ] Naming convention detection (personal names, dates, addresses)
+* [ ] Colour symbolism awareness (red=danger vs red=luck)
+* [ ] Zig FFI: `wokelangiser_check_sensitivity`, `wokelangiser_suggest_alternative`
+* [ ] Example: E-commerce checkout flow with cultural adaptations
+
+== Phase 5: Polish and Integration
+* [ ] End-to-end pipeline: manifest -> analysis -> injection -> verification -> codegen
+* [ ] Error messages and diagnostics (inclusive, actionable)
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] Performance benchmarks (1000-file codebase under 10s)
+* [ ] CI/CD for generated artifacts
+* [ ] Comprehensive test suite (unit, integration, property-based)
+
+== Phase 6: Ecosystem
+* [ ] PanLL panel: consent dashboard, accessibility audit view, i18n coverage
+* [ ] BoJ-server cartridge for automated accessibility scanning
+* [ ] VeriSimDB backing store for consent audit trails
+* [ ] Publish to crates.io
+* [ ] Integration with other -isers (typedqliser for accessible query interfaces)

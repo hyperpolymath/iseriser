@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: MPL-2.0
+# futharkiser manifest — image processing pipeline example
+#
+# Demonstrates all five SOAC patterns (map, reduce, scan, scatter, histogram)
+# applied to a typical image-processing workload. Run with:
+#
+#   futharkiser generate -m examples/image-pipeline/futharkiser.toml
+#   futharkiser build -m examples/image-pipeline/futharkiser.toml
+
+[project]
+name = "image-pipeline"
+
+# --- Map: element-wise pixel transformation ---
+[[kernels]]
+name = "blur"
+pattern = "map"
+input-type = "[f32]"
+output-type = "[f32]"
+description = "Apply Gaussian blur to each pixel"
+
+# --- Histogram: bin pixel intensities ---
+[[kernels]]
+name = "histogram"
+pattern = "histogram"
+input-type = "[u8]"
+output-type = "[i64]"
+bins = 256
+description = "Compute pixel intensity histogram"
+
+# --- Scan: inclusive prefix sum (e.g. for integral image) ---
+[[kernels]]
+name = "prefix_sum"
+pattern = "scan"
+input-type = "[f64]"
+output-type = "[f64]"
+operator = "+"
+description = "Inclusive prefix sum for integral image computation"
+
+# --- Reduce: sum all pixel values ---
+[[kernels]]
+name = "total_intensity"
+pattern = "reduce"
+input-type = "[f64]"
+output-type = "[f64]"
+operator = "+"
+description = "Sum all pixel intensities"
+
+# --- Scatter: write computed values to specific pixel locations ---
+[[kernels]]
+name = "write_pixels"
+pattern = "scatter"
+input-type = "[f32]"
+output-type = "[f32]"
+description = "Indirect write to specific pixel locations"
+
+[gpu]
+backend = "opencl"
+tuning = true

@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# ECOSYSTEM.a2ml — Bqniser ecosystem position
+[metadata]
+version = "0.1.0"
+last-updated = "2026-04-11"
+
+[project]
+name = "Bqniser"
+purpose = "Detect array computation patterns in code and rewrite as optimised BQN primitives via CBQN"
+role = "tool"
+
+[position-in-ecosystem]
+category = ""
+
+[related-projects]
+projects = [
+  # No related projects recorded
+]

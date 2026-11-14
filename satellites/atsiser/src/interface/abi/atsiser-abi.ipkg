@@ -1,0 +1,13 @@
+-- SPDX-License-Identifier: MPL-2.0
+package atsiser-abi
+
+sourcedir = "."
+
+modules = Atsiser.ABI.Types
+        , Atsiser.ABI.Layout
+        , Atsiser.ABI.Foreign
+        , Atsiser.ABI.Proofs
+        , Atsiser.ABI.Semantics
+        , Atsiser.ABI.Invariants
+        , Atsiser.ABI.FfiSeam
+        , Atsiser.ABI.Capstone

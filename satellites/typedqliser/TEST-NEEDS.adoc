@@ -1,0 +1,73 @@
+== TEST-NEEDS: typedqliser
+
+=== CRG Grade: C — ACHIEVED 2026-04-04
+
+=== Current State
+
+[width="100%",cols="40%,26%,34%",options="header",]
+|===
+|Category |Count |Details
+|*Source modules* |14 |Rust: main, lib, manifest/mod, codegen/mod,
+abi/mod, plugins (mod, sql, wasm) + 3 Idris2 ABI + 3 Zig FFI
+
+|*Unit tests (inline)* |9 |All in plugins/wasm.rs
+
+|*Integration tests* |1 file |integration_test.rs (~76 #[test])
+
+|*E2E tests* |0 |None
+
+|*Benchmarks* |0 |None
+|===
+
+=== What’s Missing
+
+==== E2E Tests
+
+* [ ] No test that generates code from a schema and validates the output
+compiles
+* [ ] No test for SQL plugin output against a real database
+* [ ] No test for WASM plugin output in a WASM runtime
+
+==== Aspect Tests
+
+* [ ] *Security*: Code generator with no injection/escape tests –
+generated SQL could be vulnerable
+* [ ] *Performance*: No benchmarks for codegen throughput with large
+schemas
+* [ ] *Concurrency*: N/A
+* [ ] *Error handling*: No tests for malformed schemas, circular
+references, unsupported types
+
+==== Build & Execution
+
+* [ ] No Idris2 ABI compilation test
+* [ ] Zig integration_test.zig likely template placeholder
+
+==== Benchmarks Needed
+
+* [ ] Codegen throughput (schemas with 10/100/1000 types)
+* [ ] Generated code compilation time
+* [ ] Plugin loading overhead
+
+==== Self-Tests
+
+* [ ] No self-diagnostic mode
+
+=== FLAGGED ISSUES
+
+* *76 integration tests is decent* but SQL plugin has 0 dedicated tests
+* *Code generator with 0 output validation tests* – generates code that
+may not compile
+* *manifest module has 0 tests* – schema parsing untested
+* *codegen module has 0 tests* – core functionality untested (only wasm
+plugin tested)
+
+=== Priority: P1 (HIGH)
+
+=== FAKE-FUZZ ALERT
+
+* `+tests/fuzz/placeholder.txt+` is a scorecard placeholder inherited
+from rsr-template-repo — it does NOT provide real fuzz testing
+* Replace with an actual fuzz harness (see
+rsr-template-repo/tests/fuzz/README.adoc) or remove the file
+* Priority: P2 — creates false impression of fuzz coverage

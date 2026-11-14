@@ -1,0 +1,34 @@
+# Example eclexiaiser manifest for a "green-service" web application.
+# SPDX-License-Identifier: MPL-2.0
+#
+# This manifest declares energy and carbon budgets for two functions:
+# - process_batch: a batch data processing function (50 mJ, 10 mg CO2 max)
+# - render_page: a web page renderer (5 mJ max, no carbon budget)
+#
+# Run:
+#   eclexiaiser validate -m examples/green-service/eclexiaiser.toml
+#   eclexiaiser generate -m examples/green-service/eclexiaiser.toml -o generated/green-service
+#   eclexiaiser info -m examples/green-service/eclexiaiser.toml
+
+[project]
+name = "green-service"
+
+[[functions]]
+name = "process_batch"
+source = "src/batch.rs"
+energy-budget-mj = 50.0         # millijoules max per call
+carbon-budget-mg = 10.0         # mg CO2 max per call
+
+[[functions]]
+name = "render_page"
+source = "src/web.rs"
+energy-budget-mj = 5.0
+
+[carbon]
+provider = "watttime"           # watttime | electricity-maps | static
+region = "GB"                   # grid region
+static-intensity = 200.0        # mg CO2/kWh (fallback if provider = static)
+
+[report]
+format = "text"                 # text | json | csrd
+include-recommendations = true

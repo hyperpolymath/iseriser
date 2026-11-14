@@ -1,0 +1,15 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the wokelangiser ABI formal proofs.
+-- Build/check with:  idris2 --build wokelangiser-abi.ipkg   (from src/interface/abi/)
+package wokelangiser-abi
+
+sourcedir = "."
+
+modules = Wokelangiser.ABI.Types
+        , Wokelangiser.ABI.Layout
+        , Wokelangiser.ABI.Foreign
+        , Wokelangiser.ABI.Proofs
+        , Wokelangiser.ABI.Semantics
+        , Wokelangiser.ABI.Invariants
+        , Wokelangiser.ABI.FfiSeam
+        , Wokelangiser.ABI.Capstone

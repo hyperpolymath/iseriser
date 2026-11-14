@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Ephapaxiser project state
+[metadata]
+project = "ephapaxiser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Ephapaxiser"
+purpose = """Enforce single-use linear type semantics on resources via Ephapax"""
+completion-percentage = 45
+
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Idris2 proofs for linearity must follow Idris2-wins-over-Ephapax rule",
+]
+
+[critical-next-actions]
+actions = [
+  "End-to-end test: wrap file handle, enforce close-once",
+  "Write Idris2 proofs for LinearResource and ConsumeProof",
+  "Test with real Rust codebase resource detection",
+]
+
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

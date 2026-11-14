@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: MPL-2.0
+# dafniser manifest — sorting example
+#
+# Defines binary_search and insertion_sort with full Dafny contracts.
+# Run: dafniser generate -m examples/sorting/dafniser.toml -o generated/sorting
+
+[project]
+name = "verified-sort"
+description = "Binary search and insertion sort with formal verification"
+
+[[functions]]
+name = "binary_search"
+params = [
+  { name = "arr", type = "seq<int>", requires = "sorted(arr)" },
+  { name = "key", type = "int" }
+]
+returns = { type = "int", ensures = "result >= 0 ==> arr[result] == key" }
+decreases = "arr.Length"
+
+[[functions]]
+name = "insertion_sort"
+params = [{ name = "arr", type = "seq<int>" }]
+returns = { type = "seq<int>", ensures = "sorted(result) && multiset(result) == multiset(arr)" }
+
+[dafny]
+target = "go"
+verify-timeout = 30

@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= Chapeliser Roadmap
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with 17 CI/CD workflows
+* [x] CLI with 7 subcommands (init, validate, generate, build, run, info, strategies)
+* [x] Manifest parser + validator (all 5 partition and 5 gather strategies)
+* [x] Library API for programmatic use
+* [x] Example manifest (panic-attacker mass-panic)
+* [x] README with architecture, SECURITY, CONTRIBUTING, GOVERNANCE
+
+== Phase 1: Core Implementation (IMPLEMENTED — machine-verification gated in CI)
+
+NOTE: "Implemented" = the code is written and the Rust layer is tested. The
+Idris2 proofs, Zig FFI, and generated Chapel are checked by `idris2`/`zig`/`chpl`
+only in CI (`.github/workflows/provable.yml`); their live status is Phase 1b.
+
+* [x] Chapel code generator — produces .chpl with real distribution logic
+  ** Per-item: even coforall distribution with locale range helper
+  ** Chunk: fixed-size chunks, round-robin across locales
+  ** Adaptive: work-stealing via Chapel DynamicIters
+  ** Spatial: Block-distributed domain decomposition
+  ** Keyed: route by c_key_hash, same key → same locale
+* [x] Five gather strategies implemented
+  ** Merge: results already in result array, count and report
+  ** Reduce: sequential fold on locale 0 via c_reduce
+  ** Tree-reduce: logarithmic pairwise reduction across locales
+  ** Stream: incremental (equivalent to merge in buffer mode)
+  ** First: scan for c_is_match predicate, early exit
+* [x] Buffer-based FFI — serialised byte buffers for cross-locale safety
+* [x] Retry logic — per-item retry with configurable max attempts
+* [x] Checkpoint support — c_checkpoint_save/load with locale-tagged buffers
+* [x] Zig FFI bridge generator — 12 Chapel-facing exports delegating to user code
+* [x] C header generator — full FFI contract with documentation
+* [x] Build script generator — env var overrides, Chapel config passthrough
+* [x] Idris2 ABI proofs *written* (Types.idr, Layout.idr, Foreign.idr) — machine-checked in Phase 1b
+  ** Partition completeness + disjointness
+  ** Gather conservation
+  ** Serialisation round-trip witness
+  ** Retry isolation
+  ** Memory layout proofs for item/result buffers
+* [x] Zig FFI reference implementation *written* (echo processor, FNV-1a hash, concatenation reducer) — compiled in Phase 1b
+* [x] Rust ABI types with runtime verification
+  ** Partition, GatherResult, MemoryBudget, FfiResult
+  ** Strategy enums with parsing
+  ** 22 unit tests
+* [x] Cluster config parsing (cluster.toml → GASNET/SSH env vars)
+* [x] Build command: release/debug mode passthrough
+* [x] 63 tests passing in the Rust layer (22 unit + 40 integration + 1 doc-test)
+
+== Phase 1b: Machine-verification (gated in CI — `.github/workflows/provable.yml`)
+
+These convert the Phase 1 artifacts from "written" to "verified". Each item
+turns `[x]` only once its CI job is green; until then the Idris2/Zig/Chapel
+artifacts above are implemented but NOT yet machine-checked.
+
+* [ ] `idris2 --check` passes for Types.idr, Layout.idr, Foreign.idr (job: `idris2-proofs`)
+* [ ] `zig build test` passes for the FFI reference impl (job: `zig-ffi`)
+* [ ] Committed golden codegen output is drift-free (job: `codegen-drift`)
+* [ ] Generated Chapel compiles + runs via `chpl` — echo sample, 8/8 items conserved (job: `chapel-golden`)
+
+== Phase 2: Polish
+* [ ] Error messages and diagnostics (human-readable codegen errors)
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] `chapeliser info` — show memory budget estimate from manifest
+* [ ] Performance benchmarks (single-locale vs multi-locale scaling)
+* [ ] Additional golden samples (other 4 partition × 5 gather strategies; multi-locale)
+* [~] CI/CD for the generated Chapel artifacts — wired in `provable.yml` (see Phase 1b)
+
+== Phase 3: Ecosystem
+* [ ] PanLL panel integration (distribution visualisation)
+* [ ] BoJ-server cartridge (distribute workloads via MCP)
+* [ ] VeriSimDB backing store for provenance-tracked results
+* [ ] End-to-end integration with panic-attacker mass-panic mode
+* [ ] Publish to crates.io

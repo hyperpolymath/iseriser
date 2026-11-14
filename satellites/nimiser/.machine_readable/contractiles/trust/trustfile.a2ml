@@ -1,0 +1,15 @@
+// trustfile.a2ml for nimiser
+// SPDX-License-Identifier: MPL-2.0
+// Generated: 2026-04-08T20:03:43+01:00
+
+trustfile {
+    name: "nimiser"
+    version: "1.0.0"
+    description: "trustfile contractile for nimiser"
+    
+    // Basic trustfile configuration
+    enabled: true
+    
+    // Repository-specific trust settings will be added here
+    // This preserves the existing contractile structure and naming convention
+}

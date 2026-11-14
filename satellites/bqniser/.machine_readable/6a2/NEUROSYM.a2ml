@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# NEUROSYM.a2ml — Neurosymbolic integration metadata for bqniser
+# Configuration for Hypatia scanning and symbolic reasoning.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
+
+[hypatia-config]
+scan-enabled = true
+scan-depth = "standard"  # quick | standard | deep
+report-format = "logtalk"
+
+[symbolic-rules]
+# BQNiser-specific symbolic rules for Hypatia
+# - Array rewrite equivalence: source pattern must produce identical output to BQN expression
+# - Rank compatibility: detected array rank must be compatible with target BQN primitive
+# - Under invertibility: G in F⌾G must have a computational inverse for the domain
+# - CBQN FFI safety: all value handles must be released after use
+
+[neural-config]
+# Pattern detection could benefit from neural hints:
+# - Classify loop bodies as "array-like" vs "stateful" (only array-like are rewritable)
+# - Estimate speedup likelihood before committing to a rewrite
+# confidence-threshold = 0.85
+# model = "hypatia-v2"

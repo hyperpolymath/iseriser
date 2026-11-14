@@ -1,0 +1,94 @@
+# This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# rhodibot.yml — RSR compliance CANARY (report-only)
+#
+# Rhodibot does NOT mutate this repository. It never deletes, renames,
+# rewrites SPDX headers, creates files, or opens PRs. Instead it DETECTS
+# what an auto-fixer would have changed and reports it.
+#
+# Design intent (owner): if rhodibot "feels the desire to edit" — i.e. it
+# detects something it considers non-compliant — that is itself a MAJOR
+# WARNING. Either the repo has drifted, OR rhodibot's own rules have
+# diverged from the normative style it is meant to enforce. Both warrant
+# a human look, so the canary FAILS the run when it finds would-mutate
+# drift. Dangerous-pattern hits are advisory warnings only.
+#
+# Licence note: SPDX/licence drift is reported for MANUAL, owner-only
+# correction. Rhodibot must never edit a licence header (estate directive).
+
+name: "\U0001F916 Rhodibot — RSR Compliance Canary"
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Every Monday at 06:00 UTC
+  workflow_dispatch: # Manual trigger
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 1
+      - name: Rhodibot — detect drift (no mutations)
+        run: |
+          set -uo pipefail
+          DRIFT=0
+          warn() { echo "::warning title=Rhodibot canary::$*"; DRIFT=$((DRIFT+1)); }
+          note() { echo "::warning title=Rhodibot advisory::$*"; }
+
+          echo "## 🤖 Rhodibot canary — report only (no edits made)" >> "$GITHUB_STEP_SUMMARY"
+
+          # --- would-DELETE: banned files ---
+          for f in AI.djot NEXT_STEPS.md TODO.md NOTES.md TASKS.md; do
+            [ -f "$f" ] && warn "banned file present: $f (an auto-fixer would delete it)"
+          done
+          # would-DELETE: stale snapshots
+          for f in *-STATUS-*.md *-COMPLETION-*.md *-COMPLETE.md *-VERIFIED-*.md; do
+            [ -f "$f" ] && warn "stale snapshot present: $f (would be deleted)"
+          done
+          # would-RENAME: legacy manifest name
+          if [ -f "AI.a2ml" ] && [ ! -f "0-AI-MANIFEST.a2ml" ]; then
+            warn "AI.a2ml present without 0-AI-MANIFEST.a2ml (would be renamed)"
+          fi
+          # would-DELETE: duplicate community files
+          [ -f "CONTRIBUTING.md" ] && [ -f "CONTRIBUTING.adoc" ] && warn "duplicate CONTRIBUTING.md + CONTRIBUTING.adoc (one would be removed)"
+          if [ -f "README.md" ] && [ -f "README.adoc" ] && [ "$(wc -l < README.md)" -lt 5 ]; then
+            warn "stub README.md alongside README.adoc (would be removed)"
+          fi
+          # SPDX drift — MANUAL owner-only fix, never auto-edited
+          for dotfile in .gitignore .gitattributes .editorconfig; do
+            if [ -f "$dotfile" ] && grep "AGPL-3.0" "$dotfile" 2>/dev/null | grep -v "AGPL-3.0-or-later" | grep -q .; then
+              warn "$dotfile carries an AGPL-3.0 SPDX header; estate policy is MPL-2.0 — fix MANUALLY (owner-only, never auto-edited)"
+            fi
+          done
+          # would-CREATE: missing required files
+          [ -f "SECURITY.md" ] || [ -f ".github/SECURITY.md" ] || warn "no SECURITY.md (would be created)"
+          [ -f "CONTRIBUTING.md" ] || [ -f ".github/CONTRIBUTING.md" ] || warn "no CONTRIBUTING.md (would be created)"
+
+          # --- unfixable compliance gaps (also drift) ---
+          [ -f "0-AI-MANIFEST.a2ml" ] || [ -f "AI.a2ml" ] || warn "missing AI manifest (0-AI-MANIFEST.a2ml)"
+          [ -f "LICENSE" ] || [ -f "LICENSE.md" ] || [ -f "LICENSE.txt" ] || warn "missing LICENSE file"
+          [ -f "README.adoc" ] || [ -f "README.md" ] || warn "missing README"
+
+          # --- advisory only: dangerous verification-bypass patterns ---
+          for pattern in believe_me assert_total Admitted sorry unsafeCoerce Obj.magic; do
+            count=$(grep -rl "$pattern" --include='*.idr' --include='*.v' --include='*.lean' --include='*.hs' --include='*.ml' --include='*.res' . 2>/dev/null | grep -v node_modules | wc -l || true)
+            [ "$count" -gt 0 ] && note "verification-bypass pattern '$pattern' in $count file(s) (advisory)"
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DRIFT" -gt 0 ]; then
+            echo "🔴 **Canary tripped: $DRIFT would-mutate finding(s).** Either the repo drifted or rhodibot's rules diverged from the norm — investigate (no edits were made)." >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=Rhodibot canary::$DRIFT would-mutate finding(s) detected — rhodibot wants to edit. Investigate; nothing was changed."
+            exit 1
+          fi
+          echo "✅ Canary clean — rhodibot has no desire to edit. Repository matches the norm." >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ Rhodibot canary clean — no drift, no mutations."

@@ -1,0 +1,33 @@
+= Blog Database Example
+// SPDX-License-Identifier: CC-BY-SA-4.0
+
+This example demonstrates VeriSimiser augmenting a typical blog database
+(users, posts, comments, tags) with VeriSimDB octad dimensions.
+
+== Usage
+
+[source,bash]
+----
+cd examples/blog-db
+
+# Generate the sidecar overlay and query interceptors:
+cargo run -- generate --manifest verisimiser.toml --output .verisim
+
+# View generated files:
+cat .verisim/sidecar_schema.sql    # Sidecar table definitions
+cat .verisim/interceptors.sql       # Query enrichment views
+----
+
+== What Gets Generated
+
+* `sidecar_schema.sql` — Creates 5 sidecar tables:
+  - `verisim_metadata` — Tracks which blog tables are augmented
+  - `verisim_provenance_log` — SHA-256 hash-chained audit trail
+  - `verisim_lineage_graph` — Data derivation DAG edges
+  - `verisim_temporal_versions` — Point-in-time snapshots
+  - `verisim_access_policies` — Row/column access control
+
+* `interceptors.sql` — Creates views for each table:
+  - `verisim_posts_with_provenance` — Posts enriched with last-modified info
+  - `verisim_posts_with_temporal` — Posts enriched with version numbers
+  - (and similar for users, comments, tags, post_tags)

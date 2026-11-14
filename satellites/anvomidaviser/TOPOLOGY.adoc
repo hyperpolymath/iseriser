@@ -1,0 +1,131 @@
+== anvomidaviser — Repository Topology
+
+=== Overview
+
+ISU notation to formal Anvomidav choreography engine. Part of the
+hyperpolymath -iser family (https://github.com/hyperpolymath/iseriser).
+
+=== Directory Map
+
+....
+anvomidaviser/
+├── 0-AI-MANIFEST.a2ml              # AI agent entry point (read first)
+├── Cargo.toml                       # Rust project manifest
+├── Containerfile                    # OCI container build (Chainguard base)
+├── contractile.just                 # Contractile task recipes
+├── CONTRIBUTING.adoc                # Contribution guide
+├── Justfile                         # Primary task runner
+├── LICENSE                          # MPL-2.0
+├── README.adoc                      # Project overview
+├── ROADMAP.adoc                     # Phased development plan
+├── SECURITY.md                      # Security policy
+├── TOPOLOGY.md                      # THIS FILE
+│
+├── src/                             # Rust source code
+│   ├── main.rs                      # CLI entry point (clap)
+│   ├── lib.rs                       # Library root
+│   ├── manifest/                    # anvomidaviser.toml parsing + validation
+│   ├── codegen/                     # Anvomidav code generation from ISU elements
+│   ├── core/                        # ISU element types, base values, scoring tables
+│   ├── definitions/                 # Domain definitions (jump/spin/step types)
+│   ├── errors/                      # Error types and diagnostics
+│   ├── abi/                         # Rust-side ABI bindings
+│   ├── aspects/                     # Cross-cutting concerns
+│   ├── bridges/                     # Inter-layer bridges
+│   ├── contracts/                   # Runtime contract checks
+│   └── interface/                   # Verified Interface Seams
+│       ├── abi/                     # Idris2 ABI definitions
+│       │   ├── Types.idr            #   ISU types (ElementCode, JumpType, SpinLevel, GOE, PCS)
+│       │   ├── Layout.idr           #   Memory layouts (TechnicalElement, ProgramScore structs)
+│       │   └── Foreign.idr          #   FFI declarations (parsing, scoring, validation)
+│       ├── ffi/                     # Zig FFI implementation
+│       │   ├── build.zig            #   Build config (shared + static lib)
+│       │   ├── src/main.zig         #   C-ABI function implementations
+│       │   └── test/                #   Integration tests
+│       │       └── integration_test.zig
+│       └── generated/               # Auto-generated C headers
+│
+├── tests/                           # Rust integration tests
+├── examples/                        # Example manifests and programs
+├── features/                        # Feature specifications
+├── verification/                    # Verification artifacts
+│
+├── container/                       # Stapeln container ecosystem
+├── docs/                            # Documentation
+│   ├── attribution/                 # Citations, maintainers
+│   ├── architecture/                # Architecture diagrams
+│   ├── theory/                      # ISU rules, scoring theory
+│   └── practice/                    # User manuals
+│
+├── .machine_readable/               # Machine-readable metadata (canonical)
+│   ├── 6a2/                         # Core state files
+│   │   ├── STATE.a2ml               #   Project state and progress
+│   │   ├── META.a2ml                #   Architecture decisions
+│   │   ├── ECOSYSTEM.a2ml           #   Ecosystem relationships
+│   │   ├── AGENTIC.a2ml             #   AI agent patterns
+│   │   ├── NEUROSYM.a2ml            #   Neurosymbolic config
+│   │   └── PLAYBOOK.a2ml            #   Operational runbook
+│   ├── ai/                          # AI configuration
+│   ├── anchors/                     # Semantic boundary declarations
+│   ├── bot_directives/              # Bot-specific instructions
+│   ├── contractiles/                # Policy enforcement (k9/dust/lust/must/trust)
+│   ├── compliance/                  # REUSE, cargo-deny
+│   ├── configs/                     # git-cliff, etc.
+│   ├── integrations/                # proven, verisimdb, vexometer
+│   ├── policies/                    # Maintenance policies
+│   └── scripts/                     # Forge sync, lifecycle, verification
+│
+├── .claude/                         # Claude Code project instructions
+│   └── CLAUDE.md
+│
+└── .github/                         # GitHub community metadata + workflows
+    └── workflows/                   # 17 CI/CD workflows
+....
+
+=== Data Flow
+
+....
+anvomidaviser.toml (manifest)
+        │
+        ▼
+   ISU Parser (Rust)
+   ├── Element codes → ElementCode types
+   ├── GOE values → GOE type (-5..+5)
+   └── PCS marks → PCSMark type (0..10.00)
+        │
+        ▼
+   Idris2 ABI (proofs)
+   ├── Validates scoring rule completeness
+   ├── Proves GOE/PCS range invariants
+   └── Verifies Zayak rule coverage
+        │
+        ▼
+   Zig FFI (C-ABI bridge)
+   ├── anvomidaviser_parse_element()
+   ├── anvomidaviser_score_program()
+   ├── anvomidaviser_validate_program()
+   └── anvomidaviser_check_zayak()
+        │
+        ▼
+   Anvomidav Codegen
+   ├── Formal program descriptions
+   ├── Timing constraints
+   ├── Transition annotations
+   └── Rink position data
+        │
+        ▼
+   Output: .anvomidav files, score sheets, validation reports
+....
+
+=== Key Integration Points
+
+[cols=",",options="header",]
+|===
+|System |Role
+|*iseriser* |Meta-framework that generated this scaffold
+|*proven* |Shared Idris2 verified library for common proofs
+|*typell* |Type theory engine used by ABI layer
+|*boj-server* |MCP cartridge host for remote scoring access
+|*verisimdb* |Historical competition data storage
+|*panll* |Visual panel for program planning UI
+|===

@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# NEUROSYM.a2ml — Neurosymbolic integration metadata for tlaiser
+# Configuration for Hypatia scanning and symbolic reasoning.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
+
+[hypatia-config]
+scan-enabled = true
+scan-depth = "standard"  # quick | standard | deep
+report-format = "logtalk"
+
+[symbolic-rules]
+# TLA+-specific symbolic rules for Hypatia scanning:
+# - Detect unbounded state spaces in generated specs
+# - Flag missing TypeOK invariants
+# - Warn on specs with no liveness properties (safety-only is suspicious)
+# - Detect unreachable states in state machine IR
+
+[neural-config]
+# Neural pattern detection for state machine extraction:
+# - Identify state machine patterns in Rust source (enum + match)
+# - Detect lock/unlock patterns for mutual exclusion properties
+# - Identify request/response patterns for liveness properties

@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# ECOSYSTEM.a2ml — Dafniser ecosystem position
+[metadata]
+version = "0.1.0"
+last-updated = "2026-04-11"
+
+[project]
+name = "Dafniser"
+purpose = "Generate correct-by-construction code for critical functions using Dafny verification and Z3 SMT solving — sorting, searching, crypto, consensus, financial algorithms"
+role = "tool"
+
+[position-in-ecosystem]
+category = ""
+
+[related-projects]
+projects = [
+  # No related projects recorded
+]

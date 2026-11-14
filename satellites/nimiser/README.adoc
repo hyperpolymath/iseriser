@@ -1,0 +1,148 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Nimiser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+Nimiser generates **high-performance C libraries** from high-level interface
+descriptions using https://nim-lang.org[Nim]'s extraordinary metaprogramming
+system.
+
+Nim (by Andreas Rumpf) compiles to C, C++, Objective-C, and JavaScript with
+Python-like syntax and a compile-time metaprogramming system more powerful than
+most languages' runtime reflection. Nimiser exploits this power to produce
+optimised, standalone C libraries with zero overhead — the user never writes a
+single line of Nim.
+
+== How It Works
+
+Describe your library interface in `nimiser.toml`. Nimiser:
+
+1. **Parses** the manifest to extract types, functions, and strategies
+2. **Generates Nim code** using compile-time metaprogramming:
+   - **Templates** for zero-cost generic abstractions
+   - **Macros** for AST-level code transformation
+   - **Generics** for type-safe specialisation
+3. **Compiles Nim to optimised C** via `nim c --app:staticLib` / `--app:lib`
+4. **Produces a standalone C library** with clean headers (`.h` + `.a`/`.so`)
+5. **Creates a Zig FFI bridge** for verified integration
+
+== Nim Metaprogramming Pipeline
+
+[source]
+----
+nimiser.toml          Nim Templates         Nim Macros
+  (manifest)    -->   (zero-cost          -->  (AST-level
+                       generics)               transforms)
+       |                  |                       |
+       v                  v                       v
+  Rust CLI          Nim Source Code          Compile-Time AST
+  (parses,          (generated)             (rewritten)
+   validates)             |                       |
+                          v                       v
+                    nim c --app:lib       Optimised C Output
+                          |
+                          v
+                   C Library (.a/.so)
+                   C Headers (.h)
+                   Zig FFI Bridge
+----
+
+=== Nim Template System
+
+Nim templates are **hygienic, zero-cost code substitutions** evaluated at
+compile time. Nimiser generates template-based wrappers for:
+
+- Type-safe buffer management
+- Platform-specific memory layouts
+- Calling convention adapters (cdecl, stdcall)
+
+=== Nim Macro System
+
+Nim macros operate on the **compile-time AST** (Abstract Syntax Tree),
+rewriting code before compilation. Nimiser uses macros for:
+
+- Automatic C FFI export generation (`{.exportc.}` pragmas)
+- Loop unrolling and specialisation for known sizes
+- Dead code elimination for unused code paths
+- Pragma injection for alignment and packing
+
+=== Nim Generics
+
+Nim generics produce **monomorphised, specialised code** at compile time.
+Nimiser generates generic wrappers that are instantiated for each concrete
+type in the manifest, yielding optimal code without runtime dispatch.
+
+== Key Value
+
+* **High-level descriptions -> optimised C libraries** with zero manual Nim
+* **Nim's metaprogramming** (templates + macros + generics) generates specialised code paths
+* **Multi-backend** -- C, C++, JavaScript from one source via Nim backends
+* **Formally verified ABI** -- Idris2 dependent types prove interface correctness
+* **Zero overhead** -- Nim compiles to C; generated code is as fast as hand-written C
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern (same as https://github.com/hyperpolymath/chapeliser[Chapeliser]):
+
+* **Manifest** (`nimiser.toml`) -- describe WHAT you want
+* **Idris2 ABI** (`src/interface/abi/`) -- formal proofs of interface correctness
+* **Zig FFI** (`src/interface/ffi/`) -- C-ABI bridge to target language runtime
+* **Codegen** (`src/codegen/`) -- generates Nim code with templates, macros, and generics
+* **Rust CLI** -- parses manifest, validates, generates, builds, runs
+
+User writes zero Nim code. Nimiser generates everything.
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of acceleration frameworks.
+
+== Nim-Specific Features
+
+=== Compile-Time Evaluation
+
+Nim's `static` and `const` blocks evaluate arbitrary code at compile time.
+Nimiser generates compile-time lookup tables, pre-computed hashes, and
+constant-folded expressions that become literal values in the C output.
+
+=== Pragma-Driven C Export
+
+Nim pragmas (`{.exportc.}`, `{.cdecl.}`, `{.packed.}`, `{.align.}`) give
+fine-grained control over the C ABI. Nimiser generates the correct pragmas
+based on the Idris2 ABI specification, ensuring layout and calling convention
+correctness.
+
+=== Destructors and Move Semantics
+
+Nim's `=destroy`, `=copy`, `=sink` hooks provide deterministic resource
+management. Nimiser generates these hooks for library types that own
+resources (allocations, file handles, etc.).
+
+== Quick Start
+
+[source,bash]
+----
+# Initialise a manifest
+nimiser init
+
+# Edit nimiser.toml to describe your library interface
+
+# Generate Nim code, compile to C, produce library
+nimiser generate
+nimiser build --release
+
+# The output/ directory contains:
+#   libmylib.a / libmylib.so  -- compiled C library
+#   mylib.h                    -- C headers
+#   mylib_ffi.zig              -- Zig FFI bridge
+----
+
+== Status
+
+**Pre-alpha.** Architecture defined, CLI scaffolded, codegen stubs in place.
+Nim template/macro generation is the primary implementation target.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

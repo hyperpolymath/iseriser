@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= eclexiaiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`eclexiaiser.toml`)
+* [x] Codegen stubs
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI build and test stubs
+* [x] README with architecture overview
+
+== Phase 1: Source Instrumentation
+* [ ] Parse target source files to identify function boundaries
+* [ ] Insert energy measurement hooks at function entry/exit
+* [ ] Support Rust, AffineScript, and Gleam as initial target languages
+* [ ] Preserve source maps for accurate attribution
+* [ ] CLI `generate` subcommand produces instrumented source
+
+== Phase 2: Eclexia Annotation Codegen
+* [ ] Generate `@requires energy < NkWh` constraints from manifest budgets
+* [ ] Generate `@provides carbon_report` annotations for report-producing functions
+* [ ] Joule annotation syntax: per-function, per-module, per-crate scopes
+* [ ] Renewable-aware scheduling hints (`@prefers renewable_peak`)
+* [ ] Composite resource constraints (energy + time + memory)
+* [ ] Emit `.eclexia` constraint files alongside instrumented source
+
+== Phase 3: Energy Measurement Integration (Zig FFI)
+* [ ] RAPL (Running Average Power Limit) energy counter reader for x86_64
+* [ ] IPMI power sensor interface for server-class hardware
+* [ ] Software estimation fallback for platforms without hardware counters
+* [ ] Zig FFI exports: `eclexiaiser_measure_energy`, `eclexiaiser_stop_measurement`
+* [ ] Thread-safe measurement context with per-function attribution
+* [ ] Benchmarks: measurement overhead < 1% of instrumented function runtime
+
+== Phase 4: Carbon Intensity API
+* [ ] WattTime API client (real-time marginal emissions signal)
+* [ ] Electricity Maps API client (zone-level carbon intensity)
+* [ ] Caching layer to avoid API rate limits during CI
+* [ ] Zig FFI export: `eclexiaiser_query_carbon`
+* [ ] Configurable region/zone in `eclexiaiser.toml`
+* [ ] Offline mode with static carbon intensity data for reproducible builds
+
+== Phase 5: Idris2 Proofs of Resource Bounds
+* [ ] `EnergyBudget` type with dependent proof of satisfiability
+* [ ] `CarbonIntensity` type with grid-zone-indexed bounds
+* [ ] `ResourceBound` composition proof: sub-budgets sum to parent budget
+* [ ] Call-graph-level verification: prove total energy fits allocation
+* [ ] `SustainabilityReport` type with CSRD field mapping proof
+* [ ] Integration with `proven` library for shared verification primitives
+
+== Phase 6: Ecosystem and Reporting
+* [ ] CSRD-compatible sustainability report generation (JSON + PDF)
+* [ ] PanLL panel: real-time energy dashboard with per-function breakdown
+* [ ] BoJ-server cartridge for remote energy analysis
+* [ ] VeriSimDB backing store for historical energy measurements
+* [ ] CI/CD integration: fail builds that exceed energy budgets
+* [ ] Publish to crates.io
+* [ ] Documentation: examples for green computing, data centre, and CSRD workflows

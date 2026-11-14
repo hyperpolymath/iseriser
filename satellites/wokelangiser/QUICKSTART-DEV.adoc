@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// QUICKSTART-DEV.adoc — clone -> build -> test -> PR
+= wokelangiser — Quick Start for Developers
+:toc:
+:toclevels: 2
+
+== Tech Stack
+
+* **Rust** — CLI host and codegen (`src/main.rs`, `src/codegen/`, `src/manifest/`)
+* **Idris2** — formal ABI proofs (`src/interface/abi/*.idr`)
+* **Zig** — C-ABI FFI bridge (`src/interface/ffi/`)
+* **Just** — task runner; **Guix/Nix** — reproducible dev environment
+
+== Set Up Development Environment
+
+=== Option A: Guix (preferred)
+
+[source,bash]
+----
+guix shell -D -f guix.scm
+----
+
+=== Option B: Nix (fallback)
+
+[source,bash]
+----
+nix develop
+----
+
+=== Option C: Manual
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/wokelangiser.git
+cd wokelangiser
+just doctor        # check required tools (just, git, cargo, ...)
+----
+
+You will need a Rust toolchain (`cargo`) and — for the ABI/FFI layers — `idris2` and `zig`.
+
+== Build
+
+[source,bash]
+----
+just build         # cargo build --release
+----
+
+== Test
+
+[source,bash]
+----
+just test          # cargo test
+# FFI tests:
+cd src/interface/ffi && zig build test
+----
+
+== Project Structure
+
+[source]
+----
+wokelangiser/
+├── src/main.rs            # Rust CLI entry (init/validate/generate/build/run/info)
+├── src/manifest/          # wokelangiser.toml parser
+├── src/codegen/           # target-language emission (WIP — stubs)
+├── src/interface/abi/     # Idris2 ABI proofs (Types/Layout/Foreign)
+├── src/interface/ffi/     # Zig C-ABI bridge + tests
+├── docs/                  # Human documentation (canonical)
+├── .machine_readable/     # Machine docs: 6a2/, contractiles/, anchors/
+├── Justfile               # Task runner recipes
+├── guix.scm / flake.nix   # Dev environments (Guix primary, Nix fallback)
+└── 0-AI-MANIFEST.a2ml     # AI agent entry point
+----
+
+== Key Recipes
+
+[source,bash]
+----
+just                # build + test (default)
+just build          # release build
+just test           # run tests
+just lint           # clippy (-D warnings)
+just fmt            # format
+just quality        # fmt-check + lint + test
+just validate ARGS  # validate a manifest
+just generate ARGS  # run the codegen pipeline (WIP)
+just doctor         # self-diagnostic
+just assail         # panic-attacker security scan
+just tour           # guided tour
+----
+
+Run `just --list` to see every recipe.
+
+== Before Submitting a PR
+
+[source,bash]
+----
+just quality        # fmt-check + lint + test must pass
+just assail         # no new security findings (if panic-attack installed)
+----
+
+Branch from `main`, use Conventional-Commits-style messages, then open a PR — see
+link:CONTRIBUTING.md[CONTRIBUTING.md].
+
+== Contractile Invariants
+
+Before changing code, read the contractiles under `.machine_readable/contractiles/`
+— especially `must/Mustfile.a2ml` (critical invariants: no banned licences, no
+unsafe FFI, tests must pass). The matching CI gate is the Governance workflow.
+
+== LLM / AI Agent Development
+
+If using an AI assistant, load context first by reading `0-AI-MANIFEST.a2ml`
+(repo entry point) and `.claude/CLAUDE.md` (language and policy rules).
+
+== Get Help
+
+* **Architecture**: link:EXPLAINME.adoc[EXPLAINME.adoc] and link:docs/developer/ABI-FFI-README.adoc[docs/developer/ABI-FFI-README.adoc]
+* **Report an issue**: `just help-me`, or https://github.com/hyperpolymath/wokelangiser/issues

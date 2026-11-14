@@ -1,0 +1,133 @@
+== oblibeniser — Topology
+
+=== Data Flow
+
+....
+User manifest (oblibeniser.toml)
+        |
+        v
+  +-----------+
+  | Rust CLI  |  src/main.rs — parse manifest, orchestrate pipeline
+  +-----------+
+        |
+        v
+  +------------------+
+  | Manifest Parser  |  src/manifest/ — validate operation declarations
+  +------------------+
+        |
+        v
+  +------------------+
+  | Idris2 ABI       |  src/interface/abi/ — formal proofs
+  | (Types.idr)      |  ReversibleOperation, InverseProof,
+  | (Layout.idr)     |  AuditEntry layout, StateSnapshot,
+  | (Foreign.idr)    |  UndoStack, FFI declarations
+  +------------------+
+        |
+        v  (generated C headers)
+  +------------------+
+  | Zig FFI Bridge   |  src/interface/ffi/ — C-ABI implementation
+  | (main.zig)       |  Operation recording, inverse computation,
+  |                  |  audit trail (hash-chained), undo stack
+  +------------------+
+        |
+        v
+  +------------------+
+  | Codegen          |  src/codegen/ — emit reversible wrappers
+  +------------------+
+        |
+        v
+  Generated output (reversible operation wrappers in target language)
+....
+
+=== Reversible Operation Lifecycle
+
+....
+1. RECORD      oblibeniser_record_forward(handle, name, pre_snapshot)
+                 -> assigns operation ID, captures pre-state
+
+2. EXECUTE     (user's forward operation runs)
+
+3. FINALISE    oblibeniser_finalise_forward(handle, op_id, post_snapshot)
+                 -> captures post-state, closes the record
+
+4. PROVE       oblibeniser_compute_inverse(handle, op_id)
+                 -> derives inverse from pre/post snapshots
+
+5. AUDIT       oblibeniser_audit_append(handle, op_id, actor, auth, forward)
+                 -> hash-chained entry in audit trail
+
+6. STACK       oblibeniser_undo_push(handle, op_id)
+                 -> push onto bounded undo stack
+
+7. UNDO        oblibeniser_undo_pop(handle)
+                 -> pop + apply inverse, restoring pre-state
+
+8. TIME-TRAVEL oblibeniser_time_travel(handle, target_op_id)
+                 -> rewind by applying inverses down the stack
+....
+
+=== Module Map
+
+[width="100%",cols="30%,37%,33%",options="header",]
+|===
+|Module |Location |Purpose
+|CLI |`+src/main.rs+` |Command-line interface (init, validate, generate,
+build, run, info)
+
+|Library |`+src/lib.rs+` |Library root (re-exports manifest, codegen,
+abi)
+
+|Manifest |`+src/manifest/+` |Parse and validate `+oblibeniser.toml+`
+
+|Codegen |`+src/codegen/+` |Generate reversible wrappers
+
+|ABI Types |`+src/interface/abi/Types.idr+` |ReversibleOperation,
+InverseProof, AuditEntry, StateSnapshot, UndoStack
+
+|ABI Layout |`+src/interface/abi/Layout.idr+` |C-ABI struct layouts with
+alignment proofs
+
+|ABI Foreign |`+src/interface/abi/Foreign.idr+` |FFI function
+declarations
+
+|FFI Impl |`+src/interface/ffi/src/main.zig+` |Zig implementation of all
+FFI functions
+
+|FFI Build |`+src/interface/ffi/build.zig+` |Zig build configuration
+
+|FFI Tests |`+src/interface/ffi/test/integration_test.zig+` |Integration
+tests
+|===
+
+=== Key Types (Idris2 ABI)
+
+[width="100%",cols="22%,21%,25%,32%",options="header",]
+|===
+|Type |Size |Align |Purpose
+|`+StateSnapshot+` |40 bytes |8 |Pre/post state capture
+
+|`+ReversibleOperation+` |variable |8 |Forward op + snapshots + inverse
+flag
+
+|`+AuditEntry+` |64 bytes |8 |Hash-chained audit record
+
+|`+UndoStack+` |24 bytes |8 |Bounded LIFO operation history
+
+|`+InverseProof+` |(type-level) |— |Dependent type proving
+`+inverse(forward(x)) = x+`
+|===
+
+=== Ecosystem Position
+
+....
+iseriser (meta-framework)
+    |
+    +-- typedqliser (#1 priority)
+    +-- chapeliser  (#2 priority)
+    +-- verisimiser (#3 priority)
+    +-- oblibeniser (this repo) — reversible computing
+    +-- ... (29+ siblings)
+    |
+    +-- proven (shared Idris2 library)
+    +-- typell (type theory engine)
+....

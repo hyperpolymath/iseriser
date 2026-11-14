@@ -1,0 +1,90 @@
+# This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# Branch Cleanup — manually delete stale branches server-side.
+#
+# Runs on GitHub's runners using GITHUB_TOKEN, deleting refs via the REST API
+# directly. This works where a proxied `git push --delete` is blocked. Refuses
+# to touch keep-listed branches and defaults to a dry run for safety.
+
+name: Branch Cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      branches:
+        description: "Space-separated branch names to delete"
+        required: true
+        type: string
+      dry_run:
+        description: "If true, only report what would be deleted"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: branch-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Delete branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_BRANCHES: ${{ inputs.branches }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          # Branches this tool must never delete.
+          KEEP="main cicd/codeql-cron-monthly estate-standardization-20260607"
+
+          is_kept() {
+            local b="$1" k
+            for k in $KEEP; do
+              [ "$b" = "$k" ] && return 0
+            done
+            return 1
+          }
+
+          echo "Repository: ${GITHUB_REPOSITORY}"
+          echo "Dry run:    ${INPUT_DRY_RUN}"
+          echo "Requested:  ${INPUT_BRANCHES}"
+          echo
+
+          deleted=0; absent=0; skipped=0
+          for b in ${INPUT_BRANCHES}; do
+            if is_kept "$b"; then
+              echo "SKIP    (protected): $b"
+              skipped=$((skipped + 1))
+              continue
+            fi
+
+            if [ "${INPUT_DRY_RUN}" = "true" ]; then
+              echo "DRY-RUN (would delete): $b"
+              continue
+            fi
+
+            # Idempotent: an already-absent ref counts as success.
+            if gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${b}" --silent 2>/tmp/gh_err; then
+              echo "DELETED: $b"
+              deleted=$((deleted + 1))
+            elif grep -qiE 'Reference does not exist|Not Found|HTTP 404|HTTP 422' /tmp/gh_err; then
+              echo "ABSENT  (already gone): $b"
+              absent=$((absent + 1))
+            else
+              echo "ERROR deleting $b:"
+              cat /tmp/gh_err
+              exit 1
+            fi
+          done
+
+          echo
+          echo "Summary: deleted=${deleted} absent=${absent} skipped=${skipped}"

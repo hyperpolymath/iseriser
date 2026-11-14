@@ -1,0 +1,62 @@
+# This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# Provable — machine-checks the claims TypedQLiser makes beyond unit tests.
+#
+#   1. golden-check — the type-checker ACCEPTS valid SQL and REJECTS invalid SQL
+#      (the blog-api example: good-queries pass, bad-queries fail at L1/L2/L3).
+#   2. zig-ffi      — the Zig C-ABI FFI builds and its unit tests pass.
+#
+# The Rust layer itself is covered by rust-ci.yml.
+name: Provable
+
+on:
+  push:
+    branches: [main, master, "claude/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  golden-check:
+    name: TypedQL — accepts good SQL, rejects bad
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Build
+        run: cargo build --quiet
+      - name: Positive — a valid query type-checks (exit 0)
+        working-directory: examples/blog-api
+        run: >-
+          ../../target/debug/typedqliser check
+          -q 'SELECT id, username, email FROM users WHERE id = $1' --ci
+      - name: Negative — invalid queries are rejected (exit non-zero)
+        working-directory: examples/blog-api
+        run: |
+          set -x
+          # syntax error (L1) must be rejected
+          ! ../../target/debug/typedqliser check -q 'SELEC * FORM users' --ci
+          # nonexistent column (L2) must be rejected
+          ! ../../target/debug/typedqliser check -q 'SELECT id, full_name FROM users' --ci
+      - name: Full example — good passes, bad fails
+        working-directory: examples/blog-api
+        run: |
+          out=$(../../target/debug/typedqliser check 2>&1 || true)
+          echo "$out"
+          echo "$out" | grep -q '2 queries checked, 1 passed, 1 failed'
+
+  zig-ffi:
+    name: Zig — build + test FFI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: mlugg/setup-zig@v2.2.1
+        with:
+          version: 0.14.0
+      - name: zig build + test
+        working-directory: src/interface/ffi
+        run: |
+          zig version
+          zig build test

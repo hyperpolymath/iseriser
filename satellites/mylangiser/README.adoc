@@ -1,0 +1,128 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Mylangiser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+**Mylangiser** analyses complex API surfaces, identifies complexity layers, and
+generates **progressive-disclosure wrappers** with beginner, intermediate, and
+expert access levels. It uses https://github.com/hyperpolymath/nextgen-languages[My-Lang]
+-- a hyperpolymath nextgen language designed around API usability -- to produce
+layered interfaces where newcomers see only what they need, and power users can
+peel back layers to reach the full API.
+
+The core idea: **every API should teach itself.** Users start simple, grow into
+advanced features at their own pace, and never hit a wall that forces them to
+rewrite.
+
+== How It Works
+
+. **Describe your API** in `mylangiser.toml` (endpoints, types, parameter sets)
+. **Mylangiser analyses the surface** -- function count, parameter complexity,
+  type depth, error surface area
+. **Complexity scoring** assigns each endpoint a difficulty rating
+. **Layer generation** produces three progressive-disclosure tiers:
+  - `@beginner` -- simplified signatures, smart defaults, friendly error messages
+  - `@intermediate` -- full parameter access, optional overrides, richer types
+  - `@expert` -- raw API, advanced combinators, performance knobs, escape hatches
+. **Idris2 ABI proofs** verify that each layer is a correct subset of the next
+  (beginner is a subset of intermediate, which is a subset of expert)
+. **My-Lang codegen** emits the layered wrapper code, ready to drop into any
+  project
+
+=== Architecture
+
+----
+mylangiser.toml  (manifest — what the API looks like)
+       │
+       ▼
+  API Analysis   (surface scanning, parameter classification)
+       │
+       ▼
+ Complexity Scoring  (endpoint difficulty, cognitive load estimation)
+       │
+       ▼
+ Idris2 ABI Proofs   (layer subset correctness, smart-default safety)
+       │
+       ▼
+ My-Lang Codegen     (emit @beginner / @intermediate / @expert wrappers)
+       │
+       ▼
+ Layered Wrapper     (drop-in progressive-disclosure library)
+----
+
+Follows the hyperpolymath **-iser pattern**: manifest -> Idris2 ABI proof ->
+Zig FFI bridge -> target language codegen. Part of the
+https://github.com/hyperpolymath/iseriser[-iser family].
+
+=== My-Lang Specifics
+
+**Disclosure levels:**
+
+* `@beginner` -- only the most common parameters; everything else gets a smart
+  default. Error messages are human-readable sentences, not codes.
+* `@intermediate` -- all parameters visible; optional ones promoted to named
+  arguments. Type signatures shown in full.
+* `@expert` -- raw API access, performance tuning, batch operations,
+  escape-hatch to underlying implementation.
+
+**Smart defaults:** Mylangiser infers safe defaults from API documentation, usage
+patterns, and type constraints. A `@beginner` user calling `send_email(to, body)`
+never needs to specify encoding, headers, or retry policy -- those are inferred.
+
+**Optional parameter promotion:** Parameters that are optional at the API level
+but frequently used get promoted to named arguments at `@intermediate`, reducing
+boilerplate without losing flexibility.
+
+**Error message simplification:** `@beginner` errors are translated into
+actionable guidance ("Did you mean X?"), while `@expert` errors expose raw status
+codes and stack context.
+
+== Key Value
+
+* **Make any complex API accessible** -- users start simple, grow into advanced
+  features without rewriting
+* **SDK simplification** -- wrap a 500-endpoint API into a discoverable,
+  layered library
+* **Developer onboarding** -- new team members use `@beginner`; veterans use
+  `@expert`
+* **API versioning** -- add new capabilities at `@expert` without breaking
+  `@beginner` consumers
+* **Library wrapper generation** -- turn any C/Rust/Zig library into a
+  progressive-disclosure package
+
+== Use Cases
+
+SDK simplification:: Wrap a cloud provider's 200+ API endpoints into a three-tier
+  library where `@beginner` covers the 20 most common operations.
+
+Developer onboarding:: New hires interact with `@beginner` interfaces for their
+  first sprint; they graduate to `@intermediate` as they learn the domain.
+
+API versioning:: New capabilities land at `@expert` first, then filter down to
+  `@intermediate` and `@beginner` once stabilised.
+
+Library wrapper generation:: Take a raw C library with 80 functions and produce a
+  layered My-Lang wrapper that hides complexity behind disclosure levels.
+
+== Status
+
+**Codebase in progress.** Architecture defined, CLI scaffolded, Idris2 ABI
+stubs in place, codegen pending. Not yet producing end-to-end output.
+
+See link:ROADMAP.adoc[ROADMAP] for phased plan.
+
+== Build
+
+[source,bash]
+----
+cargo build --release
+cargo test
+----
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

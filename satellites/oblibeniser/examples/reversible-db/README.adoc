@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= Reversible Database Example
+:author: Jonathan D.A. Jewell
+:email: j.d.a.jewell@open.ac.uk
+
+== Overview
+
+This example demonstrates how oblibeniser makes common database operations
+fully reversible using all three inverse strategies:
+
+[cols="2,1,3"]
+|===
+| Operation | Strategy | Rationale
+
+| `db_insert` / `db_delete`
+| Mirror
+| Insert ↔ Delete are algebraic inverses — deterministic reversal.
+
+| `db_update` / `db_batch_update`
+| Log-replay
+| Updates record old values in a mutation log and replay backwards to undo.
+
+| `schema_migrate` / `db_truncate`
+| Snapshot
+| Destructive operations capture full state before execution.
+|===
+
+== Usage
+
+[source,bash]
+----
+# Generate reversible wrappers from this manifest:
+oblibeniser generate \
+  --manifest examples/reversible-db/oblibeniser.toml \
+  --output generated/reversible-db
+
+# Inspect generated files:
+ls generated/reversible-db/
+# → inverses.rs  audit.rs  verify_audit.rs  summary.txt
+
+# View the generation summary:
+cat generated/reversible-db/summary.txt
+----
+
+== Audit Trail
+
+The audit trail uses hash-chaining (like a lightweight blockchain) to ensure
+tamper-evidence. Each entry contains the hash of the previous entry:
+
+....
+Entry[0]: hash=a1b2c3... prev=
+Entry[1]: hash=d4e5f6... prev=a1b2c3...
+Entry[2]: hash=g7h8i9... prev=d4e5f6...
+....
+
+If any entry is modified after the fact, the chain breaks and verification fails.
+
+== Undo Stack
+
+With `max-depth = 200`, the last 200 operations can be undone. The
+`auto-checkpoint-interval = 25` means a full state snapshot is taken every
+25 operations, enabling efficient time-travel to any point in history.

@@ -1,0 +1,52 @@
+== TOPOLOGY.md — typedqliser
+
+=== Purpose
+
+typedqliser adds formal type safety to any query language (SQL, GraphQL,
+Datalog, Cypher, and beyond) and is the #1 priority in the -iser family.
+It reads a `+typedqliser.toml+` manifest specifying the query language,
+database backend, and type-safety level (1–10), then type-checks queries
+against the database schema and generates typed query wrappers with
+optional proof certificates. typedqliser is designed for teams who need
+compile-time guarantees that queries are well-typed with respect to
+their schema, preventing entire classes of runtime errors.
+
+=== Module Map
+
+....
+typedqliser/
+├── src/
+│   ├── main.rs                    # CLI entry point (clap): init, check, generate, build, run, info
+│   ├── lib.rs                     # Library API
+│   ├── manifest/mod.rs            # typedqliser.toml parser
+│   ├── codegen/mod.rs             # Typed query wrapper generation
+│   ├── plugins/                   # Per-query-language plugins (SQL, GraphQL, Datalog, etc.)
+│   └── abi/                       # Idris2 ABI bridge stubs
+├── examples/                      # Worked examples
+├── verification/                  # Proof harnesses
+├── container/                     # Stapeln container ecosystem
+└── .machine_readable/             # A2ML metadata
+....
+
+=== Data Flow
+
+....
+typedqliser.toml manifest
+        │
+   ┌────▼────┐
+   │ Manifest │  parse + validate language, database backend, type-safety level
+   │  Parser  │
+   └────┬────┘
+        │  validated type config
+   ┌────▼────┐
+   │ Analyser │  introspect database schema, parse queries, type-check against schema
+   └────┬────┘
+        │  typed query IR + type errors (if any)
+   ┌────▼────┐
+   │ Codegen  │  emit generated/typedqliser/ (typed wrappers, optional proof certificates)
+   └────┬────┘
+        │  type-safe query artifacts
+   ┌────▼────┐
+   │  CI gate │  exit 1 on type errors (--ci mode)
+   └─────────┘
+....

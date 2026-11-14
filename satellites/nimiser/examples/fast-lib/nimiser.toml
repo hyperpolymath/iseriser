@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: MPL-2.0
+# Example nimiser manifest: fast-lib
+# A minimal math library generated via Nim metaprogramming.
+
+[project]
+name = "fast-lib"
+version = "0.1.0"
+description = "A fast math library compiled from Nim to C"
+author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+
+[[functions]]
+name = "fast_add"
+return-type = "cint"
+pragmas = ["exportc", "cdecl"]
+doc = "Add two C integers with zero overhead."
+
+  [[functions.params]]
+  name = "a"
+  type = "cint"
+
+  [[functions.params]]
+  name = "b"
+  type = "cint"
+
+[[functions]]
+name = "fast_multiply"
+return-type = "cdouble"
+pragmas = ["exportc", "cdecl", "noSideEffect"]
+doc = "Multiply two C doubles."
+
+  [[functions.params]]
+  name = "x"
+  type = "cdouble"
+
+  [[functions.params]]
+  name = "y"
+  type = "cdouble"
+
+[[functions]]
+name = "fast_negate"
+return-type = "cint"
+pragmas = ["exportc", "cdecl", "inline", "noSideEffect"]
+doc = "Negate a C integer."
+
+  [[functions.params]]
+  name = "val"
+  type = "cint"
+
+[[functions]]
+name = "fast_init"
+return-type = ""
+pragmas = ["exportc", "cdecl"]
+doc = "Initialise the library (no-op stub)."
+
+[nim]
+backend = "c"
+gc = "arc"
+opt-level = "speed"

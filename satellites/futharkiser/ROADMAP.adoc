@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Futharkiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`futharkiser.toml`)
+* [x] Codegen stubs
+* [x] Idris2 ABI module stubs
+* [x] Zig FFI bridge stubs
+* [x] README with architecture
+
+== Phase 1: Pattern Detection
+* [ ] Source-level analysis to identify array-parallel patterns
+* [ ] Detect `map` patterns (element-wise transformations)
+* [ ] Detect `reduce` patterns (folds with associative operators)
+* [ ] Detect `scan` patterns (prefix sums, running totals)
+* [ ] Classify patterns as safe-to-parallelise vs. sequential
+* [ ] Emit pattern report before codegen
+
+== Phase 2: Futhark Code Generation
+* [ ] Generate `.fut` Futhark source from detected patterns
+* [ ] Map source types to Futhark types (`f32`, `f64`, `i32`, `i64`, `bool`, arrays)
+* [ ] Emit `map`, `reduce`, `scan`, `scatter` SOACs
+* [ ] Handle nested parallelism (`flatten`/`unflatten`)
+* [ ] Generate Futhark entry points with correct signatures
+* [ ] Produce `futharkiser.pkg` manifest for Futhark package manager
+* [ ] First working end-to-end example (vector addition on GPU)
+
+== Phase 3: GPU Backend Compilation
+* [ ] Invoke `futhark opencl` compiler on generated `.fut` files
+* [ ] Invoke `futhark cuda` compiler for NVIDIA targets
+* [ ] Invoke `futhark multicore` for CPU-parallel fallback
+* [ ] Invoke `futhark c` for sequential debugging builds
+* [ ] Parse Futhark compiler output for errors and warnings
+* [ ] Generate C header from Futhark compilation output
+
+== Phase 4: Memory Management
+* [ ] Model GPU memory spaces: Device, Host, Shared
+* [ ] Track array lifetimes across CPU/GPU boundary
+* [ ] Generate host-to-device and device-to-host transfer calls
+* [ ] Minimise redundant memory copies (keep arrays on GPU between kernels)
+* [ ] GPU buffer allocation and deallocation in Zig FFI
+* [ ] Benchmark memory transfer overhead
+
+== Phase 5: Idris2 Proofs of Parallelism Safety
+* [ ] Prove associativity of `reduce` operators (required for parallel correctness)
+* [ ] Prove `map` functions are pure (no side effects)
+* [ ] Prove array shapes are compatible through pipeline
+* [ ] Prove GPU buffer descriptors match Futhark's expected layouts
+* [ ] Prove no data races in scatter operations (index uniqueness)
+* [ ] Prove memory space transitions are valid (Host -> Device -> Host)
+* [ ] Compile-time verification of ABI/FFI contract alignment
+
+== Phase 6: Ecosystem
+* [ ] PanLL panel integration (GPU kernel monitoring, memory usage)
+* [ ] BoJ-server cartridge
+* [ ] VeriSimDB backing store for benchmark results
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] Error messages and diagnostics with source-location mapping
+* [ ] Performance benchmarks against hand-written CUDA/OpenCL
+* [ ] Additional examples (image blur, Monte Carlo pi, matrix multiply)
+* [ ] Publish to crates.io

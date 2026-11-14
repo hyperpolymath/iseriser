@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: MPL-2.0
+[package]
+name = "ephapaxiser"
+version = "0.1.0"
+edition = "2024"
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
+description = "Enforce single-use linear type semantics on resources in existing code via Ephapax"
+license = "MPL-2.0"
+repository = "https://github.com/hyperpolymath/ephapaxiser"
+keywords = ["ephapax", "linear-types", "resource-safety", "code-generation"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+toml = "1.1"
+anyhow = "1"
+thiserror = "2"
+serde_json = "1"
+walkdir = "2"
+
+[dev-dependencies]
+tempfile = "3"

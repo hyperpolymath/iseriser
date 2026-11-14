@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: MPL-2.0
+---
+### [META]
+id: "abi-logic"
+level: 3
+parent: "../0.2-AI-MANIFEST.a2ml"
+
+---
+### [AI_MANIFEST]
+description: |
+  Idris2 ABI definitions for the betlangiser probabilistic engine.
+  Types: Distribution, TernaryBool, ProbabilityValue, ConfidenceInterval, SamplingStrategy.
+  Layout: Distribution struct (40B), sample buffer (56B), confidence interval (24B).
+  Foreign: Distribution creation, sampling, combination, ternary logic, properties.

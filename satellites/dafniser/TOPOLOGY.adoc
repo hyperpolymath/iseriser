@@ -1,0 +1,51 @@
+== TOPOLOGY.md — dafniser
+
+=== Purpose
+
+dafniser generates correct-by-construction code via Dafny verification.
+It reads function specifications — preconditions, postconditions, loop
+invariants, and decreases clauses — from a `+dafniser.toml+` manifest
+and emits Dafny `+.dfy+` source files. Dafny’s Z3-backed verifier
+automatically proves correctness of the generated code, which is then
+compiled to a target language (C#, Java, Go, Python, or JavaScript).
+dafniser targets developers who want machine-checked guarantees for
+critical functions without writing Dafny by hand.
+
+=== Module Map
+
+....
+dafniser/
+├── src/
+│   ├── main.rs                    # CLI entry point (clap): init, validate, generate, build, run, info
+│   ├── lib.rs                     # Library API
+│   ├── manifest/mod.rs            # dafniser.toml parser
+│   ├── codegen/mod.rs             # Dafny .dfy file and build command generation
+│   └── abi/                       # Idris2 ABI bridge stubs
+├── examples/                      # Worked examples
+├── verification/                  # Proof harnesses
+├── container/                     # Stapeln container ecosystem
+└── .machine_readable/             # A2ML metadata
+....
+
+=== Data Flow
+
+....
+dafniser.toml manifest
+        │
+   ┌────▼────┐
+   │ Manifest │  parse + validate function specs (pre/post/invariants/decreases)
+   │  Parser  │
+   └────┬────┘
+        │  validated specification config
+   ┌────▼────┐
+   │ Analyser │  type-check spec consistency, resolve dependencies
+   └────┬────┘
+        │  intermediate representation
+   ┌────▼────┐
+   │ Codegen  │  emit generated/dafniser/ (.dfy Dafny source files)
+   └────┬────┘
+        │  .dfy specs
+   ┌────▼────┐
+   │  Dafny   │  Z3-backed verifier proves correctness → compile to target language
+   └─────────┘
+....

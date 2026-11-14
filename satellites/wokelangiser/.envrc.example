@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: MPL-2.0
+# .envrc.example — optional local environment variables (template).
+#
+# Don't put real secrets in this tracked file or in .envrc. If your setup needs
+# extra variables, create a local, gitignored .env (loaded by dotenv_if_exists
+# in .envrc) containing NAME=value lines. Variables some setups use:
+#
+#   * DATABASE_URL  — your database connection string
+#   * an API key    — credential for any external service you call
+#
+# Real values live only in that gitignored .env, never in git.

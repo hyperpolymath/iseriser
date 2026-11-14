@@ -1,0 +1,96 @@
+# This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# This workflow is managed by gh actions-lock.
+# This workflow is managed by gh actions-lock.
+# Provable — machine-checks the claims Chapeliser makes outside the Rust layer.
+#
+# The Rust CLI/codegen is covered by rust-ci.yml. This workflow verifies the
+# four things that are otherwise only asserted in prose:
+#   1. idris2-proofs  — the Idris2 ABI proofs actually type-check (`idris2 --check`).
+#   2. zig-ffi        — the Zig FFI reference implementation builds and its tests pass.
+#   3. codegen-drift  — the committed golden sample matches fresh codegen output.
+#   4. chapel-golden  — the generated Chapel actually compiles AND runs via `chpl`.
+#
+# Until every job here is green, the proofs / FFI / Chapel output are "written"
+# but NOT "verified" — ROADMAP.adoc and README.adoc are worded accordingly.
+name: Provable
+
+on:
+  push:
+    branches: [main, master, "claude/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  idris2-proofs:
+    name: Idris2 — machine-check ABI proofs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container: ghcr.io/stefan-hoeck/idris2-pack:latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: idris2 --check the ABI modules
+        working-directory: src/interface/abi
+        # Modules are namespaced Chapeliser.ABI.*, so they live under
+        # Chapeliser/ABI/ (idris2 requires file path to match module name).
+        # Foreign imports Types + Layout, so checking it checks the lot; we
+        # check each explicitly for clearer failure attribution.
+        run: |
+          idris2 --version
+          idris2 --check Chapeliser/ABI/Types.idr
+          idris2 --check Chapeliser/ABI/Layout.idr
+          idris2 --check Chapeliser/ABI/Foreign.idr
+
+  zig-ffi:
+    name: Zig — build + test FFI reference impl
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: mlugg/setup-zig@v2.2.1
+        with:
+          version: 0.14.0
+      - name: zig build + test
+        working-directory: src/interface/ffi
+        run: |
+          zig version
+          zig build test
+          zig build
+
+  codegen-drift:
+    name: Codegen — golden sample is up to date
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Regenerate golden artifacts and diff against committed tree
+        run: |
+          # retry: fresh runners occasionally flake fetching crates from crates.io
+          for i in 1 2 3; do
+            cargo run --quiet -- generate -m examples/golden/echo.toml -o /tmp/golden && break
+            echo "attempt $i failed; retrying after backoff…"; sleep $((i * 5))
+          done
+          diff -ru examples/golden/generated /tmp/golden
+
+  chapel-golden:
+    name: Chapel — compile + run golden sample
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container: docker://chapel/chapel:latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Compile generated Chapel against the echo FFI stub
+        run: |
+          chpl --version
+          chpl --main-module echo_Distributed \
+            -I examples/golden/generated/include \
+            examples/golden/generated/chapel/echo_distributed.chpl \
+            examples/golden/ffi_stub.c \
+            -o /tmp/echo_distributed
+      - name: Run on a single locale and assert it conserves all items
+        run: |
+          /tmp/echo_distributed -nl1 | tee /tmp/echo.out
+          grep -q "Gathered 8/8 results (merge)" /tmp/echo.out
+          grep -q "complete in" /tmp/echo.out

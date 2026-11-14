@@ -1,0 +1,158 @@
+== What Is This?
+
+Ephapaxiser analyses code for resource handles, inserts
+https://github.com/hyperpolymath[Ephapax] linear type wrappers around
+them, and enforces *exactly-once usage* at compile time. The result:
+resource leaks, double-frees, and use-after-free bugs become
+_impossible_ in wrapped code.
+
+Ephapax (from Greek _ἐφάπαξ_ — "`once for all`") is hyperpolymath’s
+linear type language where every value must be used exactly once.
+Ephapaxiser brings those guarantees to existing Rust, C, and Zig
+codebases without requiring the developer to learn Ephapax itself.
+
+== How It Works
+
+Describe your resources in an `+ephapaxiser.toml+` manifest. Ephapaxiser
+then:
+
+[arabic]
+. *Analyses* your source code for resource acquisition and release
+patterns (file handles, sockets, database connections, GPU buffers,
+crypto keys)
+. *Generates* Ephapax linear type wrappers that structurally enforce
+single-use semantics on each resource
+. *Proves* linearity via the Idris2 ABI layer — dependent types
+guarantee that every resource is consumed exactly once
+. *Bridges* proofs into executable code via the Zig FFI — zero runtime
+overhead, proofs are erased at compile time
+. *Emits* target-language wrapper code that the developer can drop in
+place
+
+If a resource is used after consumption, leaked, or double-freed, you
+get a *compile-time error* — not a runtime crash.
+
+== Key Value
+
+* *Resource leaks become compile errors* — files always closed, keys
+always zeroised, connections always released
+* *Use-after-free impossible* — linear types structurally prevent it
+* *Double-free impossible* — consumption proof means the resource cannot
+be freed twice
+* *Crypto key safety* — keys used exactly once then destroyed (perfect
+forward secrecy enforcement)
+* *GPU buffer lifecycle* — allocate, use, release: compile-time
+guarantee the buffer is not accessed after release
+* *Database connection pooling* — connections checked out exactly once,
+always returned
+* *Session token safety* — tokens consumed on use, preventing replay
+* *Gradual adoption* — wrap one resource type at a time in existing code
+
+== Architecture
+
+Ephapaxiser follows the hyperpolymath
+https://github.com/hyperpolymath/iseriser[-iser pattern]:
+
+....
+ephapaxiser.toml manifest
+        │
+        ▼
+  Resource Analysis (Rust CLI)
+  ── identify acquire/release patterns
+        │
+        ▼
+  Idris2 ABI (src/interface/abi/)
+  ── LinearResource, UsageCount, ConsumeProof
+  ── dependent types PROVE linearity invariants
+        │
+        ▼
+  Zig FFI (src/interface/ffi/)
+  ── C-ABI bridge, zero overhead
+        │
+        ▼
+  Ephapax Codegen (src/codegen/)
+  ── emit target-language wrappers
+  ── Rust / C / Zig output
+....
+
+=== Idris2 ABI Layer
+
+The Idris2 ABI layer (`+src/interface/abi/+`) is the formal
+specification:
+
+* `+Types.idr+` — `+LinearResource+`, `+UsageCount+`,
+`+ResourceLifecycle+`, `+ConsumeProof+` — types that express "`this
+resource is used exactly once`"
+* `+Layout.idr+` — memory layout for resource tracking structs, with
+padding and alignment proofs
+* `+Foreign.idr+` — FFI declarations for resource analysis and linearity
+enforcement operations
+
+=== Idris2 Wins Rule
+
+____
+[!IMPORTANT] *When Idris2 proofs conflict with Ephapax linear types,
+Idris2 always wins.*
+
+This is a standing project rule across all hyperpolymath repositories.
+The formally verified Idris2 proofs are the source of truth. If an
+Ephapax wrapper would violate a proven Idris2 invariant, the wrapper
+must be adjusted — never the proof.
+____
+
+=== Zig FFI Layer
+
+The Zig FFI layer (`+src/interface/ffi/+`) implements the C-ABI bridge
+declared by the Idris2 ABI. It provides:
+
+* Resource handle lifecycle (init/free with linearity tracking)
+* Resource consumption operations (use-once semantics enforced)
+* Thread-local error reporting
+* Cross-platform compilation (Linux, macOS, Windows, WASM)
+
+== Use Cases
+
+* *File handle management* — ensure every opened file is closed exactly
+once
+* *Database connections* — prevent connection leaks in pooled
+environments
+* *GPU buffer lifecycle* — allocate, compute, release — no dangling
+buffers
+* *Session tokens* — single-use tokens that cannot be replayed
+* *Crypto key material* — keys consumed on use, then securely zeroised
+* *Network sockets* — no forgotten open connections
+
+== Status
+
+*Codebase in progress.* Architecture defined, Rust CLI scaffolded,
+Idris2 ABI and Zig FFI stubs in place. Resource analysis and Ephapax
+codegen are the active development frontier.
+
+See link:ROADMAP.adoc[ROADMAP] for the full phase plan.
+
+== Quick Start
+
+[source,bash]
+----
+# Initialise a manifest in your project
+ephapaxiser init --path .
+
+# Edit ephapaxiser.toml to describe your resources
+# Then generate wrappers
+ephapaxiser generate --manifest ephapaxiser.toml --output generated/
+
+# Validate your manifest
+ephapaxiser validate --manifest ephapaxiser.toml
+----
+
+== Build
+
+[source,bash]
+----
+cargo build --release
+cargo test
+----
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

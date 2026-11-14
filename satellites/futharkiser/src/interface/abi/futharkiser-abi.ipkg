@@ -1,0 +1,13 @@
+-- SPDX-License-Identifier: MPL-2.0
+package futharkiser-abi
+
+sourcedir = "."
+
+modules = Futharkiser.ABI.Types
+        , Futharkiser.ABI.Layout
+        , Futharkiser.ABI.Foreign
+        , Futharkiser.ABI.Proofs
+        , Futharkiser.ABI.Semantics
+        , Futharkiser.ABI.Invariants
+        , Futharkiser.ABI.FfiSeam
+        , Futharkiser.ABI.Capstone

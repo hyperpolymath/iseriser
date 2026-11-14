@@ -1,0 +1,15 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the oblibeniser ABI formal proofs.
+-- Build/check with:  idris2 --build oblibeniser-abi.ipkg   (from src/interface/abi/)
+package oblibeniser-abi
+
+sourcedir = "."
+
+modules = Oblibeniser.ABI.Types
+        , Oblibeniser.ABI.Layout
+        , Oblibeniser.ABI.Foreign
+        , Oblibeniser.ABI.Proofs
+        , Oblibeniser.ABI.Semantics
+        , Oblibeniser.ABI.Invariants
+        , Oblibeniser.ABI.FfiSeam
+        , Oblibeniser.ABI.Capstone

@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: MPL-2.0
+# atsiser example: safe-malloc
+#
+# Wraps standard C memory allocation (malloc/free/realloc) with ATS2 linear
+# types. After wrapping, the ATS2 type-checker guarantees:
+# - Every malloc'd pointer is freed exactly once
+# - No use-after-free (the linear type is consumed by free)
+# - No double-free (the linear type can only be consumed once)
+# - Borrows (e.g., memcpy, strlen) do not consume the resource
+
+[project]
+name = "safe-malloc"
+version = "0.1.0"
+description = "ATS2 linear type wrappers for malloc/free/realloc"
+output-dir = "generated/ats"
+
+[[c-sources]]
+path = "include/stdlib_subset.h"
+include-dirs = ["include"]
+description = "Subset of stdlib.h with memory allocation functions"
+
+[[ownership-rules]]
+function = "malloc"
+pattern = "alloc"
+resource-type = "void"
+description = "Allocates size bytes; returns pointer that must be freed"
+
+[[ownership-rules]]
+function = "free"
+pattern = "free"
+param-index = 0
+resource-type = "void"
+description = "Deallocates a malloc'd pointer"
+
+[[ownership-rules]]
+function = "realloc"
+pattern = "transfer"
+param-index = 0
+resource-type = "void"
+description = "Transfers ownership: old pointer consumed, new pointer returned"
+
+[[ownership-rules]]
+function = "memcpy"
+pattern = "borrow"
+param-index = 0
+description = "Borrows dest and src pointers for copying"
+
+[ats2]
+patsopt = "patsopt"
+patscc = "patscc"
+flags = ["-DATS_MEMALLOC_LIBC"]
+c-flags = ["-O2", "-Wall"]

@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: MPL-2.0
+# anvomidaviser example — Senior Women's Free Skate Program
+#
+# This manifest describes a realistic senior-level women's free skating
+# program with 7 jump elements, 3 spins, 1 step sequence, and 1
+# choreographic sequence, following ISU 2024-2025 season rules.
+#
+# Usage:
+#   anvomidaviser validate -m examples/competition/anvomidaviser.toml
+#   anvomidaviser generate -m examples/competition/anvomidaviser.toml -o out/
+#   anvomidaviser info -m examples/competition/anvomidaviser.toml
+
+[project]
+name = "senior-womens-free-skate"
+
+[program]
+discipline = "singles"          # singles | pairs | ice-dance
+segment = "free"                # short | free
+level = "senior"                # senior | junior | novice
+
+# --- Jump elements (7 of 7 maximum for free skate) ---
+
+# Opening combination: triple Lutz — triple Toeloop (highest base value combo)
+[[elements]]
+code = "3Lz+3T"
+
+# Solo triple Flip
+[[elements]]
+code = "3F"
+
+# Triple Loop (edge jump)
+[[elements]]
+code = "3Lo"
+
+# Double Axel — double Toeloop combination
+[[elements]]
+code = "2A+2T"
+
+# Solo triple Salchow
+[[elements]]
+code = "3S"
+
+# Second-half: double Axel (1.1x bonus)
+[[elements]]
+code = "2A"
+
+# Second-half: triple Lutz — double Toeloop — double Loop (3-jump combination, 1.1x bonus)
+[[elements]]
+code = "3Lz+2T+2Lo"
+
+# --- Spin elements (3 of 3 maximum) ---
+
+# Change-foot combination spin, level 4
+[[elements]]
+code = "CCoSp4"
+
+# Flying sit spin, level 3
+[[elements]]
+code = "FSSp3"
+
+# Combination spin, level 4
+[[elements]]
+code = "CoSp4"
+
+# --- Step and choreographic sequences ---
+
+# Step sequence, level 3
+[[elements]]
+code = "StSq3"
+
+# Choreographic sequence (fixed base value 3.00)
+[[elements]]
+code = "ChSq1"
+
+[scoring]
+goe-table = "2024-2025"        # ISU scoring season for base value tables

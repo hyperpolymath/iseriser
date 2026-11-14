@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Mylangiser project state
+[metadata]
+project = "mylangiser"
+version = "0.1.0"   # authoritative per Cargo.toml; CHANGELOG.adoc top entry says 0.2.0 (discrepancy unresolved)
+last-updated = "2026-06-05"
+status = "active"
+session = "6a2 state refresh — 2026-06-05"
+
+[project-context]
+name = "Mylangiser"
+purpose = """Generate progressive-disclosure interfaces from complex APIs via My-Lang"""
+completion-percentage = 45
+
+[position]
+phase = "implementation"   # design | implementation | testing | maintenance | archived
+maturity = "alpha"  # experimental | alpha | beta | production | lts
+maturity-note = """Real but incomplete: substantive implementation (Rust CLI/codegen ~1330 LOC across main.rs/manifest/codegen/abi; Idris2 ABI ~863 LOC in Types/Layout/Foreign.idr; Zig FFI ~417 LOC in src/interface/ffi/src/main.zig) plus a working example manifest at examples/simplified-api/mylangiser.toml. "Scaffold" understates it; codegen still in progress."""
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Phase 1 complete — no blockers. Phase 2 requires domain logic implementation.",
+]
+
+[critical-next-actions]
+actions = [
+  "Implement core domain logic in src/core/",
+  "Write first end-to-end example with real input",
+  "Begin Idris2 formal proofs for domain-specific invariants",
+]
+
+[maintenance-status]
+last-run-utc = "2026-06-05T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail
+
+[licence]
+spdx = "MPL-2.0"
+migration = "Migrated from MPL-2.0 to MPL-2.0 (commit ce87d4b)."

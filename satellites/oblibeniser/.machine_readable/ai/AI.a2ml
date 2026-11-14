@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# AI Assistant Instructions for oblibeniser
+
+## Repository Focus
+- `oblibeniser` makes operations reversible and auditable via Oblibeny
+- Core abstraction: ReversibleOperation (forward + inverse + proof)
+- Domain types: InverseProof, AuditEntry, StateSnapshot, UndoStack
+- Follows the -iser pattern: manifest -> Idris2 ABI -> Zig FFI -> codegen
+- All machine-readable content lives under `.machine_readable/` — state files (a2ml), bot directives, and contractiles
+
+## Key Invariants
+- Every ReversibleOperation MUST have a provable inverse
+- Audit trail entries MUST be hash-chained (prevHash links to prior entryHash)
+- UndoStack MUST be bounded (maxDepth prevents unbounded memory growth)
+- InverseProof MUST verify: inverse(forward(x)) = x
+
+## Architecture
+- Rust CLI (src/main.rs) — orchestrates manifest parsing and codegen
+- Idris2 ABI (src/interface/abi/) — formal proofs of reversibility and layout
+- Zig FFI (src/interface/ffi/) — C-ABI bridge with operation recording, audit, undo
+- Codegen (src/codegen/) — generates Oblibeny reversible wrappers
+
+## Workflow
+1. Inspect `.machine_readable/6a2/STATE.a2ml` for blockers and next actions.
+2. Respect any constraints listed inside `.machine_readable/6a2/AGENTIC.a2ml`.
+3. After finishing edits, update STATE with your outcomes and commit with a concise, imperative message.
+
+## Delivery Promises
+- Mention in summaries whether STATE, `.machine_readable/contractiles/`, or `.machine_readable/bot_directives/` changed.
+- Keep this file in sync with the repository's status; update it if the governance changes.

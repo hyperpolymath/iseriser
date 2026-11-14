@@ -1,0 +1,52 @@
+== PROOF-NEEDS.md
+
+=== Current State
+
+* *LOC*: ~6,000
+* *Languages*: Rust, Idris2, Zig
+* *Existing ABI proofs*: `+src/interface/abi/*.idr+` (template-level)
+* *Dangerous patterns*: None detected
+
+=== What Needs Proving
+
+==== Code Generation (src/codegen/)
+
+* Generates typed query code from schemas
+* Prove: generated code is well-typed with respect to the input schema
+* Prove: generated queries are equivalent to the schema specification
+
+==== Plugin System (src/plugins/)
+
+* `+sql.rs+` — SQL code generation
+* `+wasm.rs+` — WASM code generation
+* Prove: SQL generation produces valid SQL that matches the typed query
+semantics
+* Prove: WASM generation preserves query semantics
+
+==== ABI Module (src/abi/)
+
+* Rust ABI module — should have Idris2-backed contracts for type-safe
+FFI
+
+==== Manifest Validation (src/manifest/)
+
+* Schema manifest parsing and validation
+* Prove: manifest parsing is total and produces valid configurations
+
+=== Recommended Prover
+
+* *Idris2* for ABI contracts and codegen correctness specifications
+* *Lean4* alternative for SQL equivalence proofs
+
+=== Priority
+
+*MEDIUM* — Code generator correctness is important but downstream of
+VCL-total and TypeLL. Focus proofs on SQL generation first as it
+directly affects data integrity.
+
+=== Template ABI Cleanup (2026-03-29)
+
+Template ABI removed – was creating false impression of formal
+verification. The removed files (Types.idr, Layout.idr, Foreign.idr)
+contained only RSR template scaffolding with unresolved
+\{\{PROJECT}}/\{\{AUTHOR}} placeholders and no domain-specific proofs.

@@ -1,0 +1,121 @@
+== What Is This?
+
+Eclexiaiser instruments existing code with *energy, carbon, and
+resource-cost tracking* — making the environmental cost of computation a
+first-class concern.
+
+https://github.com/hyperpolymath/eclexia[Eclexia] is one of
+hyperpolymath’s nextgen languages focused on sustainability. It tracks
+resource consumption as a type-level constraint, so developers can write
+carbon-aware software that provably stays within energy budgets.
+Eclexiaiser brings this to any codebase without requiring the developer
+to learn Eclexia directly.
+
+== How It Works
+
+[arabic]
+. *Manifest* (`+eclexiaiser.toml+`) — define your functions and their
+energy budgets, carbon intensity limits, and resource bounds.
+. *Source instrumentation* — eclexiaiser analyses your code and inserts
+energy measurement hooks at function boundaries.
+. *Eclexia annotation codegen* — generates Eclexia constraint files with
+joule annotations (`+@requires+` `+energy+` `+<+` `+5kWh+`), carbon
+intensity bounds, and renewable-aware scheduling hints.
+. *Idris2 ABI proofs* — the generated resource bounds are formally
+verified using dependent types. The Idris2 layer proves that your energy
+budget is satisfiable and that carbon intensity limits compose correctly
+across call chains.
+. *Zig FFI bridge* — high-performance energy measurement via RAPL
+(Running Average Power Limit), IPMI, or external APIs. Zero-overhead
+C-ABI interface for reading hardware energy counters and querying carbon
+intensity services.
+. *Enforcement and reporting* — violations are caught at compile time
+where possible, and at runtime otherwise. Generates sustainability
+reports compatible with the EU Corporate Sustainability Reporting
+Directive (CSRD).
+
+== Key Value
+
+* *Know the carbon cost of every function call* — joule annotations make
+energy consumption visible and enforceable at the type level
+* *Enforce energy budgets* — set per-function and per-module energy
+limits that are checked at compile time via Idris2 dependent type proofs
+* *Generate sustainability reports* — produce CSRD-compatible reports
+showing energy consumption, carbon emissions, and renewable energy
+utilisation
+* *Carbon intensity API integration* — connect to WattTime or
+Electricity Maps to schedule heavy computation when the grid is cleanest
+* *Renewable-aware scheduling* — defer energy-intensive work to periods
+of high renewable generation
+* *Energy type system* — Eclexia’s `+@requires+`/`+@provides+`
+constraints make resource costs explicit and optimisable across the
+entire call graph
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern:
+
+....
+eclexiaiser.toml   (manifest: functions, budgets, carbon limits)
+       |
+       v
+Source instrumentation (insert energy measurement hooks)
+       |
+       v
+Eclexia annotation codegen (@requires energy, @provides carbon_report)
+       |
+       v
+Idris2 ABI (proves resource bounds compose, budgets are satisfiable)
+       |
+       v
+Zig FFI (RAPL/IPMI energy measurement, WattTime/Electricity Maps API)
+       |
+       v
+Sustainability report + enforcement violations
+....
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family].
+
+=== Key Types (Idris2 ABI)
+
+* `+EnergyBudget+` — per-function energy limit in joules, proven
+satisfiable
+* `+CarbonIntensity+` — grams CO2 per kilowatt-hour, sourced from grid
+API
+* `+JouleAnnotation+` — type-level energy annotation for a function
+* `+ResourceBound+` — composite bound (energy + carbon + time + memory)
+* `+SustainabilityReport+` — aggregated metrics with CSRD field mapping
+
+=== Zig FFI Operations
+
+* `+eclexiaiser_measure_energy+` — read hardware energy counters
+(RAPL/IPMI)
+* `+eclexiaiser_query_carbon+` — fetch current carbon intensity from
+grid API
+* `+eclexiaiser_enforce_budget+` — check a measurement against a proven
+bound
+* `+eclexiaiser_generate_report+` — produce a sustainability report
+struct
+
+== Use Cases
+
+* *Green computing* — annotate hotspots, set budgets, prove compliance
+* *Data centre optimisation* — measure per-function energy, identify
+waste
+* *Carbon-aware CI/CD* — skip heavy builds when the grid is dirty;
+schedule nightly jobs when renewables peak
+* *EU CSRD compliance* — generate the energy and emissions data required
+by the Corporate Sustainability Reporting Directive
+* *Cloud cost prediction* — estimate energy costs before deployment
+using the proven energy bounds
+
+== Status
+
+*Codebase in progress.* Scaffold complete (CLI, manifest parser,
+directory structure, CI/CD). Codegen stubs in place. Idris2 ABI and Zig
+FFI templates present — domain-specific types and energy measurement
+logic pending.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

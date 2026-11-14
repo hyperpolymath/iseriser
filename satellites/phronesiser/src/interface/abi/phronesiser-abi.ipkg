@@ -1,0 +1,15 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the phronesiser ABI formal proofs.
+-- Build/check with:  idris2 --build phronesiser-abi.ipkg   (from src/interface/abi/)
+package phronesiser-abi
+
+sourcedir = "."
+
+modules = Phronesiser.ABI.Types
+        , Phronesiser.ABI.Layout
+        , Phronesiser.ABI.Foreign
+        , Phronesiser.ABI.Proofs
+        , Phronesiser.ABI.Semantics
+        , Phronesiser.ABI.Invariants
+        , Phronesiser.ABI.FfiSeam
+        , Phronesiser.ABI.Capstone

@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# PLAYBOOK.a2ml — Operational playbook for mylangiser
+# Runbooks, incident response, deployment procedures.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
+
+[deployment]
+method = "gitops"
+target = "binary"  # Rust CLI binary + Zig shared library
+
+[build-pipeline]
+# 1. cargo build --release        (Rust CLI)
+# 2. cd src/interface/ffi && zig build  (Zig FFI library)
+# 3. cargo test                   (Rust unit tests)
+# 4. cd src/interface/ffi && zig build test  (Zig unit tests)
+
+[incident-response]
+# 1. Check .machine_readable/6a2/STATE.a2ml for current status
+# 2. Review recent commits and CI results
+# 3. Run `just validate` to check RSR compliance
+# 4. Run `just security` to audit for vulnerabilities
+# 5. For layer-generation bugs: check Idris2 proofs in src/interface/abi/
+
+[release-process]
+# 1. Update version in STATE.a2ml, META.a2ml, Cargo.toml, Justfile
+# 2. Run `just release-preflight` (validate + quality + security + maint-hard-pass)
+# 3. Verify Idris2 ABI proofs compile cleanly
+# 4. Run end-to-end test: mylangiser generate on example manifest
+# 5. Tag and push
+# 6. Run `just container-push` if applicable
+
+[maintenance-operations]
+# Baseline audit:    just maint-audit
+# Hard release gate: just maint-hard-pass
+# Permission audit:  just perms-audit
+# ABI verification:  cd src/interface/abi && idris2 --check Types.idr Layout.idr Foreign.idr

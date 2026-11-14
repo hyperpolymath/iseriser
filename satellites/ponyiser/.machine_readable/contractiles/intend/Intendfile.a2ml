@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MPL-2.0
+# Intendfile — Design intent declarations for ponyiser
+# Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+@abstract:
+What ponyiser INTENDS to become. These are bespoke design goals
+specific to the Concurrent systems with reference capability safety domain.
+@end
+
+## Domain-Specific Intent
+
+### capability-inference\n- description: Automatically infer minimal reference capabilities from usage\n- target: Whole-program analysis for optimal capability assignment\n- status: aspiration\n\n### actor-model-generation\n- description: Generate Pony-style actor systems from sequential code\n- target: Automatic parallelisation with provable safety\n- status: aspiration
+
+## Cross-Cutting Intent
+
+### iser-ecosystem-compatibility
+- description: Must interoperate with other -iser projects via shared ABI
+- target: Idris2 ABI + Zig FFI standard interface
+- status: in-progress
+
+### proven-integration
+- description: All formal proofs should be verifiable by the proven framework
+- target: Integration with hyperpolymath/proven
+- status: aspiration

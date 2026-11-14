@@ -1,0 +1,35 @@
+= anvomidaviser - Citation Guide
+:toc:
+
+== BibTeX
+
+[source,bibtex]
+----
+@software{anvomidaviser_2026,
+  author = {Jewell, Jonathan},
+  title = {anvomidaviser},
+  year = {2026},
+  url = {https://github.com/hyperpolymath/anvomidaviser},
+  license = {MPL-2.0}
+}
+----
+
+== Harvard Style
+
+Jewell, JDAJ (2026) _anvomidaviser_ [Computer software]. Available at: https://github.com/hyperpolymath/anvomidaviser
+
+== OSCOLA
+
+Jonathan D.A. Jewell, 'anvomidaviser' (2026) <https://github.com/hyperpolymath/anvomidaviser>
+
+== MLA
+
+Jewell, Jonathan "anvomidaviser." 2026, github.com/hyperpolymath/anvomidaviser.
+
+== APA 7
+
+Jewell, JDAJ (2026). _anvomidaviser_ [Computer software]. GitHub. https://github.com/hyperpolymath/anvomidaviser
+
+== See Also
+
+* link:CITATION.cff[CITATION.cff]

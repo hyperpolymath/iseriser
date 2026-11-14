@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Wokelangiser project state
+[metadata]
+project = "wokelangiser"
+version = "0.1.0"
+last-updated = "2026-06-21"
+status = "active"
+session = "RSR/security hardening + branch-cleanup automation — 2026-06-21"
+
+[project-context]
+name = "Wokelangiser"
+purpose = """Add consent patterns, accessibility annotations, i18n hooks, and cultural sensitivity markers to existing code via WokeLang"""
+completion-percentage = 45
+
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  "Implement src/codegen/* target emission (consent / accessibility / i18n) — currently stubbed",
+  "First end-to-end example: manifest -> validated -> generated wrapper",
+  "Begin Idris2 formal proofs for domain-specific invariants",
+  "Repair upstream hyperpolymath/standards@5a93d9d CI pin (see blockers)",
+]
+
+[blockers-and-issues]
+issues = [
+  "CI: Hypatia, OSSF Scorecard and Rust CI fail because hyperpolymath/standards@5a93d9d pins an unresolvable actions/cache@d4373f... SHA; needs an upstream fix plus a consumer pin bump.",
+  "Codegen (src/codegen/*) is stubbed — the `generate` pipeline is not yet functional end-to-end.",
+]
+
+[critical-next-actions]
+actions = [
+  "Implement core codegen in src/codegen/ (consent.rs, accessibility.rs, i18n.rs)",
+  "Write first end-to-end example with real input",
+  "Bump standards pin once hyperpolymath/standards repairs actions/cache",
+]
+
+[recent-changes]
+# 2026-06-21 session
+changes = [
+  "#34 merged: CodeQL Rust SAST added; scorecard-enforcer de-published; setup.sh `just` installer hardened (pinned + SHA256).",
+  "#35 merged: cleared Hypatia secret false-positives (.envrc / .envrc.example / setup.sh).",
+  "#36 merged: added reusable .github/workflows/branch-cleanup.yml (server-side ref deletion via gh/GITHUB_TOKEN).",
+  "Pruned 9 stale claude/* branches via the new workflow.",
+]
+
+[maintenance-status]
+last-run-utc = "2026-06-21T00:00:00Z"
+last-result = "warn"  # green except upstream standards-pin CI failures

@@ -1,0 +1,111 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Phronesiser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+:source-highlighter: rouge
+
+== What Is This?
+
+**Phronesiser** adds provably safe ethical constraints to AI agent decision-making
+via https://github.com/hyperpolymath/nextgen-languages[Phronesis] -- a nextgen
+language that encodes ethical constraints as formal propositions.
+
+Phronesis (Greek: _phronesis_, practical wisdom) is one of
+hyperpolymath's nextgen languages built on deontic logic (obligations, permissions,
+prohibitions). Phronesiser wraps existing AI agents in mathematically verified
+ethical guardrails, ensuring they can _prove_ they respect boundaries before acting.
+
+== How It Works
+
+[source,text]
+----
+Agent behaviour spec  →  Phronesis constraint compilation  →  Runtime enforcement  →  Audit trail
+----
+
+Define ethical constraints in `phronesiser.toml`. Phronesiser then:
+
+1. **Parses** your agent behaviour specification into a formal constraint model
+2. **Compiles** Phronesis deontic propositions: obligations (_must do X_),
+   permissions (_may do Y_), prohibitions (_must never do Z_)
+3. **Proves** safety properties via Idris2 dependent types at compile time --
+   not just guidelines, mathematical proofs
+4. **Enforces** constraints at runtime through a Zig FFI bridge with zero overhead
+5. **Audits** every decision with a formal justification trail
+
+== Phronesis Constraint Model
+
+Phronesiser operates on four pillars of ethical constraint:
+
+=== Deontic Logic
+Formalises normative concepts:
+
+* **Obligations** -- actions the agent _must_ perform (e.g., "always disclose AI identity")
+* **Permissions** -- actions the agent _may_ perform (e.g., "may access public data")
+* **Prohibitions** -- actions the agent _must never_ perform (e.g., "never recommend self-harm")
+
+=== Value Alignment
+Encodes value hierarchies as partially ordered propositions:
+
+* Safety > Helpfulness > Efficiency
+* User autonomy constraints
+* Fairness and non-discrimination invariants
+
+=== Harm Prevention
+Proactive harm detection with formal severity classification:
+
+* Physical harm boundaries
+* Psychological harm boundaries
+* Financial harm boundaries
+* Privacy violation boundaries
+
+=== Audit Decisions
+Every agent action is wrapped in a decidable proof:
+
+* `Permitted` -- action allowed, proof recorded
+* `Denied` -- action blocked, justification logged
+* `Escalated` -- ambiguous case, deferred to human oversight
+
+== Use Cases
+
+* **AI agent guardrails** -- wrap any LLM-based agent in provably safe constraints
+* **Autonomous vehicle decision boundaries** -- encode trolley-problem-class ethical rules as decidable propositions
+* **Medical AI constraints** -- formal prohibitions on unsupported diagnoses, drug interaction warnings
+* **Content moderation rules** -- deontic obligation/prohibition trees for content classifiers
+* **Financial AI boundaries** -- suitability constraints, regulatory compliance proofs
+* **Robotics safety envelopes** -- physical harm prevention with mathematical guarantees
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern:
+
+[source,text]
+----
+phronesiser.toml  →  Rust CLI  →  Idris2 ABI proof  →  Zig FFI bridge  →  constraint runtime
+----
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family].
+
+== Quick Start
+
+[source,bash]
+----
+# Initialise a constraint manifest
+phronesiser init
+
+# Define constraints in phronesiser.toml, then:
+phronesiser validate
+phronesiser generate
+phronesiser build
+phronesiser run
+----
+
+== Status
+
+**Pre-alpha.** Architecture defined, CLI scaffolded, ABI/FFI stubs in place,
+deontic constraint codegen pending.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

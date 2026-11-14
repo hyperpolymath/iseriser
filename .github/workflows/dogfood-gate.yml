@@ -39,6 +39,9 @@ jobs:
 
       - name: Validate A2ML manifests
         if: steps.detect.outputs.count > 0
+        env:
+          # satellites/ holds whole -iser repos imported as they were (PR #144); owner chose to keep them out of this gate.
+          INPUT_PATHS_IGNORE: satellites/
         run: bash .github/hooks/validate-a2ml.sh
       - name: Write summary
         run: |

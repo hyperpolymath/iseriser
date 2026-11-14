@@ -1,0 +1,121 @@
+== Ponyiser Topology
+
+=== Overview
+
+Ponyiser wraps concurrent code in Pony reference capabilities for
+compile-time data-race freedom. It follows the hyperpolymath -iser
+architecture: TOML manifest in, capability-safe Pony actors out.
+
+=== Data Flow
+
+....
+ponyiser.toml          Rust CLI              Pony Codegen
+(user manifest)  -->  (parse + validate) --> (actors + behaviours)
+                           |                       |
+                           v                       v
+                    Capability Inference     Zig FFI Bridge
+                    (assign iso/val/ref/    (C-ABI interop with
+                     box/trn/tag)            existing code)
+                           |                       |
+                           v                       v
+                    Idris2 ABI Proofs       Generated Output
+                    (subtyping lattice,     (Pony source +
+                     sendability,            FFI bridge +
+                     mailbox layout)         C headers)
+....
+
+=== Module Map
+
+[width="100%",cols="30%,37%,33%",options="header",]
+|===
+|Module |Language |Purpose
+|`+src/main.rs+` |Rust |CLI entry point (init, validate, generate,
+build, run)
+
+|`+src/lib.rs+` |Rust |Library API
+
+|`+src/manifest/+` |Rust |Parse and validate `+ponyiser.toml+`
+
+|`+src/codegen/+` |Rust |Generate Pony actors, behaviours, capability
+annotations
+
+|`+src/abi/+` |Rust |Runtime types mirroring Idris2 ABI definitions
+
+|`+src/interface/abi/Types.idr+` |Idris2 |RefCapability, Actor,
+Behaviour, CausalMessage, CapabilitySubtyping
+
+|`+src/interface/abi/Layout.idr+` |Idris2 |Actor mailbox layout,
+capability-annotated fields, C ABI proofs
+
+|`+src/interface/abi/Foreign.idr+` |Idris2 |FFI declarations: capability
+inference, subtyping, sendability, codegen
+
+|`+src/interface/ffi/src/main.zig+` |Zig |FFI implementation: capability
+lattice, sendability, actor codegen
+
+|`+src/interface/ffi/build.zig+` |Zig |Build configuration for
+shared/static library
+
+|`+src/interface/ffi/test/+` |Zig |Integration tests for capability
+subtyping and sendability
+|===
+
+=== Capability Subtyping Lattice
+
+....
+        iso
+       /   \
+      trn   val
+      |      |
+      ref    |
+       \   /
+        box
+         |
+        tag
+....
+
+* *iso* (top): isolated, exclusive read/write, sendable (consumed)
+* *trn*: transitional, write with read-only aliases, consumed into val
+* *val*: immutable, globally shareable, sendable
+* *ref*: mutable, actor-local only
+* *box*: read-only, actor-local
+* *tag* (bottom): identity-only, always sendable
+
+Sendable across actors: iso (consumed), val, tag. Actor-local only: ref,
+box, trn.
+
+=== Actor Architecture
+
+....
++-------------------+     causal messages     +-------------------+
+|   Actor A         | ----------------------> |   Actor B         |
+|   (private heap)  |   (iso/val/tag only)    |   (private heap)  |
+|                   |                         |                   |
+| fields:           |                         | behaviours:       |
+|   config: val     |                         |   on_receive(     |
+|   state: ref      |                         |     data: iso,    |
+|   logger: tag     |                         |     cfg: val      |
++-------------------+                         |   )               |
+                                              +-------------------+
+....
+
+=== Verification Layers
+
+[arabic]
+. *Idris2 ABI* — proves capability subtyping lattice and sendability at
+the type level
+. *Zig FFI* — runtime checks matching the Idris2 proofs, with
+comprehensive tests
+. *Rust CLI* — validates manifest, invokes inference and codegen
+. *Generated Pony* — Pony compiler itself enforces capabilities on the
+output
+
+=== Integration Points
+
+* *iseriser*: meta-framework that generates -iser scaffolding
+* *proven*: shared Idris2 verified library (potential capability proof
+sharing)
+* *typell*: type theory engine (capability lattice expressible in
+TypeLL)
+* *PanLL*: capability analysis panel, actor graph visualiser
+* *BoJ-server*: cartridge for ponyiser operations

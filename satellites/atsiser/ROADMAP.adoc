@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= atsiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`atsiser.toml`)
+* [x] Codegen stubs
+* [x] Idris2 ABI module stubs
+* [x] Zig FFI bridge stubs
+* [x] README with architecture
+
+== Phase 1: C Source Analysis
+* [ ] Parse C headers with `tree-sitter-c` or `libclang` bindings
+* [ ] Identify allocation patterns — `malloc`/`calloc`/`realloc`/`free` call pairs
+* [ ] Track pointer ownership through function call graphs
+* [ ] Detect buffer access patterns (array indexing, pointer arithmetic, `memcpy`)
+* [ ] Map struct field layouts and nested pointer chains
+* [ ] Build ownership-transfer graph (which function allocates, which frees)
+* [ ] Report unmatched allocations, double-free candidates, dangling pointer risks
+
+== Phase 2: ATS2 Wrapper Generation
+* [ ] Generate `viewtype` annotations for each tracked pointer
+* [ ] Emit `dataviewtype` state machines for resource lifecycles (allocated → borrowed → freed)
+* [ ] Create `arrayview` proofs for buffer bounds from detected array sizes
+* [ ] Generate wrapper function signatures with linear type constraints
+* [ ] Produce `.dats` and `.sats` files with proper ATS2 module structure
+* [ ] Handle struct wrappers — ownership per field, nested struct proof propagation
+
+== Phase 3: Proof Generation
+* [ ] Generate `praxi` axioms for known-safe patterns (e.g., `malloc` followed by null check)
+* [ ] Emit `prfun` proof obligations for ownership transfer across function boundaries
+* [ ] Generate array-bounds proofs using dependent types (`{n:nat | n < len}`)
+* [ ] Produce proof terms for struct field access (field offset + size within allocation)
+* [ ] Validate generated proofs compile under `patsopt` (ATS2 compiler)
+
+== Phase 4: Round-Trip Compilation
+* [ ] Invoke `patsopt` to typecheck generated ATS2 wrappers
+* [ ] Compile ATS2 → C and verify output links against original library
+* [ ] Benchmark: confirm zero overhead (generated C vs. original C)
+* [ ] Test: original test suites pass through ATS2 wrappers unchanged
+* [ ] Emit compilation report — which proofs succeeded, which need manual attention
+
+== Phase 5: Idris2 Meta-Proofs
+* [ ] Prove in Idris2 that the ATS2 wrapper generation preserves C ABI compatibility
+* [ ] Formal proof that ownership graphs are acyclic (no circular ownership)
+* [ ] Prove completeness — every allocation site has a corresponding free proof
+* [ ] Verify buffer-bounds proofs cover all array accesses in the analysed C code
+* [ ] Cross-check Idris2 proofs against ATS2 proof obligations for consistency
+
+== Phase 6: Ecosystem Integration
+* [ ] BoJ-server cartridge for on-demand C → ATS2 wrapping
+* [ ] PanLL panel — visualise ownership graphs, proof coverage, and unsafe gaps
+* [ ] CI/CD integration — run atsiser as a pre-merge check on C repositories
+* [ ] VeriSimDB backing store for analysis results and proof artifacts
+* [ ] Publish to crates.io
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] Integration examples with real-world C libraries (OpenSSL, SQLite, zlib)

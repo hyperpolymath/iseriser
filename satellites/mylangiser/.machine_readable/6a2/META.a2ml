@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# META.a2ml — Mylangiser meta-level information
+[metadata]
+version = "0.1.0"   # authoritative per Cargo.toml; CHANGELOG.adoc top entry says 0.2.0 (discrepancy unresolved)
+last-updated = "2026-06-05"
+
+[project-info]
+license = "MPL-2.0"
+author = "Jonathan D.A. Jewell (hyperpolymath)"
+
+[architecture-decisions]
+decisions = [
+  "Licence migrated from MPL-2.0 to MPL-2.0 (commit ce87d4b).",
+]
+
+[development-practices]
+versioning = "SemVer"
+documentation = "AsciiDoc"
+build-tool = "just"
+
+[maintenance-axes]
+scoping-first = true
+axis-1 = "must > intend > like"
+axis-2 = "corrective > adaptive > perfective"
+axis-3 = "systems > compliance > effects"

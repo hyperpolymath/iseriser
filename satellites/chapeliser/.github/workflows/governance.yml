@@ -1,0 +1,19 @@
+# This workflow is managed by gh actions-lock.
+# SPDX-License-Identifier: MPL-2.0
+# This workflow is managed by gh actions-lock.
+name: Governance
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  governance:
+    uses: hyperpolymath/standards/.github/workflows/governance-reusable.yml@469605210e767ee94d1c7a9c13cb6a1d0a78cad1

@@ -1,0 +1,117 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Ponyiser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+Ponyiser wraps existing concurrent code in https://www.ponylang.io/[Pony's] **reference capability system** — making data races structurally impossible at compile time.
+
+Pony (by Sylvan Clebsch et al.) uses a capability-secure type system with six reference capabilities that guarantee zero data races without locks, mutexes, or garbage collection pauses. Ponyiser brings these guarantees to existing codebases through manifest-driven code generation.
+
+== The Six Reference Capabilities
+
+Pony's type system assigns every reference one of six capabilities:
+
+[cols="1,1,3"]
+|===
+| Capability | Alias | Meaning
+
+| `iso`
+| Isolated
+| Only one reference exists. The holder has exclusive read/write access. Sendable across actors — ownership transfers on send.
+
+| `val`
+| Immutable
+| Globally immutable. Any number of actors can hold `val` references simultaneously. Sendable — no aliasing hazard because nobody can write.
+
+| `ref`
+| Mutable
+| Mutable, but **not sendable**. Confined to the actor that created it. Multiple aliases within the same actor are fine.
+
+| `box`
+| Read-only
+| Read access only. May be an alias of a `ref` (same actor) or a `val` (any actor). Cannot be sent across actor boundaries unless it is also `val`.
+
+| `trn`
+| Transitional
+| Write access, but existing aliases are read-only (`box`). Designed to be consumed into `val` once mutation is complete — enabling safe publish patterns.
+
+| `tag`
+| Identity-only
+| No read, no write. Used to hold a reference for identity comparison or to send actor addresses. Always sendable.
+|===
+
+These six capabilities form a **subtyping lattice**: `iso` is the most restrictive (and most powerful), `tag` is the least. Pony's compiler statically verifies that every reference obeys its capability at every use site.
+
+== How It Works
+
+Describe your concurrent components in `ponyiser.toml`. Ponyiser then:
+
+1. **Analyses** shared state, message-passing patterns, and data flow between concurrent components
+2. **Assigns** the most permissive safe Pony reference capability to each data reference (iso for exclusive ownership, val for shared immutable, ref for actor-local mutable, etc.)
+3. **Generates** Pony actors with correctly annotated behaviours (asynchronous message handlers) and capability-safe field declarations
+4. **Creates** a Zig FFI bridge for interop with your existing code, with C-ABI-compatible types
+5. **Verifies** via the Idris2 ABI layer that the generated capability assignments satisfy Pony's subtyping rules — any violation becomes a compile-time error
+
+The result is lock-free, data-race-free concurrent code backed by formal proofs.
+
+== Pony Concurrency Model
+
+Ponyiser generates code that follows Pony's actor model:
+
+* **Actors** — lightweight concurrent entities, each with a private heap. No shared mutable state between actors.
+* **Behaviours** — asynchronous message handlers on actors. Behaviours execute atomically within an actor (no interleaving).
+* **Causal messaging** — messages between actors are delivered in causal order. If actor A sends message M1 before M2 to actor B, B processes M1 first.
+* **Capability-safe fields** — every field in an actor carries a reference capability. The compiler prevents you from storing a `ref` in a sendable message or sharing an `iso` without consuming it.
+
+== Use Cases
+
+* **Concurrent server code** — wrap request handlers in actors with `iso` request objects and `val` shared config
+* **Actor-based architectures** — model existing producer/consumer or pipeline patterns as Pony actors with capability-safe channels
+* **Real-time systems** — Pony's GC is per-actor and never stops the world; generated code inherits this property
+* **Message-passing pipelines** — chain actors where each stage receives `iso` ownership of data, transforms it, and passes it on
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern (same as https://github.com/hyperpolymath/chapeliser[Chapeliser]):
+
+* **Manifest** (`ponyiser.toml`) — describe WHAT concurrent components you have, their shared state, and message patterns
+* **Idris2 ABI** (`src/interface/abi/`) — formal proofs of capability subtyping correctness and actor mailbox layout
+* **Zig FFI** (`src/interface/ffi/`) — C-ABI bridge between generated Pony code and existing codebase
+* **Codegen** (`src/codegen/`) — generates Pony actors, behaviours, and capability annotations
+* **Rust CLI** — parses manifest, validates capability assignments, generates, builds, runs
+
+User writes zero Pony code. Ponyiser generates everything.
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of acceleration frameworks.
+
+== Quick Start
+
+[source,bash]
+----
+# Initialise a manifest in the current directory
+ponyiser init
+
+# Edit ponyiser.toml to describe your concurrent components
+
+# Validate the manifest
+ponyiser validate
+
+# Generate Pony actors and FFI bridge
+ponyiser generate
+
+# Build and run
+ponyiser build --release
+ponyiser run
+----
+
+== Status
+
+**Pre-alpha.** Architecture defined, CLI scaffolded, ABI types for reference capabilities designed. Codegen pending.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

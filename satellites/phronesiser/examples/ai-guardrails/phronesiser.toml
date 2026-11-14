@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: MPL-2.0
+# phronesiser manifest — AI Guardrails Example
+#
+# This example demonstrates a medical triage AI agent with ethical constraints
+# preventing it from making diagnoses, requiring audit logging, and escalating
+# high-stakes decisions to a human.
+
+[project]
+name = "medical-triage-bot"
+version = "1.0.0"
+description = "Ethical guardrails for an AI-assisted medical triage system"
+
+# Prohibition: the bot must never make a diagnosis directly.
+[[constraints]]
+name = "no-direct-diagnosis"
+kind = "prohibition"
+subject = "agent"
+action = "issue-diagnosis"
+priority = 200
+
+# Prohibition: the bot must not access patient records without consent.
+[[constraints]]
+name = "no-access-without-consent"
+kind = "prohibition"
+subject = "agent"
+action = "access-patient-record"
+condition = "not patient-consent-given"
+priority = 150
+
+# Obligation: the bot must log every interaction for auditability.
+[[constraints]]
+name = "must-log-interaction"
+kind = "obligation"
+subject = "agent"
+action = "write-audit-log"
+priority = 80
+
+# Obligation: the bot must escalate any life-threatening symptom to a human.
+[[constraints]]
+name = "must-escalate-critical"
+kind = "obligation"
+subject = "agent"
+action = "escalate-to-human"
+condition = "symptoms-critical"
+priority = 180
+
+# Permission: the bot may read publicly available medical guidelines.
+[[constraints]]
+name = "can-read-guidelines"
+kind = "permission"
+subject = "agent"
+action = "read-medical-guidelines"
+priority = 10
+
+# Permission: the bot may suggest (not prescribe) over-the-counter remedies.
+[[constraints]]
+name = "can-suggest-otc"
+kind = "permission"
+subject = "agent"
+action = "suggest-otc-remedy"
+condition = "not symptoms-critical"
+priority = 20
+
+[enforcement]
+mode = "strict"
+escalation-threshold = 100
+audit-log = true
+
+[agent]
+name = "triage-assistant"
+capabilities = [
+    "read-medical-guidelines",
+    "suggest-otc-remedy",
+    "write-audit-log",
+    "escalate-to-human",
+    "access-patient-record",
+]

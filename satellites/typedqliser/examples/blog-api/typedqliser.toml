@@ -1,0 +1,25 @@
+# TypedQLiser example: blog API
+# Run: cd examples/blog-api && typedqliser check
+
+[typedql]
+name = "blog-api"
+language = "sql"
+level = 4
+schema-source = "file"
+
+[database]
+target-db = "postgresql"
+schema-file = "schema.json"
+
+[paths]
+queries = ["*.sql"]
+embedding = "standalone"
+
+[output]
+proof-certificates = false
+error-format = "human"
+
+[levels]
+enforce = [1, 2, 3]
+warn = [4]
+skip = [5, 6, 7, 8, 9, 10]

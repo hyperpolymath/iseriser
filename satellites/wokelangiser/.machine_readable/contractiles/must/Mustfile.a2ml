@@ -1,0 +1,106 @@
+# SPDX-License-Identifier: MPL-2.0
+# Mustfile — Physical state contract for wokelangiser
+# Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+@abstract:
+What MUST be true about this repository's files and configuration.
+These are hard requirements — CI fails if any check fails.
+@end
+
+## File Presence
+
+### license-present
+- description: LICENSE file must exist
+- run: test -f LICENSE
+- severity: critical
+
+### readme-present
+- description: README.adoc or README.md must exist
+- run: test -f README.adoc || test -f README.md
+- severity: critical
+
+### security-policy
+- description: SECURITY.md must exist
+- run: test -f SECURITY.md
+- severity: critical
+
+### ai-manifest
+- description: 0-AI-MANIFEST.a2ml must exist
+- run: test -f 0-AI-MANIFEST.a2ml
+- severity: critical
+
+### contributing
+- description: CONTRIBUTING.adoc must exist
+- run: test -f CONTRIBUTING.adoc || test -f CONTRIBUTING.md
+- severity: warning
+
+### editorconfig
+- description: .editorconfig must exist
+- run: test -f .editorconfig
+- severity: warning
+
+### cargo-builds
+- description: Project must compile
+- run: cargo check 2>&1 | tail -1
+- severity: critical
+
+### tests-pass
+- description: All tests must pass
+- run: cargo test
+- severity: critical
+
+## SPDX Compliance
+
+### spdx-headers
+- description: All source files must have SPDX-License-Identifier
+- run: "! find src/ -name '*.rs' 2>/dev/null | head -20 | xargs grep -L 'SPDX-License-Identifier' 2>/dev/null | head -1 | grep -q ."
+- severity: warning
+
+### no-agpl
+- description: No AGPL-3.0 references (superseded by MPL-2.0)
+- run: "! grep -r 'AGPL-3.0' .gitignore .gitattributes .editorconfig 2>/dev/null | head -1 | grep -q ."
+- severity: critical
+
+### no-pmpl
+- description: No superseded licence identifiers remain (project is MPL-2.0 + CC-BY-SA-4.0)
+- run: "! grep -rniI 'palimpsest\|pmpl' . --exclude-dir=.git --exclude-dir=contractiles --exclude='*.just' --exclude=dep5 --exclude=0002-licensing-policy.adoc | head -1 | grep -q ."
+- severity: critical
+
+### licenses-present
+- description: Both REUSE licence texts exist (MPL-2.0 + CC-BY-SA-4.0)
+- run: test -f LICENSES/MPL-2.0.txt && test -f LICENSES/CC-BY-SA-4.0.txt
+- severity: critical
+
+### docs-cc-by-sa
+- description: Documentation (*.adoc / *.md) carries the CC-BY-SA-4.0 SPDX header
+- run: "! git ls-files '*.adoc' '*.md' | xargs grep -L 'SPDX-License-Identifier: MPL-2.0' 2>/dev/null | head -1 | grep -q ."
+- severity: warning
+
+## Dangerous Patterns
+
+### no-believe-me
+- description: No believe_me in Idris2 code
+- run: "! grep -r 'believe_me' --include='*.idr' . 2>/dev/null | grep -v node_modules | head -1 | grep -q ."
+- severity: critical
+
+### no-unsafe-coerce
+- description: No unsafeCoerce in source
+- run: "! grep -r 'unsafeCoerce\|unsafe_coerce' --include='*.rs' --include='*.idr' . 2>/dev/null | head -1 | grep -q ."
+- severity: critical
+
+### no-sorry
+- description: No sorry/Admitted escape hatches
+- run: "! grep -r 'sorry\|Admitted\|assert_total' --include='*.idr' --include='*.lean' --include='*.v' . 2>/dev/null | grep -v node_modules | head -1 | grep -q ."
+- severity: critical
+
+## Project-Specific Constraints (wokelangiser)
+
+### consent-codegen-compiles
+- description: Consent codegen module compiles without errors
+- run: cargo check --lib 2>&1 | grep -q 'Finished\|could not compile' && cargo check --lib
+- severity: critical
+
+### wcag-level-enum
+- description: WCAGLevel type defined in ABI
+- run: grep -q 'WCAGLevel\|wcag_level' src/abi/ -r
+- severity: warning

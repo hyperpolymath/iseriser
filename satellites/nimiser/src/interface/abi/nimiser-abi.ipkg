@@ -1,0 +1,4 @@
+-- SPDX-License-Identifier: MPL-2.0
+package nimiser-abi
+sourcedir = "."
+modules = Nimiser.ABI.Types, Nimiser.ABI.Layout, Nimiser.ABI.Foreign, Nimiser.ABI.Proofs

@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= betlangiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`betlangiser.toml`)
+* [x] Codegen stubs
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI bridge stubs
+* [x] README with architecture
+
+== Phase 1: Deterministic Analysis
+* [ ] Source scanner -- identify numeric literals, constants, named values
+* [ ] Boolean condition detector -- find if/else, match, ternary expressions
+* [ ] Decision point mapper -- trace control flow that depends on uncertain values
+* [ ] Value dependency graph -- which outputs depend on which inputs
+* [ ] Language adapters -- Rust, AffineScript, Gleam source parsing
+* [ ] Integration tests with real-world codebases
+
+== Phase 2: Distribution Wrapping
+* [ ] Distribution annotation DSL in `betlangiser.toml`
+* [ ] Normal, Uniform, Beta, Bernoulli distribution codegen
+* [ ] Custom distribution support (user-defined PDF/CDF)
+* [ ] Parameter validation (e.g. stddev > 0, 0 <= p <= 1)
+* [ ] 14 number system selection based on precision requirements
+* [ ] Betlang wrapper generation with ternary bet semantics
+* [ ] Round-trip: deterministic source -> annotated manifest -> Betlang output
+
+== Phase 3: Propagation Engine
+* [ ] Arithmetic propagation -- uncertainty through +, -, *, /
+* [ ] Comparison propagation -- uncertain comparisons yield TernaryBool
+* [ ] Control flow propagation -- if/else with unknown conditions
+* [ ] Loop propagation -- accumulation of uncertainty across iterations
+* [ ] Monte Carlo sampling engine (configurable sample count)
+* [ ] Analytical inference where distributions have closed-form combinations
+* [ ] Confidence interval computation and reporting
+
+== Phase 4: Ternary Logic
+* [ ] TernaryBool type: True / False / Unknown
+* [ ] Kleene three-valued logic operators (AND, OR, NOT)
+* [ ] Unknown propagation rules through conditionals
+* [ ] Threshold-based collapse: Unknown -> True/False at confidence level
+* [ ] Ternary decision trees -- branch on all three values
+* [ ] Integration with Betlang bet semantics (wager, evidence, posterior)
+
+== Phase 5: Idris2 Proofs
+* [ ] Prove distribution parameter validity (dependent types)
+* [ ] Prove Kolmogorov axioms for composed distributions
+* [ ] Prove support bounds (distribution output ranges)
+* [ ] Prove propagation correctness (arithmetic on distributions)
+* [ ] Prove ternary logic truth tables match Kleene algebra
+* [ ] Prove sample buffer layout correctness (memory safety)
+* [ ] Prove confidence interval coverage guarantees
+
+== Phase 6: Ecosystem
+* [ ] BoJ-server cartridge for betlangiser
+* [ ] Monte Carlo visualisation panel in PanLL
+* [ ] Distribution comparison panel (overlay PDFs, CDFs)
+* [ ] Sensitivity analysis -- which uncertain inputs matter most
+* [ ] VeriSimDB backing store for simulation results
+* [ ] Publish to crates.io
+* [ ] Integration with other -isers (e.g. chapeliser for distributed Monte Carlo)

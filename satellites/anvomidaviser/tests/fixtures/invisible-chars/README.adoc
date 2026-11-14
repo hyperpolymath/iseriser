@@ -1,0 +1,35 @@
+= Invisible Character Test Fixtures
+
+Test files for the invisible character detection gate (empty-linter).
+
+== File Inventory
+
+=== Clean Files (Should NOT be flagged)
+
+* `clean.rs` — No invisible characters at all
+* `legitimate-whitespace.rs` — Tabs, newlines, spaces (all legitimate)
+
+=== Files with C0 Control Characters (BLOCKING - corruption)
+
+* `nul-byte.rs` — Contains NUL byte (\x00)
+* `backspace.rs` — Contains backspace (\x08)
+* `vertical-tab.rs` — Contains vertical tab (\x0B)
+* `form-feed.rs` — Contains form feed (\x0C)
+* `escape.rs` — Contains escape character (\x1B)
+
+=== Files with Leading BOM (BLOCKING - see CI gate rule)
+
+* `leading-bom.rs` — UTF-8 BOM at file start (EF BB BF / U+FEFF)
+
+== Usage
+
+These fixtures are used to test the invisible character detection in `.github/workflows/dogfood-gate.yml`.
+
+The gate distinguishes:
+
+* *BLOCKING*: C0 control characters (\x00-\x08, \x0B, \x0C, \x0E-\x1F) and leading BOM
+* *ADVISORY*: Other invisible Unicode (NBSP, zero-width marks, BOM not at file start)
+
+== Notes
+
+The leading BOM check enforces byte-wise detection to catch UTF-8 BOM (EF BB BF) at position zero, as it can cause parser issues in some tools and is not needed for UTF-8 files.

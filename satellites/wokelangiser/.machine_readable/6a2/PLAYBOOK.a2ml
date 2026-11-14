@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# PLAYBOOK.a2ml — Operational playbook for wokelangiser
+# Runbooks, incident response, deployment procedures.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-06-21"
+
+[deployment]
+method = "ci-triggered"
+target = "binary"  # Rust CLI binary + Zig shared library
+artifacts = ["wokelangiser (CLI)", "libwokelangiser.so (FFI)"]
+
+[incident-response]
+# 1. Check .machine_readable/6a2/STATE.a2ml for current status
+# 2. Review recent commits and CI results
+# 3. Run `just validate` to check compliance
+# 4. Run `just security` to audit for vulnerabilities
+# 5. Verify ABI-FFI consistency: struct sizes in Layout.idr match main.zig
+# 6. Run Zig tests: `cd src/interface/ffi && zig build test`
+
+[release-process]
+# 1. Update version in STATE.a2ml, META.a2ml, Cargo.toml, main.zig VERSION
+# 2. Run `just release-preflight` (validate + quality + security + maint-hard-pass)
+# 3. Verify consent state machine tests pass (Zig + integration)
+# 4. Verify contrast ratio tests match W3C reference values
+# 5. Optional local permission hardening: `just perms-snapshot && just perms-lock`
+# 6. Tag and push
+# 7. Restore local permissions if needed: `just perms-restore`
+# 8. Run `just container-push` if applicable
+
+[maintenance-operations]
+# Baseline audit:
+#   just maint-audit
+# Hard release gate:
+#   just maint-hard-pass
+# Permission audit:
+#   just perms-audit
+# ABI-FFI consistency check:
+#   Compare struct sizes: ConsentRecord=24B, AccessibilityRecord=32B, I18nRecord=24B
+
+[branch-cleanup]
+# The development git proxy returns HTTP 403 on `git push --delete`, so stale
+# branches cannot be removed from a clone. Delete them server-side instead via
+# the reusable workflow, which calls the GitHub REST API with GITHUB_TOKEN on the
+# runner (bypassing the proxy):
+#   Actions -> "Branch Cleanup" -> Run workflow
+#     branches = "claude/foo claude/bar"   (space-separated)
+#     dry_run  = true   (preview first; set false to actually delete)
+workflow = ".github/workflows/branch-cleanup.yml"
+trigger = "workflow_dispatch"
+dry-run-default = true
+protected = ["main", "cicd/codeql-cron-monthly", "estate-standardization-20260607"]

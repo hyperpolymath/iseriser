@@ -1,0 +1,11 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the tlaiser ABI formal proofs.
+-- Build/check with:  idris2 --build tlaiser-abi.ipkg   (from src/interface/abi/)
+package tlaiser-abi
+
+sourcedir = "."
+
+modules = Tlaiser.ABI.Types
+        , Tlaiser.ABI.Layout
+        , Tlaiser.ABI.Foreign
+        , Tlaiser.ABI.Proofs

@@ -1,0 +1,163 @@
+https://github.com/sponsors/hyperpolymath[image:https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?logo=github[Sponsor]]
+
+== What Is This?
+
+Betlangiser analyses deterministic code, identifies values that should
+be probabilistic, wraps them in *Betlang distributions*, and generates
+*uncertainty-propagating code*. Turn `+price+` `+=+` `+100+` into
+`+price+` `+=+` `+Normal(100,+` `+5)+` with automatic propagation
+through arithmetic and control flow — without rewriting your codebase.
+
+Betlang is a ternary probabilistic programming language where every
+boolean becomes *true / false / unknown*, enabling reasoning under
+genuine uncertainty rather than forcing premature binary decisions.
+
+== How It Works
+
+[arabic]
+. You write a `+betlangiser.toml+` manifest declaring which values are
+uncertain
+. Betlangiser *analyses your deterministic source* to find numeric
+values, boolean conditions, and decision points
+. The *Idris2 ABI layer* proves that distribution compositions are
+mathematically correct (Kolmogorov axioms, support bounds, parameter
+validity)
+. The *Zig FFI bridge* provides zero-overhead C-ABI sampling and
+combination
+. The *codegen engine* emits Betlang wrappers with ternary bet semantics
+. You get *probability distributions*, not point estimates
+
+== Key Value
+
+* *Retrofit uncertainty* — add probabilistic modelling to existing code
+without a rewrite
+* *Ternary logic* — every boolean becomes true/false/unknown,
+propagating uncertainty through conditionals and loops
+* *Distribution types* — Normal, Uniform, Beta, Bernoulli, and custom
+distributions as first-class values
+* *Proven correctness* — Idris2 dependent types prove distribution
+composition obeys Kolmogorov axioms at compile time
+* *14 number systems* — from exact rationals to fuzzy intervals, matched
+to precision requirements
+* *Automatic propagation* — uncertainty flows through arithmetic,
+comparisons, and control flow without manual instrumentation
+
+== Use Cases
+
+* *Financial modelling* — model price uncertainty, risk distributions,
+portfolio Monte Carlo
+* *Sensor fusion* — combine noisy readings with known error
+distributions
+* *Risk assessment* — propagate uncertainty through decision trees
+* *Monte Carlo pipelines* — generate full simulation harnesses from
+deterministic code
+* *Scientific computing* — add measurement uncertainty to numerical
+models
+
+== Architecture
+
+Follows the hyperpolymath *-iser pattern*:
+
+....
+betlangiser.toml (manifest)
+  -> Deterministic source analysis
+    -> Idris2 ABI (proves distribution correctness)
+      -> Zig FFI (C-ABI sampling bridge)
+        -> Betlang codegen (uncertainty-propagating wrappers)
+....
+
+=== Idris2 ABI Layer
+
+* `+Types.idr+` — Distribution, TernaryBool, ProbabilityValue,
+ConfidenceInterval, SamplingStrategy
+* `+Layout.idr+` — Distribution struct memory layout, sample buffer
+layout
+* `+Foreign.idr+` — Distribution creation, sampling, combination,
+ternary logic FFI declarations
+
+=== Zig FFI Bridge
+
+* `+main.zig+` — Distribution allocation, sampling engine, combination
+operators, ternary logic evaluation
+* `+build.zig+` — Shared/static library build, cross-compilation
+* `+test/integration_test.zig+` — ABI compliance tests
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family].
+
+== CLI Commands
+
+[source,bash]
+----
+# Initialise a new manifest
+betlangiser init
+
+# Validate manifest
+betlangiser validate -m betlangiser.toml
+
+# Generate Betlang wrappers and FFI bridge
+betlangiser generate -m betlangiser.toml -o generated/betlangiser
+
+# Build generated artifacts
+betlangiser build -m betlangiser.toml --release
+
+# Run the workload
+betlangiser run -m betlangiser.toml
+
+# Show manifest info
+betlangiser info -m betlangiser.toml
+----
+
+== Example Manifest
+
+[source,toml]
+----
+[workload]
+name = "pricing-model"
+description = "Add uncertainty to deterministic pricing"
+
+[sources]
+paths = ["src/pricing.rs"]
+
+[distributions]
+# Wrap a deterministic value in a normal distribution
+[[distributions.wrap]]
+target = "base_price"
+distribution = "Normal"
+params = { mean = 100.0, stddev = 5.0 }
+
+[[distributions.wrap]]
+target = "demand_factor"
+distribution = "Uniform"
+params = { low = 0.8, high = 1.2 }
+
+[[distributions.wrap]]
+target = "is_peak_season"
+distribution = "Bernoulli"
+params = { p = 0.3 }
+
+[propagation]
+strategy = "monte-carlo"
+samples = 10000
+confidence = 0.95
+
+[output]
+format = "betlang"
+ternary-logic = true
+----
+
+== Building
+
+[source,bash]
+----
+cargo build --release
+cargo test
+----
+
+== Status
+
+*Pre-alpha.* Architecture defined, CLI scaffolded, ABI definitions in
+progress. Codegen engine pending.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= typedqliser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD
+* [x] CLI with subcommands
+* [x] Manifest parser
+* [x] Codegen stubs
+* [x] ABI module stubs
+* [x] README with architecture
+
+== Phase 1: Core Implementation
+* [ ] Implement target-language-specific code generation
+* [ ] Write Idris2 ABI proofs for core invariants
+* [ ] Build Zig FFI bridge
+* [ ] First working end-to-end example
+* [ ] Integration tests
+
+== Phase 2: Polish
+* [ ] Error messages and diagnostics
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] CI/CD for the generated artifacts
+* [ ] Performance benchmarks
+* [ ] Additional examples
+
+== Phase 3: Ecosystem
+* [ ] PanLL panel integration
+* [ ] BoJ-server cartridge
+* [ ] VeriSimDB backing store for results
+* [ ] Publish to crates.io

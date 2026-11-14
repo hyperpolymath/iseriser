@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: MPL-2.0
+[package]
+name = "phronesiser"
+version = "0.1.0"
+edition = "2024"
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
+description = "Add provably safe ethical constraints to AI agent decision-making via Phronesis"
+license = "MPL-2.0"
+repository = "https://github.com/hyperpolymath/phronesiser"
+keywords = ["ethics", "deontic-logic", "ai-safety", "constraints", "formal-verification"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+toml = "1.1"
+anyhow = "1"
+thiserror = "2"
+handlebars = "6"
+walkdir = "2"
+chrono = { version = "0.4", features = ["serde"] }
+serde_json = "1"
+
+[dev-dependencies]
+tempfile = "3"

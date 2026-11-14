@@ -1,0 +1,140 @@
+https://github.com/sponsors/hyperpolymath[image:https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?logo=github[Sponsor]]
+
+== What Is This?
+
+ATSiser analyses C source code, identifies memory-critical patterns
+(malloc/free pairs, buffer accesses, pointer arithmetic, struct
+ownership), and generates *ATS2 wrappers* with linear type annotations
+that enforce memory safety at compile time — then compiles those
+wrappers back to C with zero runtime overhead.
+
+https://www.cs.bu.edu/~hwxi/atslangweb/[ATS] (Applied Type System) by
+Hongwei Xi at Boston University provides linear types, dependent types,
+and theorem proving while compiling to C. ATSiser uses ATS2’s
+`+viewtype+` and `+dataviewtype+` constructs to express pointer
+ownership, array bounds, and proof obligations over existing C
+interfaces — *without rewriting the original C code*.
+
+== How It Works
+
+Describe your C interface in `+atsiser.toml+`. ATSiser:
+
+[arabic]
+. *Parses C headers* — identifies allocation sites, pointer ownership
+patterns, buffer accesses, and struct field layouts
+. *Generates ATS2 wrappers* — creates `+viewtype+` annotations for
+pointer ownership, `+arrayview+` proofs for buffer bounds, and
+`+dataviewtype+` encodings for resource lifecycles
+. *Emits proof obligations* — generates ATS2 proof terms (`+praxi+`,
+`+prfun+`) that the ATS2 compiler checks at compile time
+. *Compiles to C* — ATS2 erases all proofs during compilation, producing
+C code with identical performance to the original
+. *Bridges via Zig FFI* — integration layer for non-C consumers
+
+=== Example Manifest
+
+[source,toml]
+----
+[workload]
+name = "my-legacy-lib"
+description = "Harden libfoo with linear type safety"
+
+[source]
+headers = ["include/foo.h", "include/bar.h"]
+sources = ["src/*.c"]
+
+[analysis]
+track-allocations = true        # Follow malloc/free pairs
+track-buffers = true            # Bound-check array accesses
+track-ownership = true          # Prove pointer ownership transfer
+
+[output]
+ats2-wrappers = "generated/ats2/"
+c-headers = "generated/abi/"
+proofs = "generated/proofs/"
+----
+
+== Key Value
+
+* *Memory safety for legacy C* — no rewrites, no new runtime, no garbage
+collector
+* *Zero runtime overhead* — ATS2 proofs are erased at compile time;
+generated C is identical in performance to handwritten C
+* *Gradual adoption* — wrap critical functions first, expand coverage
+over time
+* *Formal guarantees* — no leaks, no use-after-free, no double-free, no
+out-of-bounds access — all proven at compile time via linear types
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern:
+
+* *Manifest* (`+atsiser.toml+`) — describe WHAT C code you want hardened
+* *C Source Analysis* (`+src/core/+`) — parse headers, identify
+allocation patterns, track pointer ownership through call graphs
+* *Idris2 ABI* (`+src/interface/abi/+`) — formal proofs that the
+generated wrappers correctly model memory safety properties (ownership
+transfer, buffer bounds, allocation/deallocation pairing)
+* *Zig FFI* (`+src/interface/ffi/+`) — C-ABI bridge for integration with
+non-C consumers
+* *ATS2 Codegen* (`+src/codegen/+`) — generates ATS2 source with
+`+viewtype+`, `+dataviewtype+`, `+praxi+`, and `+prfun+` annotations
+* *Rust CLI* (`+src/main.rs+`) — orchestrates analysis, generation, and
+compilation
+
+User writes zero ATS2 code. ATSiser generates everything from the
+manifest and C source analysis.
+
+=== ATS2 Concepts Used
+
+* *viewtype* — linear types that track pointer ownership; consuming a
+`+viewtype+` value proves the pointer was freed exactly once
+* *dataviewtype* — algebraic data types with linear semantics for
+modelling resource states (allocated, borrowed, freed)
+* *arrayview* — dependent-type proofs that array accesses are within
+bounds
+* *praxi / prfun* — proof-level functions that establish safety
+invariants without generating any runtime code
+
+== CLI Commands
+
+[source,bash]
+----
+# Initialise a new manifest
+atsiser init
+
+# Validate manifest and C sources
+atsiser validate -m atsiser.toml
+
+# Analyse C code and generate ATS2 wrappers
+atsiser generate -m atsiser.toml -o generated/atsiser
+
+# Build generated artifacts (ATS2 → C compilation)
+atsiser build -m atsiser.toml
+
+# Show analysis summary
+atsiser info -m atsiser.toml
+----
+
+== Use Cases
+
+* *Legacy C library hardening* — wrap libc, OpenSSL, or custom C
+libraries with compile-time memory safety proofs
+* *Embedded systems safety* — add formal guarantees to
+resource-constrained C code without any runtime cost
+* *Gradual migration from C to safe C* — incrementally wrap functions,
+building a safety envelope around existing codebases
+* *Compliance* — generate machine-checkable proofs of memory safety for
+safety-critical or regulated codebases
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of
+acceleration frameworks.
+
+== Status
+
+*Codebase in progress.* Architecture defined, CLI scaffolded, codegen
+and C source analysis pending implementation.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0

@@ -1,0 +1,9 @@
+-- SPDX-License-Identifier: MPL-2.0
+package mylangiser-abi
+
+sourcedir = "."
+
+modules = Mylangiser.ABI.Types
+        , Mylangiser.ABI.Layout
+        , Mylangiser.ABI.Foreign
+        , Mylangiser.ABI.Proofs

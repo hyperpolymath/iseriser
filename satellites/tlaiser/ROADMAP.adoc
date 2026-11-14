@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+= tlaiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`tlaiser.toml`)
+* [x] Codegen stubs
+* [x] ABI module stubs (Idris2 + Zig)
+* [x] README with architecture and TLA+ concepts
+
+== Phase 1: State Machine Extraction
+* [ ] Parse Rust source to extract state machine patterns (enum + match arms)
+* [ ] Parse state transition tables from `tlaiser.toml` manifest
+* [ ] Build internal state machine IR (states, transitions, guards, actions)
+* [ ] Support common patterns: request/response, lock/unlock, publish/subscribe
+* [ ] State machine validation: reachability, determinism, completeness checks
+
+== Phase 2: TLA+/PlusCal Code Generation
+* [ ] Generate PlusCal `algorithm` blocks from state machine IR
+* [ ] Generate TLA+ `VARIABLES`, `Init`, `Next` from transition tables
+* [ ] Generate safety invariants (□ always): mutual exclusion, no-deadlock, type-correctness
+* [ ] Generate liveness properties (◇ eventually): progress, termination, response
+* [ ] Generate fairness conditions (weak/strong fairness per process)
+* [ ] Generate temporal ordering (↝ leads-to) from manifest declarations
+* [ ] TLC configuration file generation (model constraints, symmetry sets)
+
+== Phase 3: TLC Integration
+* [ ] Invoke TLC model checker on generated specs
+* [ ] Parse TLC output: state count, depth, violations
+* [ ] Format counterexample traces as human-readable step sequences
+* [ ] Support TLC tuning: worker threads, state space limits, simulation mode
+* [ ] Incremental checking: re-check only changed specifications
+
+== Phase 4: Idris2 ABI Proofs
+* [ ] `StateMachine` type with dependent-type state space bounds
+* [ ] `TemporalFormula` GADTs for □/◇/↝ with well-formedness proofs
+* [ ] `SafetyProperty` and `LivenessProperty` with composability proofs
+* [ ] `Invariant` type ensuring invariants reference valid state variables
+* [ ] `ModelCheckResult` with verified counterexample trace indexing
+* [ ] Zig FFI bridge: state extraction, TLA+ codegen calls, TLC execution
+
+== Phase 5: Polish and Diagnostics
+* [ ] Rich error messages: "state X is unreachable", "invariant Y references unknown variable"
+* [ ] Counterexample visualisation: state graph with violation path highlighted
+* [ ] Shell completions (bash, zsh, fish)
+* [ ] Performance benchmarks for extraction and generation
+* [ ] Example gallery: Raft, 2PC, dining philosophers, producer-consumer
+
+== Phase 6: Ecosystem Integration
+* [ ] PanLL panel: interactive state machine explorer and model checker dashboard
+* [ ] BoJ-server cartridge: `tlaiser` as MCP tool
+* [ ] VeriSimDB backing store: persist model check results with provenance
+* [ ] CI/CD integration: `tlaiser check` as a GitHub Action
+* [ ] Publish to crates.io
+* [ ] Integration with `proven` for shared verified primitives

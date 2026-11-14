@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Phronesiser Roadmap
+:toc:
+:icons: font
+
+== Phase 0: Scaffold (COMPLETE)
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] Manifest parser (`phronesiser.toml`)
+* [x] Codegen stubs
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI bridge stubs
+* [x] README with architecture
+
+== Phase 1: Deontic Core
+* [ ] Define `DeonticModality` type (obligation, permission, prohibition) in Idris2 ABI
+* [ ] Implement `EthicalConstraint` with formal propositions
+* [ ] Implement `ValueAlignment` partial ordering in Idris2
+* [ ] Implement `HarmPrevention` severity classification
+* [ ] Build `AuditDecision` decidable proof type (permitted/denied/escalated)
+* [ ] Zig FFI: constraint evaluation engine
+* [ ] Rust codegen: Phronesis constraint compilation from TOML
+* [ ] First working end-to-end example: AI agent with deontic guardrails
+* [ ] Integration tests for constraint compilation and enforcement
+
+== Phase 2: Constraint Language
+* [ ] TOML-to-Phronesis constraint compilation pipeline
+* [ ] Obligation/permission/prohibition rule syntax
+* [ ] Value hierarchy definition syntax
+* [ ] Harm prevention boundary syntax
+* [ ] Constraint composition (AND, OR, conditional, temporal)
+* [ ] Constraint conflict detection (obligation vs prohibition)
+* [ ] Error messages and diagnostics for malformed constraints
+
+== Phase 3: Runtime Enforcement
+* [ ] Runtime constraint checker with zero-copy evaluation
+* [ ] Audit trail generation (structured JSON logs)
+* [ ] Escalation hooks for ambiguous cases
+* [ ] Performance benchmarks (constraint evaluation latency)
+* [ ] Hot-reload of constraint sets without restart
+
+== Phase 4: Agent Integration
+* [ ] LLM agent wrapper (pre-action constraint check)
+* [ ] Post-action audit verification
+* [ ] Multi-agent constraint propagation
+* [ ] Agent-specific constraint scoping
+* [ ] Shell completions (bash, zsh, fish)
+
+== Phase 5: Formal Verification
+* [ ] Prove constraint soundness (no contradictory obligations/prohibitions)
+* [ ] Prove completeness (all agent actions covered by at least one rule)
+* [ ] Prove monotonicity (adding constraints never weakens safety)
+* [ ] Cross-platform ABI verification
+
+== Phase 6: Ecosystem
+* [ ] PanLL panel for constraint visualisation and editing
+* [ ] BoJ-server cartridge for constraint management
+* [ ] VeriSimDB backing store for audit trails
+* [ ] Publish to crates.io
+* [ ] Example library: medical AI constraints
+* [ ] Example library: autonomous vehicle constraints
+* [ ] Example library: content moderation constraints
