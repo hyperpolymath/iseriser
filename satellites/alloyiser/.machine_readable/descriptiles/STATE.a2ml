@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Alloyiser project state
+[metadata]
+project = "alloyiser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
+
+[project-context]
+name = "Alloyiser"
+purpose = """Extract formal models from API specs (OpenAPI/GraphQL/gRPC) and verify invariants with the Alloy Analyzer via SAT solving"""
+completion-percentage = 45
+
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
+
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
+
+[blockers-and-issues]
+issues = [
+  "Alloy Analyzer (Java) not installed on dev machine — .als output verified by structure",
+]
+
+[critical-next-actions]
+actions = [
+  "Add GraphQL and gRPC parsers for multi-format support",
+  "Write Idris2 proofs for model extraction correctness",
+  "Create petstore.yaml end-to-end example with Alloy verification",
+]
+
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail

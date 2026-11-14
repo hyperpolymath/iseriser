@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# PLAYBOOK.a2ml — Operational playbook for alloyiser
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-03-21"
+
+[deployment]
+method = "binary"  # alloyiser ships as a Rust binary; Alloy JAR is a runtime dependency
+target = "binary"  # container | binary | library | wasm
+# Container deployment also available via Containerfile (includes JVM + Alloy JAR)
+
+[runtime-dependencies]
+# Alloy Analyzer requires a JVM (Java 11+)
+# alloyiser invokes java -jar alloy6.jar in headless mode
+# Users can set ALLOY_JAR environment variable or configure in alloyiser.toml
+
+[incident-response]
+# 1. Check .machine_readable/descriptiles/STATE.a2ml for current status
+# 2. Review recent commits and CI results
+# 3. Run `just validate` to check compliance
+# 4. Run `just assail` to run panic-attacker pre-commit scan
+# 5. If Alloy codegen produces invalid .als: check src/codegen/ templates
+# 6. If SAT solver times out: reduce scope in alloyiser.toml
+
+[release-process]
+# 1. Update version in STATE.a2ml, META.a2ml, Cargo.toml, Justfile
+# 2. Run `just quality` (format + lint + test)
+# 3. Run `just assail` (panic-attacker pre-commit scan)
+# 4. Tag and push
+# 5. Mirrors propagate to GitLab and Bitbucket automatically
+
+[maintenance-operations]
+# Baseline audit: just quality
+# Pre-commit scan: just assail
+# Container build: podman build -f Containerfile -t alloyiser .
