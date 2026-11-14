@@ -1,0 +1,50 @@
+== TOPOLOGY.md — tlaiser
+
+=== Purpose
+
+tlaiser extracts state machine descriptions from declarative manifest
+definitions and model-checks them using TLA+ (Leslie Lamport’s Temporal
+Logic of Actions) and PlusCal. It generates TLA+ specs, PlusCal
+algorithms, and TLC model checker configurations, then invokes TLC to
+exhaustively explore all reachable system states. tlaiser is aimed at
+engineers who need to verify concurrent and distributed system designs
+without writing TLA+ by hand.
+
+=== Module Map
+
+....
+tlaiser/
+├── src/
+│   ├── main.rs                    # CLI entry point (clap): init, validate, generate, build, run, info
+│   ├── lib.rs                     # Library API
+│   ├── manifest/mod.rs            # tlaiser.toml parser
+│   ├── codegen/mod.rs             # TLA+ spec, PlusCal, and TLC config generation
+│   └── ...                        # [WIP] state machine analysis modules
+├── examples/                      # Worked examples
+├── verification/                  # Proof harnesses
+├── container/                     # Stapeln container ecosystem
+└── .machine_readable/             # A2ML metadata
+....
+
+=== Data Flow
+
+....
+tlaiser.toml manifest
+        │
+   ┌────▼────┐
+   │ Manifest │  parse + validate state machine definitions
+   │  Parser  │
+   └────┬────┘
+        │  validated state machine config
+   ┌────▼────┐
+   │ Analyser │  enumerate states, transitions, invariants
+   └────┬────┘
+        │  intermediate representation
+   ┌────▼────┐
+   │ Codegen  │  emit generated/tlaiser/ (.tla, .cfg, PlusCal)
+   └────┬────┘
+        │  TLA+ specs + TLC config
+   ┌────▼────┐
+   │   TLC    │  model checker: exhaustive state-space exploration
+   └─────────┘
+....

@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: MPL-2.0
+# Intendfile — Design intent declarations for tlaiser
+# Author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+@abstract:
+What tlaiser INTENDS to become. These are bespoke design goals
+specific to the State machine extraction and formal model checking domain.
+@end
+
+## Domain-Specific Intent
+
+### live-model-checking\n- description: Continuous model checking as code changes (CI integration)\n- target: Incremental TLC runs on diff\n- status: aspiration\n\n### counterexample-replay\n- description: Turn TLC counterexamples into executable test cases\n- target: Automatic regression tests from spec violations\n- status: aspiration
+
+## Cross-Cutting Intent
+
+### iser-ecosystem-compatibility
+- description: Must interoperate with other -iser projects via shared ABI
+- target: Idris2 ABI + Zig FFI standard interface
+- status: in-progress
+
+### proven-integration
+- description: All formal proofs should be verifiable by the proven framework
+- target: Integration with hyperpolymath/proven
+- status: aspiration

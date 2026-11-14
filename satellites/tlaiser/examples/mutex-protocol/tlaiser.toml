@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: MPL-2.0
+# Mutex protocol example for tlaiser.
+#
+# This demonstrates a simple mutual exclusion protocol with two processes
+# competing for a shared lock. The key properties verified are:
+# - Safety: at most one process is in the critical section at any time.
+# - Liveness: every waiting process eventually enters the critical section.
+#
+# Run: tlaiser generate -m examples/mutex-protocol/tlaiser.toml -o generated/mutex
+
+[project]
+name = "mutex-protocol"
+version = "1.0.0"
+description = "Mutual exclusion protocol — two processes, one lock"
+
+[[state-machines]]
+name = "MutexProtocol"
+states = ["Idle", "Waiting", "Critical"]
+initial-state = "Idle"
+description = "A process lifecycle in the mutex protocol"
+
+  [[state-machines.variables]]
+  name = "lock"
+  init = "FALSE"
+  type = "BOOLEAN"
+
+  [[state-machines.transitions]]
+  from = "Idle"
+  to = "Waiting"
+  label = "request"
+
+  [[state-machines.transitions]]
+  from = "Waiting"
+  to = "Critical"
+  guard = "lock = FALSE"
+  action = "lock' = TRUE"
+  label = "acquire"
+
+  [[state-machines.transitions]]
+  from = "Critical"
+  to = "Idle"
+  action = "lock' = FALSE"
+  label = "release"
+
+[[properties]]
+name = "TypeSafe"
+kind = "safety"
+formula = "state \\in {Idle, Waiting, Critical}"
+
+[[properties]]
+name = "MutualExclusion"
+kind = "safety"
+formula = "lock = TRUE => state = Critical"
+
+[[properties]]
+name = "EventualEntry"
+kind = "liveness"
+formula = "state = Critical"
+
+[tlc]
+workers = 4
+max-states = 100000
+symmetry = false

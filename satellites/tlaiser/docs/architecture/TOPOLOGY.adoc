@@ -1,0 +1,157 @@
+== TOPOLOGY.md — tlaiser
+
+=== Purpose
+
+TLAiser extracts state machine specifications from existing code and
+model-checks them with TLA+/PlusCal. It catches concurrency bugs
+(deadlocks, race conditions, protocol violations) that testing alone
+cannot find, by exhaustively exploring all possible state interleavings
+via the TLC model checker.
+
+=== Repository Layout
+
+....
+tlaiser/
+├── 0-AI-MANIFEST.a2ml              # AI agent entry point
+├── Cargo.toml                      # Rust project manifest
+├── Justfile                        # Task runner
+├── Containerfile                   # OCI container build (Chainguard base)
+├── README.adoc                     # Human-readable orientation
+├── ROADMAP.adoc                    # Phased development plan
+├── SECURITY.md                     # Security policy
+├── CONTRIBUTING.adoc               # Contribution guide
+├── LICENSE                         # MPL-2.0
+│
+├── src/                            # Rust source code
+│   ├── main.rs                     # CLI entry point (clap)
+│   ├── lib.rs                      # Library API
+│   ├── manifest/mod.rs             # tlaiser.toml parser (serde/toml)
+│   ├── codegen/mod.rs              # TLA+/PlusCal spec generation
+│   ├── abi/mod.rs                  # Rust-side ABI mirror types
+│   ├── core/                       # State machine IR, extraction engine
+│   ├── definitions/                # TLA+ property definitions
+│   ├── errors/                     # Error types and diagnostics
+│   ├── contracts/                  # Internal contract validation
+│   ├── bridges/                    # Language-specific extraction bridges
+│   ├── aspects/                    # Cross-cutting concerns
+│   └── interface/                  # Verified Interface Seams
+│       ├── abi/                    # Idris2 ABI (The Spec)
+│       │   ├── Types.idr           # StateMachine, TemporalFormula, etc.
+│       │   ├── Layout.idr          # State space memory layout proofs
+│       │   └── Foreign.idr         # FFI declarations for TLC bridge
+│       ├── ffi/                    # Zig FFI (The Bridge)
+│       │   ├── build.zig           # Zig build configuration
+│       │   ├── src/main.zig        # C-ABI implementation
+│       │   └── test/               # Integration tests
+│       └── generated/              # Auto-generated C headers
+│
+├── .machine_readable/              # ALL machine-readable metadata
+│   ├── 6a2/                        # A2ML state files
+│   │   ├── STATE.a2ml              # Current project state
+│   │   ├── META.a2ml               # Architecture decisions
+│   │   ├── ECOSYSTEM.a2ml          # -iser family position
+│   │   ├── AGENTIC.a2ml            # AI agent constraints
+│   │   ├── NEUROSYM.a2ml           # Hypatia scanning config
+│   │   └── PLAYBOOK.a2ml           # Operational runbook
+│   ├── anchors/                    # Semantic boundary declarations
+│   ├── policies/                   # Maintenance policies
+│   ├── bot_directives/             # Bot-specific instructions
+│   ├── contractiles/               # K9/must/trust/dust enforcement
+│   ├── ai/                         # AI configuration
+│   └── integrations/               # Tool integration configs
+│
+├── docs/                           # Technical documentation
+│   ├── architecture/               # TOPOLOGY.md (this file), diagrams
+│   ├── theory/                     # TLA+ theory, temporal logic reference
+│   ├── practice/                   # Usage guides, tutorials
+│   └── whitepapers/                # Research background
+│
+├── examples/                       # Example tlaiser.toml manifests
+├── tests/                          # Rust integration tests
+├── verification/                   # Formal verification artifacts
+├── container/                      # Stapeln container ecosystem
+├── features/                       # Feature specifications
+│
+├── .github/                        # GitHub CI/CD (17 workflows)
+├── .hypatia/                       # Hypatia scanner rules
+└── .well-known/                    # RFC 8615 well-known URIs
+....
+
+=== Data Flow
+
+....
+                    ┌─────────────────┐
+                    │  tlaiser.toml   │ (user manifest)
+                    │  or source code │
+                    └────────┬────────┘
+                             │ parse/extract
+                             ▼
+                    ┌─────────────────┐
+                    │  State Machine  │ (internal IR)
+                    │  IR: states,    │
+                    │  transitions,   │
+                    │  guards, actions│
+                    └────────┬────────┘
+                             │ codegen
+                             ▼
+                    ┌─────────────────┐
+                    │  TLA+/PlusCal   │ (generated spec)
+                    │  + TLC config   │
+                    │  + properties   │
+                    └────────┬────────┘
+                             │ model-check
+                             ▼
+                    ┌─────────────────┐
+                    │  TLC Model      │ (exhaustive state exploration)
+                    │  Checker        │
+                    └────────┬────────┘
+                             │
+                    ┌────────┴────────┐
+                    ▼                 ▼
+            ┌──────────┐     ┌──────────────┐
+            │  PASS    │     │  VIOLATION   │
+            │ (all     │     │ counter-     │
+            │  states  │     │ example      │
+            │  valid)  │     │ trace        │
+            └──────────┘     └──────────────┘
+....
+
+=== Interface Seams (ABI-FFI Standard)
+
+[width="100%",cols="31%,43%,26%",options="header",]
+|===
+|Layer |Language |Role
+|*ABI* |Idris2 |Formal type definitions with dependent-type proofs:
+`+StateMachine+`, `+TemporalFormula+`, `+SafetyProperty+`,
+`+LivenessProperty+`, `+Invariant+`, `+ModelCheckResult+`
+
+|*FFI* |Zig |C-compatible implementation: state extraction engine, TLA+
+code generation, TLC process management
+
+|*Headers* |C (generated) |Bridge between Idris2 ABI and Zig FFI
+|===
+
+=== Key Dependencies
+
+[cols=",",options="header",]
+|===
+|Crate |Purpose
+|`+clap+` |CLI argument parsing
+|`+serde+` + `+toml+` |Manifest parsing
+|`+anyhow+` + `+thiserror+` |Error handling
+|`+handlebars+` |TLA+ template rendering
+|`+walkdir+` |Source file discovery
+|===
+
+=== Ecosystem Position
+
+TLAiser is part of the hyperpolymath *-iser family* of acceleration
+frameworks. It sits alongside typedqliser, chapeliser, verisimiser, and
+~26 other -isers, all generated from the iseriser meta-framework.
+
+=== External Dependencies
+
+* *TLA+ Tools* (tla2tools.jar) — TLC model checker, PlusCal translator
+* *Java runtime* — required by TLC
+* *Idris2 compiler* — for ABI proof verification
+* *Zig compiler* — for FFI bridge compilation

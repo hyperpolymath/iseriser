@@ -1,0 +1,159 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= Tlaiser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+TLAiser extracts state machine specifications from existing code and
+**model-checks them with TLA+/PlusCal** — catching concurrency bugs that
+no amount of testing finds.
+
+https://lamport.azurewebsites.net/tla/tla.html[TLA+] (Temporal Logic of Actions,
+by Leslie Lamport) is the gold standard for specifying and verifying concurrent
+and distributed systems. PlusCal is its imperative-style front-end that compiles
+to TLA+. The TLC model checker exhaustively explores all possible states to find
+invariant violations and liveness failures.
+
+Amazon, Microsoft, and Intel use TLA+ internally to verify distributed systems.
+TLAiser brings this power to everyone — **you describe your system, TLAiser
+generates the spec and runs the checker**.
+
+== Pipeline
+
+[source]
+----
+Source Code                TLA+ Spec              TLC Model Checker
+    │                         │                        │
+    ▼                         ▼                        ▼
+┌──────────┐  extract   ┌──────────┐  generate  ┌──────────┐
+│ Your code │ ────────► │  State   │ ────────► │  TLA+/   │
+│ or TOML   │           │ Machine  │           │ PlusCal  │
+│ manifest  │           │  Model   │           │   Spec   │
+└──────────┘            └──────────┘           └──────────┘
+                                                     │
+                                                     ▼ model-check
+                                               ┌──────────┐
+                                               │   TLC    │
+                                               │ Checker  │
+                                               └──────────┘
+                                                     │
+                                                     ▼
+                                               ┌──────────┐
+                                               │ Invariant│
+                                               │ Violation│
+                                               │  Report  │
+                                               └──────────┘
+----
+
+== TLA+ Concepts
+
+TLAiser leverages the full power of TLA+ temporal logic:
+
+* **□ (Always)** — safety properties: "bad things never happen"
+  (e.g., no deadlock, no data corruption, mutual exclusion holds)
+* **◇ (Eventually)** — liveness properties: "good things eventually happen"
+  (e.g., every request gets a response, every lock is eventually released)
+* **↝ (Leads-to)** — temporal ordering: "if A happens, B eventually follows"
+  (e.g., if a message is sent, it is eventually delivered)
+* **Fairness conditions** — weak/strong fairness constraints that prevent
+  unrealistic infinite stuttering of enabled actions
+
+== Key Value
+
+* **Catch distributed systems bugs before production** — deadlocks, race conditions,
+  protocol violations, split-brain scenarios
+* **Exhaustive verification** — TLC checks ALL possible interleavings, not just
+  the ones your tests happen to exercise
+* **Counterexample traces** — when a violation is found, TLAiser shows exactly
+  the sequence of steps that triggers the bug
+* **Safety + Liveness** — verify both that bad things never happen AND that
+  good things eventually do
+
+== Use Cases
+
+* **Distributed protocol verification** — Raft, Paxos, 2PC, custom consensus
+* **Database transaction isolation** — verify serialisability, snapshot isolation,
+  read-committed guarantees under concurrent transactions
+* **Consensus algorithm validation** — prove agreement, validity, and termination
+  properties before implementation
+* **Microservice choreography checking** — verify saga patterns, event-driven
+  workflows, and distributed state machines for deadlock-freedom
+* **Lock-free data structure verification** — prove linearisability of concurrent
+  algorithms
+
+== How It Works
+
+Describe your system's state transitions in `tlaiser.toml`. TLAiser:
+
+1. **Extracts** state machine models from your code (or from the manifest)
+2. **Generates** TLA+ specifications with safety and liveness properties
+3. **Runs** the TLC model checker to exhaustively verify all reachable states
+4. **Reports** violations with concrete counterexample traces
+
+[source,toml]
+----
+# tlaiser.toml — example: distributed lock service
+[workload]
+name = "distributed-lock"
+entry = "src/lock_service.rs::LockStateMachine"
+strategy = "state-extraction"
+
+[data]
+input-type = "LockRequest"
+output-type = "LockGrant | LockDenied | LockTimeout"
+
+[properties]
+safety = ["MutualExclusion", "NoDeadlock"]
+liveness = ["EventualAccess"]
+fairness = "weak"
+
+[model]
+processes = 3
+max-steps = 50
+----
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern (same as https://github.com/hyperpolymath/chapeliser[Chapeliser]):
+
+* **Manifest** (`tlaiser.toml`) — describe WHAT you want to verify
+* **Idris2 ABI** (`src/interface/abi/`) — formal proofs: state machine types,
+  temporal formulae, model check results all verified at compile time
+* **Zig FFI** (`src/interface/ffi/`) — C-ABI bridge to TLC runtime and
+  state extraction engine
+* **Codegen** (`src/codegen/`) — generates TLA+/PlusCal specifications from
+  extracted state machines
+* **Rust CLI** — parses manifest, extracts state machines, generates specs,
+  invokes TLC, reports results
+
+User writes zero TLA+. TLAiser generates everything.
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family] of acceleration frameworks.
+
+== Quick Start
+
+[source,bash]
+----
+# Initialise a manifest in your project
+tlaiser init
+
+# Edit tlaiser.toml to describe your state machine
+
+# Generate TLA+ specs and run TLC
+tlaiser generate
+tlaiser run
+
+# Or all at once
+tlaiser build && tlaiser run
+----
+
+== Status
+
+**Pre-alpha.** Architecture defined, scaffolding in place, codegen pending.
+
+== License
+
+SPDX-License-Identifier: CC-BY-SA-4.0
