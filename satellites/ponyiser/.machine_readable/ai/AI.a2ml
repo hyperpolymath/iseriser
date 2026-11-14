@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+
+# AI Assistant Instructions for ponyiser
+
+## Repository Focus
+- **ponyiser** wraps concurrent code in Pony reference capabilities (iso, val, ref, box, trn, tag) for compile-time data-race freedom.
+- Follows the hyperpolymath -iser pattern: manifest-driven code generation with Idris2 ABI proofs and Zig FFI bridge.
+- All machine-readable content lives under `.machine_readable/` — state files (a2ml), bot directives, and contractiles.
+- Prefer to keep generated files out of source control, and regenerate them with the documented commands before committing.
+
+## Domain Knowledge
+- Pony's six reference capabilities form a subtyping lattice: iso <: trn <: ref <: box, iso <: val <: box, everything <: tag.
+- Only iso (consumed), val (immutable), and tag (identity) are sendable across actor boundaries.
+- Actors have private heaps. No shared mutable state between actors.
+- Behaviours are asynchronous message handlers. Messages are delivered in causal (FIFO) order.
+
+## Workflow
+1. Inspect `.machine_readable/6a2/STATE.a2ml` for blockers and next actions.
+2. Respect any constraints listed inside `.machine_readable/6a2/AGENTIC.a2ml` when tooling changes are requested.
+3. After finishing edits, update STATE with your outcomes and commit with a concise, imperative message.
+
+## Delivery Promises
+- Mention in summaries whether STATE, `.machine_readable/contractiles/`, or `.machine_readable/bot_directives/` changed.
+- Keep this file in sync with the repository's status; update it if the governance changes.

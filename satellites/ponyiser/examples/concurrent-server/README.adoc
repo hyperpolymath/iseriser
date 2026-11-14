@@ -1,0 +1,46 @@
+= concurrent-server — ponyiser Example
+// SPDX-License-Identifier: CC-BY-SA-4.0
+
+== Overview
+
+This example demonstrates how ponyiser wraps a concurrent TCP server in Pony
+reference capabilities to guarantee data-race freedom at compile time.
+
+== Architecture
+
+[source]
+----
+Listener (actor)
+  ├── port: U16 val         (immutable config)
+  ├── active_connections: U64 ref (mutable counter, actor-local)
+  └── logger: Logger tag    (identity reference to shared logger)
+
+Handler (actor)
+  ├── conn: TCPConnection iso  (unique ownership of connection)
+  ├── recv_buffer: Array[U8] iso (unique ownership of buffer)
+  └── logger: Logger tag       (identity reference to shared logger)
+
+Logger (actor)
+  ├── out: OutStream ref    (mutable output, actor-local)
+  └── level: U8 val         (immutable log level)
+----
+
+== Capability Safety
+
+* `iso` — unique references: `conn` and `recv_buffer` in Handler ensure no
+  two actors can access the same connection or buffer simultaneously.
+* `val` — immutable values: `port`, `level`, log messages, and received data
+  can be safely shared across actors.
+* `ref` — local mutable: `active_connections` and `out` are only accessed
+  within their owning actor's sequential execution context.
+* `tag` — identity only: `logger` references allow sending messages to the
+  Logger actor without accessing its internal state.
+
+== Usage
+
+[source,bash]
+----
+cd examples/concurrent-server
+ponyiser validate -m ponyiser.toml
+ponyiser generate -m ponyiser.toml -o generated/
+----

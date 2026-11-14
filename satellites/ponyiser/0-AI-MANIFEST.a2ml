@@ -1,0 +1,142 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+
+# STOP - CRITICAL READING REQUIRED
+
+**THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
+
+## WHAT IS THIS?
+
+This is the AI manifest for **ponyiser**. It declares:
+- Canonical file locations (where things MUST be, and nowhere else)
+- Critical invariants (rules that must NEVER be violated)
+- Repository structure and organization
+
+**ponyiser** wraps concurrent code in Pony reference capabilities (iso, val,
+ref, box, trn, tag) for compile-time data-race freedom. It generates Pony
+actors and behaviours from a TOML manifest, backed by Idris2 formal proofs
+and a Zig FFI bridge.
+
+## CANONICAL LOCATIONS (UNIVERSAL RULE)
+
+### Machine-Readable Metadata: `.machine_readable/` ONLY
+
+These 6 a2ml files MUST exist in `.machine_readable/6a2/` directory ONLY:
+1. **STATE.a2ml** - Project state, progress, blockers
+2. **META.a2ml** - Architecture decisions, governance
+3. **ECOSYSTEM.a2ml** - Position in -iser ecosystem, relationships
+4. **AGENTIC.a2ml** - AI agent interaction patterns
+5. **NEUROSYM.a2ml** - Neurosymbolic integration config
+6. **PLAYBOOK.a2ml** - Operational runbook
+
+**CRITICAL:** If ANY of these files exist in the root directory, this is an ERROR.
+
+### Anchor File: `.machine_readable/anchors/ANCHOR.a2ml` ONLY
+
+Canonical authority and semantic-boundary declaration MUST exist at:
+
+` .machine_readable/anchors/ANCHOR.a2ml `
+
+Do not place `ANCHOR.a2ml` at repository root.
+
+### Maintenance Policies: `.machine_readable/policies/` ONLY
+
+Canonical maintenance/governance files MUST exist under:
+
+` .machine_readable/policies/ `
+
+Minimum required files:
+- `MAINTENANCE-AXES.a2ml`
+- `MAINTENANCE-CHECKLIST.a2ml`
+- `SOFTWARE-DEVELOPMENT-APPROACH.a2ml`
+
+Do not place maintenance policy files in repository root.
+
+### Bot Directives: `.machine_readable/bot_directives/` ONLY
+
+Bot-specific instructions for your automated agents.
+
+### Contractiles: `.machine_readable/contractiles/` ONLY
+
+Policy enforcement contracts (k9, dust, lust, must, trust).
+
+### AI Configuration & Guides: `.machine_readable/ai/` ONLY
+
+- `AI.a2ml` - Language-specific or LLM-specific patterns
+- `PLACEHOLDERS.md` - Bootstrap guide
+
+### Community & Forge Metadata: `.github/` ONLY
+
+- `CODEOWNERS` - Review assignments
+- `MAINTAINERS` - Machine-readable contact list
+- `SUPPORT` - Support channels
+- `SECURITY.md` - Technical security policy
+- `CONTRIBUTING.md` - Technical contribution manual
+- `CODE_OF_CONDUCT.md` - Conduct rules
+
+### Agent Instructions
+
+- `0-AI-MANIFEST.a2ml` - THIS FILE (universal entry point)
+
+## PONYISER-SPECIFIC INVARIANTS
+
+1. **Six reference capabilities only** — iso, val, ref, box, trn, tag. No extensions.
+2. **Capability subtyping lattice** — iso <: trn <: ref <: box, iso <: val <: box, tag is bottom. The lattice is fixed; do not invent new subtyping rules.
+3. **Actor isolation** — each generated actor has a private heap. No shared mutable state between actors.
+4. **Behaviours are async** — all inter-actor communication is via behaviours (asynchronous message handlers). No synchronous cross-actor calls.
+5. **Causal messaging** — messages between two actors are delivered in causal (FIFO) order.
+6. **Sendability rule** — only iso (consumed), val, and tag references can cross actor boundaries. ref, box, and trn are actor-local.
+
+## CORE INVARIANTS
+
+1. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
+2. **Single source of truth** - `.machine_readable/` is authoritative
+3. **No stale metadata** - If root state files exist, they are OUT OF DATE
+4. **License consistency** - All code MPL-2.0 unless platform requires MPL-2.0
+5. **Author attribution** - Always "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+6. **Container images** - MUST use Chainguard base (`cgr.dev/chainguard/wolfi-base:latest` or `cgr.dev/chainguard/static:latest`)
+7. **Container runtime** - Podman, never Docker. Files are `Containerfile`, never `Dockerfile`
+8. **Container orchestration** - `selur-compose`, never `docker-compose`
+
+## REPOSITORY STRUCTURE
+
+This repo follows the **Dual-Track** architecture:
+
+```
+ponyiser/
+├── 0-AI-MANIFEST.a2ml         # THIS FILE (start here)
+├── README.adoc                 # High-level orientation (Rich Human)
+├── ROADMAP.adoc                # Phased roadmap with Pony milestones
+├── CONTRIBUTING.adoc           # Human contribution guide
+├── Justfile                    # Task runner
+├── Cargo.toml                  # Rust CLI build
+├── Containerfile               # OCI build
+├── LICENSE                     # MPL-2.0
+├── src/                        # Source code
+│   ├── main.rs                 # CLI entry point
+│   ├── lib.rs                  # Library API
+│   ├── manifest/               # ponyiser.toml parser
+│   ├── codegen/                # Pony actor/behaviour code generation
+│   ├── abi/                    # Rust-side ABI types (mirrors Idris2)
+│   └── interface/              # Verified Interface Seams
+│       ├── abi/                # Idris2 ABI (RefCapability, Actor, Behaviour proofs)
+│       │   ├── Types.idr       # RefCapability, Actor, Behaviour, CausalMessage
+│       │   ├── Layout.idr      # Actor mailbox memory layout proofs
+│       │   └── Foreign.idr     # Capability analysis and codegen FFI
+│       ├── ffi/                # Zig FFI (C-ABI bridge)
+│       └── generated/          # C Headers (auto-generated)
+├── container/                  # Stapeln container ecosystem
+├── docs/                       # Technical documentation
+└── .machine_readable/          # ALL machine-readable metadata
+```
+
+## SESSION STARTUP CHECKLIST
+
+1. Read THIS file (0-AI-MANIFEST.a2ml) first
+2. Understand canonical location: `.machine_readable/`
+3. State understanding of canonical locations
+4. Note: ponyiser is about Pony reference capabilities for data-race freedom
+
+## ATTESTATION PROOF
+
+**"I have read the AI manifest. All machine-readable content (state files, anchors, policies, bot directives, contractiles, AI guides) is located in `.machine_readable/` ONLY, and community metadata is in `.github/`. I will not create duplicate files in the root directory. I understand ponyiser generates Pony actors with capability-safe references from TOML manifests."**

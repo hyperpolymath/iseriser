@@ -1,0 +1,15 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the ponyiser ABI formal proofs.
+-- Build/check with:  idris2 --build ponyiser-abi.ipkg   (from src/interface/abi/)
+package ponyiser-abi
+
+sourcedir = "."
+
+modules = Ponyiser.ABI.Types
+        , Ponyiser.ABI.Layout
+        , Ponyiser.ABI.Foreign
+        , Ponyiser.ABI.Proofs
+        , Ponyiser.ABI.Semantics
+        , Ponyiser.ABI.Invariants
+        , Ponyiser.ABI.FfiSeam
+        , Ponyiser.ABI.Capstone

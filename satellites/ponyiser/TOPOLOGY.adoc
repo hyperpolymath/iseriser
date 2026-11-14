@@ -1,0 +1,51 @@
+== TOPOLOGY.md — ponyiser
+
+=== Purpose
+
+ponyiser eliminates data races by wrapping concurrent code in Pony actor
+and behaviour wrappers with reference capability annotations. Pony’s six
+reference capabilities (iso, val, ref, box, trn, tag) guarantee
+data-race freedom at compile time without locks or runtime checks.
+ponyiser reads concurrency patterns from a `+ponyiser.toml+` manifest
+and generates Pony actor wrappers with the appropriate capability
+annotations, targeting any codebase that needs provably safe
+concurrency.
+
+=== Module Map
+
+....
+ponyiser/
+├── src/
+│   ├── main.rs                    # CLI entry point (clap): init, validate, generate, build, run, info
+│   ├── lib.rs                     # Library API
+│   ├── manifest/mod.rs            # ponyiser.toml parser
+│   ├── codegen/mod.rs             # Pony actor wrapper and capability annotation generation
+│   └── abi/                       # Idris2 ABI bridge stubs
+├── examples/                      # Worked examples
+├── verification/                  # Proof harnesses
+├── container/                     # Stapeln container ecosystem
+└── .machine_readable/             # A2ML metadata
+....
+
+=== Data Flow
+
+....
+ponyiser.toml manifest
+        │
+   ┌────▼────┐
+   │ Manifest │  parse + validate concurrency patterns and capability requirements
+   │  Parser  │
+   └────┬────┘
+        │  validated concurrency config
+   ┌────▼────┐
+   │ Analyser │  infer appropriate Pony reference capabilities (iso/val/ref/box/trn/tag)
+   └────┬────┘
+        │  capability-annotated IR
+   ┌────▼────┐
+   │ Codegen  │  emit generated/ponyiser/ (Pony actor wrappers with capability annotations)
+   └────┬────┘
+        │  Pony source with guaranteed data-race freedom
+   ┌────▼────┐
+   │  Ponyc   │  compile-time verification of reference capabilities
+   └─────────┘
+....
