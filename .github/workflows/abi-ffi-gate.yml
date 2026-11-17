@@ -81,6 +81,22 @@ jobs:
             echo "::error::Idris2 modules not listed in iseriser-abi.ipkg: $missing"
             exit 1
           fi
+      - name: No holes or escape hatches in the ABI proofs
+        working-directory: src/interface/abi
+        run: |
+          set -euo pipefail
+          # Idris2 accepts a ?hole and these escape hatches even under
+          # --total, so a green type-check alone would not show the proofs
+          # are complete.
+          pattern='(^|[^A-Za-z0-9_])\?[a-z_][A-Za-z0-9_]*|believe_me|assert_total|assert_smaller|idris_crash|%default[[:space:]]+(partial|covering)|^[[:space:]]*(partial|covering)[[:space:]]'
+          hits=$(find . -name '*.idr' -not -path './build/*' -print0 \
+            | xargs -0 grep -nE "$pattern" \
+            | grep -vE '^[^:]+:[0-9]+:[[:space:]]*(--|\|\|\|)' || true)
+          if [ -n "$hits" ]; then
+            echo "::error::Holes or escape hatches in the ABI proofs:"
+            echo "$hits"
+            exit 1
+          fi
       - name: Type-check with totality enforced
         working-directory: src/interface/abi
         run: |
