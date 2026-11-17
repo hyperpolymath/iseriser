@@ -44,3 +44,44 @@ jobs:
           echo "/tmp/zig-linux-x86_64-0.14.0" >> "$GITHUB_PATH"
       - name: zig test FFI
         run: zig test src/interface/ffi/src/main.zig -lc
+
+  idris2-check:
+    name: Idris2 ABI type-check (Idris2 0.8.0, total)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install Idris2 0.8.0 from the pinned upstream commit
+        env:
+          # Exact commit referenced by the upstream v0.8.0 tag.
+          IDRIS2_REVISION: 15a3e4e70843f7a34100f6470c04b791330788df
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y chezscheme make libgmp-dev
+          git clone --filter=blob:none --no-checkout \
+            https://github.com/idris-lang/Idris2.git /tmp/idris2
+          git -C /tmp/idris2 checkout --detach "$IDRIS2_REVISION"
+          make -C /tmp/idris2 bootstrap SCHEME=scheme
+          make -C /tmp/idris2 install PREFIX="$HOME/.idris2"
+          echo "$HOME/.idris2/bin" >> "$GITHUB_PATH"
+      - name: Every ABI module is listed in the package
+        working-directory: src/interface/abi
+        run: |
+          set -euo pipefail
+          # A module missing from the .ipkg is never type-checked here.
+          files=$(find . -name '*.idr' -not -path './build/*' \
+            | sed 's|^\./||; s|\.idr$||; s|/|.|g' | sort)
+          listed=$(sed -n '/^modules/,/^[a-z]/p' iseriser-abi.ipkg \
+            | grep -oE '[A-Z][A-Za-z0-9_.]+' | sort -u)
+          missing=$(comm -23 <(echo "$files") <(echo "$listed"))
+          if [ -n "$missing" ]; then
+            echo "::error::Idris2 modules not listed in iseriser-abi.ipkg: $missing"
+            exit 1
+          fi
+      - name: Type-check with totality enforced
+        working-directory: src/interface/abi
+        run: |
+          set -euo pipefail
+          idris2 --version
+          idris2 --total --typecheck iseriser-abi.ipkg
