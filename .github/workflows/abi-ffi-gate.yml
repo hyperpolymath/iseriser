@@ -72,7 +72,9 @@ jobs:
           # A module missing from the .ipkg is never type-checked here.
           files=$(find . -name '*.idr' -not -path './build/*' \
             | sed 's|^\./||; s|\.idr$||; s|/|.|g' | sort)
+          # Comments are dropped first: a module named only after -- is not built.
           listed=$(sed -n '/^modules/,/^[a-z]/p' iseriser-abi.ipkg \
+            | sed 's/--.*$//' \
             | grep -oE '[A-Z][A-Za-z0-9_.]+' | sort -u)
           missing=$(comm -23 <(echo "$files") <(echo "$listed"))
           if [ -n "$missing" ]; then
@@ -84,4 +86,8 @@ jobs:
         run: |
           set -euo pipefail
           idris2 --version
-          idris2 --total --typecheck iseriser-abi.ipkg
+          # Totality comes from opts in the .ipkg. Given --total here, Idris2
+          # 0.8.0 prints an options error, checks nothing and exits 0.
+          grep -Eq '^opts[[:space:]]*=[[:space:]]*".*--total' iseriser-abi.ipkg \
+            || { echo "::error::iseriser-abi.ipkg must set opts = \"--total\""; exit 1; }
+          idris2 --typecheck iseriser-abi.ipkg
