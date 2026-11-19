@@ -107,97 +107,97 @@ between formal specifications and real-world calling conventions.
 [width="100%",cols="25%,25%,25%,25%",options="header",]
 |===
 |Name |Description |Tests |Status
-|https://github.com/hyperpolymath/typedqliser[*TypedQLiser*] |Add formal
+|link:satellites/typedqliser/[*TypedQLiser*] |Add formal
 type safety (10 levels, dependent/linear/session types) to any query
 language |0 |scaffold
 
-|https://github.com/hyperpolymath/chapeliser[*Chapeliser*]
+|link:satellites/chapeliser/[*Chapeliser*]
 |General-purpose Chapel acceleration — distribute any workload without
 learning Chapel |22 |scaffold
 
-|https://github.com/hyperpolymath/verisimiser[*Verisimiser*] |Augment
+|link:satellites/verisimiser/[*Verisimiser*] |Augment
 any database with VeriSimDB octad capabilities — drift, provenance,
 temporal |26 |scaffold
 
-|https://github.com/hyperpolymath/julianiser[*Julianiser*] |Auto-wrap
+|link:satellites/julianiser/[*Julianiser*] |Auto-wrap
 Python/R data pipelines into Julia for 100x speedups |25 |scaffold
 
-|https://github.com/hyperpolymath/futharkiser[*Futharkiser*] |Compile
+|link:satellites/futharkiser/[*Futharkiser*] |Compile
 annotated array operations to GPU kernels via Futhark |42 |scaffold
 
-|https://github.com/hyperpolymath/idrisiser[*Idrisiser*] |Generate
+|link:satellites/idrisiser/[*Idrisiser*] |Generate
 proven-correct wrappers from interfaces using Idris2 dependent types |6
 |scaffold
 
-|https://github.com/hyperpolymath/tlaiser[*TLAiser*] |Extract state
+|link:satellites/tlaiser/[*TLAiser*] |Extract state
 machines from code and model-check with TLA+/PlusCal |32 |scaffold
 
-|https://github.com/hyperpolymath/dafniser[*Dafniser*] |Generate
+|link:satellites/dafniser/[*Dafniser*] |Generate
 correct-by-construction code for critical functions using Dafny |28
 |scaffold
 
-|https://github.com/hyperpolymath/ponyiser[*Ponyiser*] |Wrap concurrent
+|link:satellites/ponyiser/[*Ponyiser*] |Wrap concurrent
 code in Pony reference capabilities for data-race freedom |27 |scaffold
 
-|https://github.com/hyperpolymath/otpiser[*OTPiser*] |Generate OTP
+|link:satellites/otpiser/[*OTPiser*] |Generate OTP
 supervision trees and fault-tolerance scaffolding |1 |scaffold
 
-|https://github.com/hyperpolymath/halideiser[*Halideiser*] |Compile
+|link:satellites/halideiser/[*Halideiser*] |Compile
 image/video pipelines to optimised Halide schedules |24 |scaffold
 
-|https://github.com/hyperpolymath/lustreiser[*Lustreiser*] |Generate
+|link:satellites/lustreiser/[*Lustreiser*] |Generate
 formally verified real-time embedded code via Lustre |36 |scaffold
 
-|https://github.com/hyperpolymath/bqniser[*BQNiser*] |Detect array
+|link:satellites/bqniser/[*BQNiser*] |Detect array
 patterns and rewrite as optimised BQN primitives |0 |scaffold
 
-|https://github.com/hyperpolymath/alloyiser[*Alloyiser*] |Extract formal
+|link:satellites/alloyiser/[*Alloyiser*] |Extract formal
 models from API specs and verify with Alloy |25 |scaffold
 
-|https://github.com/hyperpolymath/atsiser[*ATSiser*] |Wrap C codebases
+|link:satellites/atsiser/[*ATSiser*] |Wrap C codebases
 in ATS linear types for zero-cost memory safety |32 |scaffold
 
-|https://github.com/hyperpolymath/nimiser[*Nimiser*] |Generate
+|link:satellites/nimiser/[*Nimiser*] |Generate
 high-performance C libraries via Nim metaprogramming |28 |scaffold
 
-|https://github.com/hyperpolymath/a2mliser[*A2MLiser*] |Add
+|link:satellites/a2mliser/[*A2MLiser*] |Add
 cryptographic attestation to any markup or configuration via A2ML |0
 |scaffold
 
-|https://github.com/hyperpolymath/affinescriptiser[*AffineScriptiser*]
+|link:satellites/affinescriptiser/[*AffineScriptiser*]
 |Wrap code in affine + dependent types targeting WASM via AffineScript
 |36 |scaffold
 
-|https://github.com/hyperpolymath/anvomidaviser[*Anvomidaviser*]
+|link:satellites/anvomidaviser/[*Anvomidaviser*]
 |Convert ISU notation to formal figure skating programs via Anvomidav
 |36 |scaffold
 
-|https://github.com/hyperpolymath/betlangiser[*BetLangiser*] |Add
+|link:satellites/betlangiser/[*BetLangiser*] |Add
 ternary probabilistic modelling to deterministic code via Betlang |36
 |scaffold
 
-|https://github.com/hyperpolymath/eclexiaiser[*Eclexiaiser*] |Add
+|link:satellites/eclexiaiser/[*Eclexiaiser*] |Add
 energy/carbon/resource-cost awareness to software via Eclexia |23
 |scaffold
 
-|https://github.com/hyperpolymath/ephapaxiser[*Ephapaxiser*] |Enforce
+|link:satellites/ephapaxiser/[*Ephapaxiser*] |Enforce
 single-use linear type semantics on resources via Ephapax |17 |scaffold
 
-|https://github.com/hyperpolymath/k9iser[*K9iser*] |Wrap configs into
+|link:satellites/k9iser/[*K9iser*] |Wrap configs into
 self-validating K9 contracts |19 |scaffold
 
-|https://github.com/hyperpolymath/mylangiser[*MyLangiser*] |Generate
+|link:satellites/mylangiser/[*MyLangiser*] |Generate
 progressive-disclosure interfaces from complex APIs via My-Lang |20
 |scaffold
 
-|https://github.com/hyperpolymath/oblibeniser[*Oblibeniser*] |Make
+|link:satellites/oblibeniser/[*Oblibeniser*] |Make
 operations reversible and auditable via Oblibeny |27 |scaffold
 
-|https://github.com/hyperpolymath/phronesiser[*Phronesiser*] |Add
+|link:satellites/phronesiser/[*Phronesiser*] |Add
 provably safe ethical constraints to AI agents via Phronesis |31
 |scaffold
 
-|https://github.com/hyperpolymath/wokelangiser[*WokeLangiser*] |Add
+|link:satellites/wokelangiser/[*WokeLangiser*] |Add
 consent patterns and accessibility to existing code via WokeLang |44
 |scaffold
 
