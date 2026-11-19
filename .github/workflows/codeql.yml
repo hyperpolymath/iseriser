@@ -33,6 +33,10 @@ jobs:
         include:
           - language: actions
             build-mode: none
+          # Rust in src/ and in the 26 crates under satellites/ (the
+          # merged -iser repos, whose own workflows no longer run).
+          - language: rust
+            build-mode: none
 
     steps:
       - name: Checkout
