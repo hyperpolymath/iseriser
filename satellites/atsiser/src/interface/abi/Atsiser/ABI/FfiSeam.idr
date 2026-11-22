@@ -3,7 +3,7 @@
 --
 ||| Layer 4: Sealing the ABI <-> FFI seam for atsiser.
 |||
-||| The structural gate (scripts/abi-ffi-gate.py) checks that the Idris
+||| The structural gate (scripts/abi-ffi-gate.jl) checks that the Idris
 ||| `Result` enum and the Zig FFI enum agree by name and value. This module
 ||| supplies the PROOF-SIDE guarantee that the integer encoding `resultToInt`
 ||| is SOUND:
