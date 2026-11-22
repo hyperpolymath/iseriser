@@ -24,7 +24,8 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - name: Install Julia 1.11.5
         run: |
-          curl -fsSL https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-1.11.5-linux-x86_64.tar.gz -o /tmp/julia.tar.gz
+          curl -fsSL --proto '=https' --tlsv1.2 https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-1.11.5-linux-x86_64.tar.gz -o /tmp/julia.tar.gz
+          echo '723e878c642220cc0251a0e13758c059a389cadc7f01376feaf1ea7388fe8f9c  /tmp/julia.tar.gz' | sha256sum --check --strict
           tar -xf /tmp/julia.tar.gz -C /tmp
           echo "/tmp/julia-1.11.5/bin" >> "$GITHUB_PATH"
       - name: Run ABI-FFI gate
