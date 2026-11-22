@@ -3,7 +3,7 @@
 --
 ||| Layer-4 ABI<->FFI seam proof for Anvomidaviser.
 |||
-||| The structural gate (scripts/abi-ffi-gate.py) checks that the Idris `Result`
+||| The structural gate (scripts/abi-ffi-gate.jl) checks that the Idris `Result`
 ||| enum and the Zig FFI enum agree by name and value. This module supplies the
 ||| PROOF-SIDE guarantee that the encoding itself is SOUND:
 |||

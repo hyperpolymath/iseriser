@@ -3,7 +3,7 @@
 --
 ||| Layer 4 — Sealing the ABI<->FFI seam for BQNiser.
 |||
-||| The structural gate (scripts/abi-ffi-gate.py) checks that the Idris2
+||| The structural gate (scripts/abi-ffi-gate.jl) checks that the Idris2
 ||| `Result` enum and the Zig FFI enum agree by name+value.  This module
 ||| supplies the PROOF-SIDE guarantee: that the encoding `resultToInt` is
 ||| SOUND — distinct ABI outcomes never collide on the wire, and the C
