@@ -67,29 +67,6 @@ jobs:
           make -C /tmp/idris2 bootstrap SCHEME=scheme
           make -C /tmp/idris2 install PREFIX="$HOME/.idris2"
           echo "$HOME/.idris2/bin" >> "$GITHUB_PATH"
-      - name: Every ABI module is listed in its package
-        run: |
-          set -euo pipefail
-          # Covers the root ABI and every satellite ABI. GitHub runs only the
-          # root workflows, so the satellites' own gates never run here.
-          # A module missing from its .ipkg is never type-checked.
-          fail=0
-          for dir in src/interface/abi satellites/*/src/interface/abi; do
-            ipkg=$(find "$dir" -maxdepth 1 -name '*.ipkg' | head -n 1)
-            [ -n "$ipkg" ] || { echo "::error::no .ipkg in $dir"; fail=1; continue; }
-            files=$(cd "$dir" && find . -name '*.idr' -not -path './build/*' \
-              | sed 's|^\./||; s|\.idr$||; s|/|.|g' | sort)
-            # Comments are dropped first: a module named only after -- is not built.
-            listed=$(sed -n '/^modules/,/^[a-z]/p' "$ipkg" \
-              | sed 's/--.*$//' \
-              | grep -oE '[A-Z][A-Za-z0-9_.]+' | sort -u)
-            missing=$(comm -23 <(echo "$files") <(echo "$listed"))
-            if [ -n "$missing" ]; then
-              echo "::error::Idris2 modules not listed in $ipkg: $missing"
-              fail=1
-            fi
-          done
-          exit "$fail"
       - name: No holes or escape hatches in the ABI proofs
         run: |
           set -euo pipefail
@@ -115,44 +92,55 @@ jobs:
             echo "$hits"
             exit 1
           fi
-      - name: No declarations without a definition
-        run: |
-          set -euo pipefail
-          # Idris2 accepts a top-level signature with no clauses even under
-          # --total and treats it as a postulate. A signature after %foreign
-          # is an FFI binding and is skipped.
-          hits=$(find src/interface/abi satellites/*/src/interface/abi \
-              -name '*.idr' -not -path '*/build/*' -print0 \
-            | xargs -0 awk -f scripts/idris2-undefined.awk)
-          if [ -n "$hits" ]; then
-            echo "::error::Declarations with no definition (postulates) in the ABI proofs:"
-            echo "$hits"
-            exit 1
-          fi
-      - name: Type-check with totality enforced
+      - name: Type-check each package with totality enforced
         run: |
           set -euo pipefail
           idris2 --version
-          # Totality comes from opts in each .ipkg. Given --total on the
-          # command line, Idris2 0.8.0 prints an options error, checks
-          # nothing and exits 0.
-          # The flag must sit inside the quoted value: opts = "" -- --total sets
-          # no options, because the text after the quote is a comment. The
-          # package must have exactly one opts/options line: a later one
-          # replaces the earlier, so opts = "--total" then options = "" sets
-          # no options either.
+          # Covers the root ABI and every satellite ABI. GitHub runs only the
+          # root workflows, so the satellites' own gates never run here.
+          #
+          # Totality comes only from opts in each .ipkg: given --total on the
+          # command line, Idris2 0.8.0 prints an options error, checks nothing
+          # and exits 0. The .ipkg is read with its {- -} and -- comments
+          # removed, so a commented-out line counts for nothing. It must then
+          # have exactly one opts/options line (a later one replaces the
+          # earlier) with --total inside the quoted value.
+          #
+          # After the type-check, every .idr must have a .ttc: a module the
+          # package does not reach is never checked. Then Idris2 is asked
+          # about every declared name (scripts/idris2-postulates.sh): a
+          # signature with no definition, or a %extern, is accepted under
+          # --total and fails here.
           fail=0
           for dir in src/interface/abi satellites/*/src/interface/abi; do
-            ipkg=$(basename "$(find "$dir" -maxdepth 1 -name '*.ipkg' | head -n 1)")
-            decls=$(grep -cE '^[[:space:]]*(opts|options)[[:space:]]*=' "$dir/$ipkg" || true)
+            ipkg=$(find "$dir" -maxdepth 1 -name '*.ipkg' | head -n 1)
+            [ -n "$ipkg" ] || { echo "::error::no .ipkg in $dir"; fail=1; continue; }
+            fields=$(perl -0777 -pe 's/\{-.*?-\}//gs; s/(^|[ \t])--[^\n]*/$1/gm' "$ipkg")
+            decls=$(printf '%s\n' "$fields" | grep -cE '^[[:space:]]*(opts|options)[[:space:]]*=' || true)
             if [ "$decls" != 1 ] \
-              || ! grep -Eq '^[[:space:]]*(opts|options)[[:space:]]*=[[:space:]]*"[^"]*--total[^"]*"' "$dir/$ipkg"; then
-              echo "::error::$dir/$ipkg must have exactly one opts line, set to opts = \"--total\""
+              || ! printf '%s\n' "$fields" | grep -Eq '^[[:space:]]*(opts|options)[[:space:]]*=[[:space:]]*"[^"]*--total[^"]*"'; then
+              echo "::error::$ipkg must have exactly one opts line, set to opts = \"--total\""
               fail=1
               continue
             fi
-            echo "::group::$dir/$ipkg"
-            (cd "$dir" && idris2 --typecheck "$ipkg") || fail=1
+            echo "::group::$ipkg"
+            rm -rf "$dir/build"
+            if (cd "$dir" && idris2 --typecheck "$(basename "$ipkg")"); then
+              unbuilt=$(cd "$dir" && find . -name '*.idr' -not -path './build/*' \
+                | sed 's|^\./||; s|\.idr$||' | while read -r m; do
+                    ls build/ttc/*/"$m".ttc >/dev/null 2>&1 || echo "$m"
+                  done)
+              if [ -n "$unbuilt" ]; then
+                echo "::error::$ipkg does not type-check these modules: $unbuilt"
+                fail=1
+              fi
+              if ! bash scripts/idris2-postulates.sh "$dir"; then
+                echo "::error::$ipkg declares names with no definition, or %extern names (above)"
+                fail=1
+              fi
+            else
+              fail=1
+            fi
             echo "::endgroup::"
           done
           exit "$fail"
