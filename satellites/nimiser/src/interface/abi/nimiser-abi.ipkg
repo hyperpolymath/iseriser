@@ -1,4 +1,8 @@
 -- SPDX-License-Identifier: MPL-2.0
 package nimiser-abi
 sourcedir = "."
-modules = Nimiser.ABI.Types, Nimiser.ABI.Layout, Nimiser.ABI.Foreign, Nimiser.ABI.Proofs
+modules = Nimiser.ABI.Types, Nimiser.ABI.Layout, Nimiser.ABI.Foreign, Nimiser.ABI.Proofs, Nimiser.ABI.Capstone, Nimiser.ABI.FfiSeam, Nimiser.ABI.Invariants, Nimiser.ABI.Semantics
+
+-- Totality is set here: Idris2 0.8.0 refuses --total as a command-line
+-- override for package commands and then checks nothing.
+opts = "--total"

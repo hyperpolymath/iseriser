@@ -2,3 +2,7 @@
 package a2mliser-abi
 sourcedir = "."
 modules = A2mliser.ABI.Types, A2mliser.ABI.Layout, A2mliser.ABI.Foreign, A2mliser.ABI.Proofs, A2mliser.ABI.Semantics, A2mliser.ABI.Invariants, A2mliser.ABI.FfiSeam, A2mliser.ABI.Capstone
+
+-- Totality is set here: Idris2 0.8.0 refuses --total as a command-line
+-- override for package commands and then checks nothing.
+opts = "--total"

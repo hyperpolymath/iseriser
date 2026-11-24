@@ -11,3 +11,7 @@ modules = Affinescriptiser.ABI.Types
         , Affinescriptiser.ABI.Invariants
         , Affinescriptiser.ABI.FfiSeam
         , Affinescriptiser.ABI.Capstone
+
+-- Totality is set here: Idris2 0.8.0 refuses --total as a command-line
+-- override for package commands and then checks nothing.
+opts = "--total"

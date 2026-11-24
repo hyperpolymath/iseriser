@@ -15,3 +15,7 @@ modules = Chapeliser.ABI.Types
         , Chapeliser.ABI.Invariants
         , Chapeliser.ABI.FfiSeam
         , Chapeliser.ABI.Capstone
+
+-- Totality is set here: Idris2 0.8.0 refuses --total as a command-line
+-- override for package commands and then checks nothing.
+opts = "--total"

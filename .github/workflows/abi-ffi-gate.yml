@@ -5,7 +5,9 @@
 # The Idris2 ABI (src/interface/abi) is the source of truth. This gate fails if
 # the Zig FFI (src/interface/ffi) drifts from it: a declared C function with no
 # export, a mismatched result-code map, or an unrendered template token. A
-# second job builds + tests the Zig FFI under the pinned Zig 0.14.0.
+# second job builds + tests the Zig FFI under the pinned Zig 0.14.0. The
+# idris2-check job type-checks the root ABI and every satellite ABI
+# (satellites/*/src/interface/abi) with totality enforced.
 name: ABI-FFI Gate
 
 on:
@@ -65,31 +67,38 @@ jobs:
           make -C /tmp/idris2 bootstrap SCHEME=scheme
           make -C /tmp/idris2 install PREFIX="$HOME/.idris2"
           echo "$HOME/.idris2/bin" >> "$GITHUB_PATH"
-      - name: Every ABI module is listed in the package
-        working-directory: src/interface/abi
+      - name: Every ABI module is listed in its package
         run: |
           set -euo pipefail
-          # A module missing from the .ipkg is never type-checked here.
-          files=$(find . -name '*.idr' -not -path './build/*' \
-            | sed 's|^\./||; s|\.idr$||; s|/|.|g' | sort)
-          # Comments are dropped first: a module named only after -- is not built.
-          listed=$(sed -n '/^modules/,/^[a-z]/p' iseriser-abi.ipkg \
-            | sed 's/--.*$//' \
-            | grep -oE '[A-Z][A-Za-z0-9_.]+' | sort -u)
-          missing=$(comm -23 <(echo "$files") <(echo "$listed"))
-          if [ -n "$missing" ]; then
-            echo "::error::Idris2 modules not listed in iseriser-abi.ipkg: $missing"
-            exit 1
-          fi
+          # Covers the root ABI and every satellite ABI. GitHub runs only the
+          # root workflows, so the satellites' own gates never run here.
+          # A module missing from its .ipkg is never type-checked.
+          fail=0
+          for dir in src/interface/abi satellites/*/src/interface/abi; do
+            ipkg=$(find "$dir" -maxdepth 1 -name '*.ipkg' | head -n 1)
+            [ -n "$ipkg" ] || { echo "::error::no .ipkg in $dir"; fail=1; continue; }
+            files=$(cd "$dir" && find . -name '*.idr' -not -path './build/*' \
+              | sed 's|^\./||; s|\.idr$||; s|/|.|g' | sort)
+            # Comments are dropped first: a module named only after -- is not built.
+            listed=$(sed -n '/^modules/,/^[a-z]/p' "$ipkg" \
+              | sed 's/--.*$//' \
+              | grep -oE '[A-Z][A-Za-z0-9_.]+' | sort -u)
+            missing=$(comm -23 <(echo "$files") <(echo "$listed"))
+            if [ -n "$missing" ]; then
+              echo "::error::Idris2 modules not listed in $ipkg: $missing"
+              fail=1
+            fi
+          done
+          exit "$fail"
       - name: No holes or escape hatches in the ABI proofs
-        working-directory: src/interface/abi
         run: |
           set -euo pipefail
           # Idris2 accepts a ?hole and these escape hatches even under
           # --total, so a green type-check alone would not show the proofs
           # are complete.
           pattern='(^|[^A-Za-z0-9_])\?[a-z_][A-Za-z0-9_]*|believe_me|assert_total|assert_smaller|idris_crash|%default[[:space:]]+(partial|covering)|^[[:space:]]*(partial|covering)[[:space:]]'
-          hits=$(find . -name '*.idr' -not -path './build/*' -print0 \
+          hits=$(find src/interface/abi satellites/*/src/interface/abi \
+              -name '*.idr' -not -path '*/build/*' -print0 \
             | xargs -0 grep -nE "$pattern" \
             | grep -vE '^[^:]+:[0-9]+:[[:space:]]*(--|\|\|\|)' || true)
           if [ -n "$hits" ]; then
@@ -98,12 +107,22 @@ jobs:
             exit 1
           fi
       - name: Type-check with totality enforced
-        working-directory: src/interface/abi
         run: |
           set -euo pipefail
           idris2 --version
-          # Totality comes from opts in the .ipkg. Given --total here, Idris2
-          # 0.8.0 prints an options error, checks nothing and exits 0.
-          grep -Eq '^opts[[:space:]]*=[[:space:]]*".*--total' iseriser-abi.ipkg \
-            || { echo "::error::iseriser-abi.ipkg must set opts = \"--total\""; exit 1; }
-          idris2 --typecheck iseriser-abi.ipkg
+          # Totality comes from opts in each .ipkg. Given --total on the
+          # command line, Idris2 0.8.0 prints an options error, checks
+          # nothing and exits 0.
+          fail=0
+          for dir in src/interface/abi satellites/*/src/interface/abi; do
+            ipkg=$(basename "$(find "$dir" -maxdepth 1 -name '*.ipkg' | head -n 1)")
+            if ! grep -Eq '^opts[[:space:]]*=[[:space:]]*".*--total' "$dir/$ipkg"; then
+              echo "::error::$dir/$ipkg must set opts = \"--total\""
+              fail=1
+              continue
+            fi
+            echo "::group::$dir/$ipkg"
+            (cd "$dir" && idris2 --typecheck "$ipkg") || fail=1
+            echo "::endgroup::"
+          done
+          exit "$fail"
