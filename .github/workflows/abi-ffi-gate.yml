@@ -96,7 +96,9 @@ jobs:
           # Idris2 accepts a ?hole and these escape hatches even under
           # --total, so a green type-check alone would not show the proofs
           # are complete.
-          pattern='(^|[^A-Za-z0-9_])\?[a-z_][A-Za-z0-9_]*|believe_me|assert_total|assert_smaller|idris_crash|%default[[:space:]]+(partial|covering)|^[[:space:]]*(partial|covering)[[:space:]]'
+          # A partial or covering modifier may stand alone on its line or follow
+          # a visibility keyword (export partial), and Idris2 honours it there.
+          pattern='(^|[^A-Za-z0-9_])\?[a-z_][A-Za-z0-9_]*|believe_me|assert_total|assert_smaller|idris_crash|%default[[:space:]]+(partial|covering)|^[[:space:]]*((public[[:space:]]+)?export[[:space:]]+|private[[:space:]]+)?(partial|covering)([[:space:]]|$)'
           hits=$(find src/interface/abi satellites/*/src/interface/abi \
               -name '*.idr' -not -path '*/build/*' -print0 \
             | xargs -0 grep -nE "$pattern" \
@@ -113,10 +115,12 @@ jobs:
           # Totality comes from opts in each .ipkg. Given --total on the
           # command line, Idris2 0.8.0 prints an options error, checks
           # nothing and exits 0.
+          # The flag must sit inside the quoted value: opts = "" -- --total sets
+          # no options, because the text after the quote is a comment.
           fail=0
           for dir in src/interface/abi satellites/*/src/interface/abi; do
             ipkg=$(basename "$(find "$dir" -maxdepth 1 -name '*.ipkg' | head -n 1)")
-            if ! grep -Eq '^opts[[:space:]]*=[[:space:]]*".*--total' "$dir/$ipkg"; then
+            if ! grep -Eq '^opts[[:space:]]*=[[:space:]]*"[^"]*--total[^"]*"' "$dir/$ipkg"; then
               echo "::error::$dir/$ipkg must set opts = \"--total\""
               fail=1
               continue
