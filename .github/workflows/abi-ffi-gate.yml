@@ -96,9 +96,13 @@ jobs:
           # Idris2 accepts a ?hole and these escape hatches even under
           # --total, so a green type-check alone would not show the proofs
           # are complete.
-          # A partial or covering modifier may stand alone on its line or follow
-          # a visibility keyword (export partial), and Idris2 honours it there.
-          pattern='(^|[^A-Za-z0-9_])\?[a-z_][A-Za-z0-9_]*|believe_me|assert_total|assert_smaller|idris_crash|%default[[:space:]]+(partial|covering)|^[[:space:]]*((public[[:space:]]+)?export[[:space:]]+|private[[:space:]]+)?(partial|covering)([[:space:]]|$)'
+          # Idris2 honours a partial or covering modifier after any other
+          # modifier (export, %inline, ...) or alone on its line, so any use of
+          # either word on a code line fails. A hole name may start with
+          # either case (?Foo). Whole-line -- and ||| comments are skipped; a
+          # trailing or block comment or a string naming either word fails
+          # too, so reword it.
+          pattern='(^|[^A-Za-z0-9_'"'"'])\?[A-Za-z_]|believe_me|assert_total|assert_smaller|idris_crash|(^|[^A-Za-z0-9_'"'"'.])(partial|covering)([^A-Za-z0-9_'"'"']|$)'
           hits=$(find src/interface/abi satellites/*/src/interface/abi \
               -name '*.idr' -not -path '*/build/*' -print0 \
             | xargs -0 grep -nE "$pattern" \
@@ -116,12 +120,17 @@ jobs:
           # command line, Idris2 0.8.0 prints an options error, checks
           # nothing and exits 0.
           # The flag must sit inside the quoted value: opts = "" -- --total sets
-          # no options, because the text after the quote is a comment.
+          # no options, because the text after the quote is a comment. The
+          # package must have exactly one opts/options line: a later one
+          # replaces the earlier, so opts = "--total" then options = "" sets
+          # no options either.
           fail=0
           for dir in src/interface/abi satellites/*/src/interface/abi; do
             ipkg=$(basename "$(find "$dir" -maxdepth 1 -name '*.ipkg' | head -n 1)")
-            if ! grep -Eq '^opts[[:space:]]*=[[:space:]]*"[^"]*--total[^"]*"' "$dir/$ipkg"; then
-              echo "::error::$dir/$ipkg must set opts = \"--total\""
+            decls=$(grep -cE '^[[:space:]]*(opts|options)[[:space:]]*=' "$dir/$ipkg" || true)
+            if [ "$decls" != 1 ] \
+              || ! grep -Eq '^[[:space:]]*(opts|options)[[:space:]]*=[[:space:]]*"[^"]*--total[^"]*"' "$dir/$ipkg"; then
+              echo "::error::$dir/$ipkg must have exactly one opts line, set to opts = \"--total\""
               fail=1
               continue
             fi
