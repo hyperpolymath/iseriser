@@ -102,9 +102,13 @@ jobs:
           # Totality comes only from opts in each .ipkg: given --total on the
           # command line, Idris2 0.8.0 prints an options error, checks nothing
           # and exits 0. The .ipkg is read with its {- -} and -- comments
-          # removed, so a commented-out line counts for nothing. It must then
-          # have exactly one opts/options line (a later one replaces the
-          # earlier) with --total inside the quoted value.
+          # removed, so a commented-out line counts for nothing. A {- block
+          # comment is refused outright: Idris2 nests them, a regex cannot
+          # follow that, and no package uses one. The package must then have
+          # exactly one opts/options line (a later one replaces the earlier)
+          # and its value must be exactly "--total": in a longer value such as
+          # "--directive --total", --total is consumed as the argument of
+          # --directive and totality stays off.
           #
           # After the type-check, every .idr must have a .ttc: a module the
           # package does not reach is never checked. Then Idris2 is asked
@@ -115,10 +119,15 @@ jobs:
           for dir in src/interface/abi satellites/*/src/interface/abi; do
             ipkg=$(find "$dir" -maxdepth 1 -name '*.ipkg' | head -n 1)
             [ -n "$ipkg" ] || { echo "::error::no .ipkg in $dir"; fail=1; continue; }
-            fields=$(perl -0777 -pe 's/\{-.*?-\}//gs; s/(^|[ \t])--[^\n]*/$1/gm' "$ipkg")
+            if grep -qF '{-' "$ipkg"; then
+              echo "::error::$ipkg contains a {- block comment, which this gate does not parse"
+              fail=1
+              continue
+            fi
+            fields=$(perl -pe 's/(^|[ \t])--[^\n]*/$1/g' "$ipkg")
             decls=$(printf '%s\n' "$fields" | grep -cE '^[[:space:]]*(opts|options)[[:space:]]*=' || true)
             if [ "$decls" != 1 ] \
-              || ! printf '%s\n' "$fields" | grep -Eq '^[[:space:]]*(opts|options)[[:space:]]*=[[:space:]]*"[^"]*--total[^"]*"'; then
+              || ! printf '%s\n' "$fields" | grep -Eq '^[[:space:]]*(opts|options)[[:space:]]*=[[:space:]]*"--total"[[:space:]]*$'; then
               echo "::error::$ipkg must have exactly one opts line, set to opts = \"--total\""
               fail=1
               continue

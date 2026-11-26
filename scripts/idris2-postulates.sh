@@ -15,7 +15,9 @@
 # declarations inside namespace, parameters and mutual blocks, and names
 # that are operators or not ASCII, are all checked. Over-matching is
 # harmless: a candidate that is not a name prints nothing. Names local to
-# a where block cannot be looked up through the REPL and are not checked.
+# a where block cannot be looked up through the REPL and are not checked
+# (known gap). Block comments that share a line with code, and %foreign
+# outside Foreign.idr/Types.idr, are refused rather than parsed.
 set -euo pipefail
 
 dir=${1:?usage: idris2-postulates.sh DIR}
@@ -23,6 +25,24 @@ cd "$dir"
 fail=0
 set -f  # names such as (*) must not glob
 while IFS= read -r -d '' file; do
+  # Fail closed on a block comment that shares a line with code: Idris2
+  # allows {- -} between any two tokens, which would hide a name from the
+  # scan below. Whole-line {- ... -} comments are fine and are skipped.
+  inline=$(grep -nE '[^[:space:]].*\{-|\{-.*-\}[[:space:]]*[^[:space:]]' "$file" | grep -vE '^[0-9]+:[[:space:]]*--' || true)
+  if [ -n "$inline" ]; then
+    printf '%s\n' "$inline" | sed "s|^|$dir/$file: block comment shares a line with code: |"
+    fail=1
+  fi
+  # %foreign trusts the C side and is not checked by the type-checker, so it
+  # may only appear in the FFI binding modules.
+  case ${file##*/} in
+    Foreign.idr|Types.idr) ;;
+    *)
+      if grep -qE '^[[:space:]]*%foreign' "$file"; then
+        echo "$dir/$file: %foreign outside Foreign.idr/Types.idr"
+        fail=1
+      fi ;;
+  esac
   names=$(awk '
     { s = $0; sub(/^[ \t]+/, "", s) }
     s ~ /^(--|\|\|\||\{-)/ { next }
