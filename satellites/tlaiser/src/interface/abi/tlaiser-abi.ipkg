@@ -9,3 +9,11 @@ modules = Tlaiser.ABI.Types
         , Tlaiser.ABI.Layout
         , Tlaiser.ABI.Foreign
         , Tlaiser.ABI.Proofs
+        , Tlaiser.ABI.Capstone
+        , Tlaiser.ABI.FfiSeam
+        , Tlaiser.ABI.Invariants
+        , Tlaiser.ABI.Semantics
+
+-- Totality is set here: Idris2 0.8.0 refuses --total as a command-line
+-- override for package commands and then checks nothing.
+opts = "--total"
