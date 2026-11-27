@@ -145,7 +145,7 @@ jobs:
           fetch-depth: 0
 
       - name: Verify scanner failure controls
-        run: ruby tests/ci/static_analysis_gate_test.rb
+        run: bash tests/ci/static_analysis_gate_test.sh
 
       - name: Setup Elixir for Hypatia scanner
         id: beam
